@@ -1,22 +1,28 @@
-# macOS system files
+# Xcode
 .DS_Store
-
-# Xcode user settings
-*.xcuserstate
-xcuserdata/
-*.xccheckout
-
-# Xcode workspace and project files
-*.xcworkspace
-!default.xcworkspace
-
-# Build products
-build/
 DerivedData/
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+*.xcarchive
+*.moved-aside
+*.xcuserstate
+timeline.xctimeline
+playground.xcworkspace
 
-# SwiftPM
-.swiftpm/
+# Swift Package Manager
 .build/
+Packages/
+Package.resolved
 
 # CocoaPods
 Pods/
@@ -31,17 +37,18 @@ fastlane/Preview.html
 fastlane/screenshots
 fastlane/test_output
 
-# Archives
-*.xcarchive
+# SwiftLint
+.swiftlint.yml
 
-# Logging
-*.log
+# Crash Reports
+*.crash
+*.ips
 
-# Simulator files
-*.simstate
-*.simsettings
-
-# App DSYM
-*.dSYM
+# Firebase Crashlytics
 *.dSYM.zip
+*.dSYM
+
+# Other Common
+*.log
+*.tmp
 
