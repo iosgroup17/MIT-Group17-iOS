@@ -11,7 +11,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		19850B442ED9A24500D4CE7F /* Exceptions for "HandleApp" folder in "HandleApp" target */ = {
+		19850B722ED9A45000D4CE7F /* Exceptions for "HandleApp" folder in "HandleApp" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -21,10 +21,10 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		19850B342ED9A24400D4CE7F /* HandleApp */ = {
+		19850B6B2ED9A45000D4CE7F /* HandleApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				19850B442ED9A24500D4CE7F /* Exceptions for "HandleApp" folder in "HandleApp" target */,
+				19850B722ED9A45000D4CE7F /* Exceptions for "HandleApp" folder in "HandleApp" target */,
 			);
 			path = HandleApp;
 			sourceTree = "<group>";
@@ -45,7 +45,7 @@
 		19850B292ED9A24400D4CE7F = {
 			isa = PBXGroup;
 			children = (
-				19850B342ED9A24400D4CE7F /* HandleApp */,
+				19850B6B2ED9A45000D4CE7F /* HandleApp */,
 				19850B332ED9A24400D4CE7F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -74,7 +74,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				19850B342ED9A24400D4CE7F /* HandleApp */,
+				19850B6B2ED9A45000D4CE7F /* HandleApp */,
 			);
 			name = HandleApp;
 			packageProductDependencies = (
