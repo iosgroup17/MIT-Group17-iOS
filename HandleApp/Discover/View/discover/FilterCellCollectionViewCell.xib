@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24412" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24405"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="FilterCellCollectionViewCell" id="gTV-IL-0wX" customClass="FilterCellCollectionViewCell" customModule="HandleApp" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="393" height="55"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="393" height="55"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="Go8-tW-oly">
+                        <rect key="frame" x="0.0" y="10" width="393" height="35"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Psi-iv-hZa">
+                                <rect key="frame" x="0.0" y="0.0" width="57" height="35"/>
+                                <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="All"/>
+                                <connections>
+                                    <action selector="filterTapped:" destination="gTV-IL-0wX" eventType="touchUpInside" id="3Hx-ll-Gbt"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jsD-cv-yUz">
+                                <rect key="frame" x="66.999999999999986" y="0.0" width="132.66666666666663" height="35"/>
+                                <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Instagram"/>
+                                <connections>
+                                    <action selector="filterTapped:" destination="gTV-IL-0wX" eventType="touchUpInside" id="UI8-Em-gRJ"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="doD-Hg-9Ce">
+                                <rect key="frame" x="209.66666666666666" y="0.0" width="116.66666666666666" height="35"/>
+                                <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="LinkedIn"/>
+                                <connections>
+                                    <action selector="filterTapped:" destination="gTV-IL-0wX" eventType="touchUpInside" id="cKi-qY-MxK"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ffg-jl-i7y">
+                                <rect key="frame" x="336.33333333333331" y="0.0" width="56.666666666666686" height="35"/>
+                                <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="X"/>
+                                <connections>
+                                    <action selector="filterTapped:" destination="gTV-IL-0wX" eventType="touchUpInside" id="JHc-43-1De"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                    </stackView>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="Go8-tW-oly" secondAttribute="trailing" id="43e-1C-jyC"/>
+                <constraint firstItem="Go8-tW-oly" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="PUc-xC-eGH"/>
+                <constraint firstItem="Go8-tW-oly" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="10" id="bW3-L4-NDM"/>
+                <constraint firstAttribute="bottom" secondItem="Go8-tW-oly" secondAttribute="bottom" constant="10" id="vBf-8l-26H"/>
+            </constraints>
+            <connections>
+                <outlet property="buttonAll" destination="Psi-iv-hZa" id="zal-2F-zdt"/>
+                <outlet property="buttonInstagram" destination="jsD-cv-yUz" id="z3g-uH-9w0"/>
+                <outlet property="buttonLinkedIn" destination="doD-Hg-9Ce" id="FM9-7I-cSp"/>
+                <outlet property="buttonX" destination="ffg-jl-i7y" id="Ork-gu-Q9y"/>
+            </connections>
+            <point key="canvasLocation" x="139" y="154"/>
+        </collectionViewCell>
+    </objects>
+</document>

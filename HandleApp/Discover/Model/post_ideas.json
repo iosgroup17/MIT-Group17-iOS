@@ -1,0 +1,1395 @@
+{
+    "top_ideas": [
+        {
+            "id": "idea_1",
+            "caption": "The mindset shift that changed my startup forever",
+            "image": "image1",
+            "platform_icon": "icon-instagram"
+        },
+        {
+            "id": "idea_2",
+            "caption": "One hiring mistake every founder learns too late",
+            "image": "image2",
+            "platform_icon": "icon-twitter"
+        },
+        {
+            "id": "idea_3",
+            "caption": "What my 2025 founder desk setup really looks like",
+            "image": "img-post-3",
+            "platform_icon": "icon-linkedin"
+        },
+        {
+            "id": "idea_4",
+            "caption": "The hook formula I use for all my content",
+            "image": "img-post-4",
+            "platform_icon": "icon-twitter"
+        },
+        {
+            "id": "idea_5",
+            "caption": "A behind-the-scenes look at our latest product release",
+            "image": "img-post-1",
+            "platform_icon": "icon-instagram"
+        },
+        {
+            "id": "idea_6",
+            "caption": "Why leaving my safe job was the best decision",
+            "image": "img-post-2",
+            "platform_icon": "icon-linkedin"
+        },
+        {
+            "id": "idea_7",
+            "caption": "The habit that keeps my startup running smoothly",
+            "image": "img-post-3",
+            "platform_icon": "icon-instagram"
+        },
+        {
+            "id": "idea_8",
+            "caption": "Three founder fears I finally addressed this year",
+            "image": "img-post-4",
+            "platform_icon": "icon-twitter"
+        },
+        {
+            "id": "idea_9",
+            "caption": "The simple routine that doubled my focus",
+            "image": "img-post-2",
+            "platform_icon": "icon-linkedin"
+        },
+        {
+            "id": "idea_10",
+            "caption": "What I learned launching my product too early",
+            "image": "img-post-4",
+            "platform_icon": "icon-twitter"
+        }
+    ],
+    
+    "trending_topics": [
+        { "id": "topic_1", "name": "Founder Story", "icon": "figure.walk" },
+        { "id": "topic_2", "name": "Milestones", "icon": "person.3.sequence" },
+        { "id": "topic_3", "name": "Productivity", "icon": "clock.badge" },
+        { "id": "topic_4", "name": "Team Building", "icon": "lightbulb" },
+        { "id": "topic_5", "name": "Authentic & personal reflections", "icon": "chart.line.uptrend.xyaxis" }
+    ],
+    
+    
+    
+      "topic_ideas": [
+        {
+          "topic_id": "topic_1",
+          "ideas": [
+            {
+              "id": "fj_1",
+              "caption": "My toughest week as a founder",
+              "why_this_post": "Relatable Story",
+              "image": "img_01",
+              "platform_icon": "icon-linkedin"
+            },
+            {
+              "id": "fj_2",
+              "caption": "What my first investor meeting taught me",
+              "why_this_post": "High Insight",
+              "image": "img_02",
+              "platform_icon": "icon-twitter"
+            },
+            {
+              "id": "fj_3",
+              "caption": "The moment my startup almost died",
+              "why_this_post": "Emotional Pull",
+              "image": "img_03",
+              "platform_icon": "icon-instagram"
+            },
+            {
+              "id": "fj_4",
+              "caption": "The mindset shift that changed everything",
+              "why_this_post": "Strong Hook",
+              "image": "img_04",
+              "platform_icon": "icon-linkedin"
+            },
+            {
+              "id": "fj_5",
+              "caption": "A big mistake that made me better",
+              "why_this_post": "Honest Share",
+              "image": "img_05",
+              "platform_icon": "icon-twitter"
+            },
+            {
+              "id": "fj_6",
+              "caption": "Why I refuse to hustle 24/7",
+              "why_this_post": "Mental Health",
+              "image": "img_06",
+              "platform_icon": "icon-instagram"
+            }
+          ]
+        },
+        {
+          "topic_id": "topic_2",
+          "ideas": [
+            {
+              "id": "tb_1",
+              "caption": "How I hired my first core teammate",
+              "why_this_post": "Founder Insight",
+              "image": "img_07",
+              "platform_icon": "icon-linkedin"
+            },
+            {
+              "id": "tb_2",
+              "caption": "The interview question I always ask",
+              "why_this_post": "Useful Tip",
+              "image": "img_08",
+              "platform_icon": "icon-twitter"
+            },
+            {
+              "id": "tb_3",
+              "caption": "A lesson I learned from a bad hire",
+              "why_this_post": "Human Moment",
+              "image": "img_09",
+              "platform_icon": "icon-linkedin"
+            },
+            {
+              "id": "tb_4",
+              "caption": "How I build trust inside my team",
+              "why_this_post": "Leadership Boost",
+              "image": "img_10",
+              "platform_icon": "icon-instagram"
+            },
+            {
+              "id": "tb_5",
+              "caption": "Why culture matters more than skills",
+              "why_this_post": "Founders Agree",
+              "image": "img_11",
+              "platform_icon": "icon-twitter"
+            },
+            {
+              "id": "tb_6",
+              "caption": "The hardest firing decision I ever made",
+              "why_this_post": "Real Talk",
+              "image": "img_12",
+              "platform_icon": "icon-linkedin"
+            }
+          ]
+        },
+        {
+          "topic_id": "topic_3",
+          "ideas": [
+            {
+              "id": "prod_1",
+              "caption": "My daily 3-task founder workflow",
+              "why_this_post": "Clear Routine",
+              "image": "img_01",
+              "platform_icon": "icon-twitter"
+            },
+            {
+              "id": "prod_2",
+              "caption": "How I plan deep work blocks",
+              "why_this_post": "High Output",
+              "image": "img_02",
+              "platform_icon": "icon-linkedin"
+            },
+            {
+              "id": "prod_3",
+              "caption": "The productivity rule I never break",
+              "why_this_post": "Founder Clarity",
+              "image": "img_03",
+              "platform_icon": "icon-instagram"
+            },
+            {
+              "id": "prod_4",
+              "caption": "Small habits that compound fast",
+              "why_this_post": "Actionable Tip",
+              "image": "img_04",
+              "platform_icon": "icon-twitter"
+            },
+            {
+              "id": "prod_5",
+              "caption": "My team’s favorite async method",
+              "why_this_post": "Efficient Flow",
+              "image": "img_05",
+              "platform_icon": "icon-linkedin"
+            },
+            {
+              "id": "prod_6",
+              "caption": "The tech stack that runs my life",
+              "why_this_post": "Tool Share",
+              "image": "img_06",
+              "platform_icon": "icon-twitter"
+            }
+          ]
+        },
+        {
+          "topic_id": "topic_4",
+          "ideas": [
+            {
+              "id": "sl_1",
+              "caption": "The feature we shipped too early",
+              "why_this_post": "Real Lesson",
+              "image": "img_01",
+              "platform_icon": "icon-twitter"
+            },
+            {
+              "id": "sl_2",
+              "caption": "Why founders must love feedback",
+              "why_this_post": "Value Share",
+              "image": "img_02",
+              "platform_icon": "icon-linkedin"
+            },
+            {
+              "id": "sl_3",
+              "caption": "Three mistakes I kept repeating",
+              "why_this_post": "Honest Growth",
+              "image": "img_03",
+              "platform_icon": "icon-instagram"
+            },
+            {
+              "id": "sl_4",
+              "caption": "The moment our product finally clicked",
+              "why_this_post": "Breakthrough",
+              "image": "img_04",
+              "platform_icon": "icon-twitter"
+            },
+            {
+              "id": "sl_5",
+              "caption": "Why simplicity beats complexity",
+              "why_this_post": "Strong Insight",
+              "image": "img_05",
+              "platform_icon": "icon-linkedin"
+            },
+            {
+              "id": "sl_6",
+              "caption": "Pricing models that scare me",
+              "why_this_post": "Money Talk",
+              "image": "img_06",
+              "platform_icon": "icon-twitter"
+            }
+          ]
+        },
+        {
+          "topic_id": "topic_5",
+          "ideas": [
+            {
+              "id": "gr_1",
+              "caption": "The growth experiment that surprised me",
+              "why_this_post": "Data Backed",
+              "image": "img_01",
+              "platform_icon": "icon-linkedin"
+            },
+            {
+              "id": "gr_2",
+              "caption": "How we improved retention in 14 days",
+              "why_this_post": "Value Packed",
+              "image": "img_02",
+              "platform_icon": "icon-twitter"
+            },
+            {
+              "id": "gr_3",
+              "caption": "The content strategy that finally worked",
+              "why_this_post": "Scalable Tip",
+              "image": "img_03",
+              "platform_icon": "icon-instagram"
+            },
+            {
+              "id": "gr_4",
+              "caption": "Why small iterations beat big changes",
+              "why_this_post": "Founder Logic",
+              "image": "img_04",
+              "platform_icon": "icon-linkedin"
+            },
+            {
+              "id": "gr_5",
+              "caption": "A simple habit that boosts reach",
+              "why_this_post": "Growth Hack",
+              "image": "img_05",
+              "platform_icon": "icon-twitter"
+            },
+            {
+              "id": "gr_6",
+              "caption": "Getting our first 100 paid users",
+              "why_this_post": "Milestone",
+              "image": "img_06",
+              "platform_icon": "icon-linkedin"
+            }
+          ]
+        }
+      ],
+    
+    "recommendations": [
+        {
+            "id": "rec_1",
+            "caption": "I analyzed our top-performing posts and realized that raw, imperfect screenshots outperform polished graphics by a huge margin. Here’s why authenticity converts.",
+            "why_this_post": "Authentic, proven, performs well",
+            "image": "image1",
+            "platform_icon": "LinkedIn"
+        },
+        {
+            "id": "rec_2",
+            "caption": "The unpopular truth: Founders don’t need more ideas—they need sharper execution. Here’s how I cut my workload by 40% without losing output.",
+            "why_this_post": "Bold, contrarian, high reach",
+            "image": "image2",
+            "platform_icon": "X"
+        },
+        {
+            "id": "rec_3",
+            "caption": "I automated 60% of our onboarding using no-code tools. Here’s the exact workflow, templates, and lessons I wish I knew earlier.",
+            "why_this_post": "Detailed, actionable, saves time",
+            "image": "img-post-3",
+            "platform_icon": "LinkedIn"
+        },
+        {
+            "id": "rec_4",
+            "caption": "The pitch email that landed our first major partnership. I’m sharing the actual template and why it consistently works.",
+            "why_this_post": "Practical, valuable, replicable",
+            "image": "img-post-4",
+            "platform_icon": "Instagram"
+        },
+        {
+            "id": "rec_5",
+            "caption": "Here’s the messy workspace I tried hiding for months. But it reminded me: perfection kills progress.",
+            "why_this_post": "Relatable, human, engaging",
+            "image": "img-post-1",
+            "platform_icon": "Instagram"
+        },
+        {
+            "id": "rec_6",
+            "caption": "I tested deep work blocks for 30 days. These are the three changes that dramatically improved my creative output.",
+            "why_this_post": "Productive, proven, helpful",
+            "image": "img-post-2",
+            "platform_icon": "X"
+        },
+        {
+            "id": "rec_7",
+            "caption": "A client story that almost broke me—and the framework I now use to prevent scope creep forever.",
+            "why_this_post": "Story-driven, valuable, memorable",
+            "image": "img-post-3",
+            "platform_icon": "LinkedIn"
+        },
+        {
+            "id": "rec_8",
+            "caption": "My failed launch taught me more than any win. Here’s the exact mistake and what I fixed the next time.",
+            "why_this_post": "Honest, vulnerable, impactful",
+            "image": "img-post-4",
+            "platform_icon": "X"
+        },
+        {
+            "id": "rec_9",
+            "caption": "The simple psychology trick I use to keep readers on my posts until the last line—works every single time.",
+            "why_this_post": "Psychology, retention, effective",
+            "image": "img-post-1",
+            "platform_icon": "LinkedIn"
+        }
+    ],
+    
+    
+    "selected_post_details": [
+    {
+        "id": "idea_1",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "image1",
+            "image2",
+            "img-post-1",
+            "img-post-2"
+        ],
+        "full_caption": "The core idea: **The mindset shift that changed my startup forever**. \n\nThis post is intentionally structured for high-value, authentic engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "idea_2",
+        "platform_name": "X (Twitter)",
+        "platform_icon_id": "icon-twitter",
+        "images": [
+            "img-post-2.png",
+            "img-post-3.png",
+            "img_02.png",
+            "img_03.png"
+        ],
+        "full_caption": "The core idea: **One hiring mistake every founder learns too late**. \n\nThis post is intentionally structured for high-value, authentic engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Tue 9:00 AM",
+            "Thu 1:00 PM",
+            "Sat 8:00 AM"
+        ],
+        "suggested_hashtags": [
+            "#startuptips",
+            "#bizdev",
+            "#tech",
+            "#twittermarketing"
+        ]
+    },
+    {
+        "id": "idea_3",
+        "platform_name": "LinkedIn",
+        "platform_icon_id": "icon-linkedin",
+        "images": [
+            "img-post-3.png",
+            "img-post-4.png",
+            "img_04.png",
+            "img_03.png"
+        ],
+        "full_caption": "The core idea: **What my 2025 founder desk setup really looks like**. \n\nThis post is intentionally structured for high-value, authentic engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Tue 1:00 PM",
+            "Wed 11:00 AM",
+            "Thu 1:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#leadership",
+            "#careeradvice",
+            "#innovate",
+            "#linkedinmarketing"
+        ]
+    },
+    {
+        "id": "idea_4",
+        "platform_name": "X (Twitter)",
+        "platform_icon_id": "icon-twitter",
+        "images": [
+            "img-post-4.png",
+            "img-post-5.png",
+            "img_04.png",
+            "img_05.png"
+        ],
+        "full_caption": "The core idea: **The hook formula I use for all my content**. \n\nThis post is intentionally structured for high-value, authentic engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Tue 9:00 AM",
+            "Thu 1:00 PM",
+            "Sat 8:00 AM"
+        ],
+        "suggested_hashtags": [
+            "#startuptips",
+            "#bizdev",
+            "#tech",
+            "#twittermarketing"
+        ]
+    },
+    {
+        "id": "idea_5",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-post-6.png",
+            "img-post-7.png",
+            "img_06.png",
+            "img_07.png"
+        ],
+        "full_caption": "The core idea: **A behind-the-scenes look at our latest product release**. \n\nThis post is intentionally structured for high-value, authentic engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "idea_6",
+        "platform_name": "LinkedIn",
+        "platform_icon_id": "icon-linkedin",
+        "images": [
+            "img-post-2.png",
+            "img-post-2-alt-a.png",
+            "img-post-2-alt-b.png",
+            "img-post-2-story.png"
+        ],
+        "full_caption": "The core idea: **Why leaving my safe job was the best decision**. \n\nThis post is intentionally structured for high-value, authentic engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Tue 1:00 PM",
+            "Wed 11:00 AM",
+            "Thu 1:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#leadership",
+            "#careeradvice",
+            "#innovate",
+            "#linkedinmarketing"
+        ]
+    },
+    {
+        "id": "idea_7",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-post-8.png",
+            "img-post-9.png",
+            "img_08.png",
+            "img_09.png"
+        ],
+        "full_caption": "The core idea: **The habit that keeps my startup running smoothly**. \n\nThis post is intentionally structured for high-value, authentic engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "idea_8",
+        "platform_name": "X (Twitter)",
+        "platform_icon_id": "icon-twitter",
+        "images": [
+            "img-post-9",
+            "img-post-10.png",
+            "img_09.png",
+            "img_10.png"
+        ],
+        "full_caption": "The core idea: **Three founder fears I finally addressed this year**. \n\nThis post is intentionally structured for high-value, authentic engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Tue 9:00 AM",
+            "Thu 1:00 PM",
+            "Sat 8:00 AM"
+        ],
+        "suggested_hashtags": [
+            "#startuptips",
+            "#bizdev",
+            "#tech",
+            "#twittermarketing"
+        ]
+    },
+    {
+        "id": "idea_9",
+        "platform_name": "LinkedIn",
+        "platform_icon_id": "icon-linkedin",
+        "images": [
+            "img-post-2.png",
+            "img-post-2-alt-a.png",
+            "img-post-2-alt-b.png",
+            "img-post-2-story.png"
+        ],
+        "full_caption": "The core idea: **The simple routine that doubled my focus**. \n\nThis post is intentionally structured for high-value, authentic engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Tue 1:00 PM",
+            "Wed 11:00 AM",
+            "Thu 1:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#leadership",
+            "#careeradvice",
+            "#innovate",
+            "#linkedinmarketing"
+        ]
+    },
+    {
+        "id": "idea_10",
+        "platform_name": "X (Twitter)",
+        "platform_icon_id": "icon-twitter",
+        "images": [
+            "img-post-10",
+            "img_10.png",
+            "img_11.png",
+            "img_12.png"
+        ],
+        "full_caption": "The core idea: **What I learned launching my product too early**. \n\nThis post is intentionally structured for high-value, authentic engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Tue 9:00 AM",
+            "Thu 1:00 PM",
+            "Sat 8:00 AM"
+        ],
+        "suggested_hashtags": [
+            "#startuptips",
+            "#bizdev",
+            "#tech",
+            "#twittermarketing"
+        ]
+    },
+    {
+        "id": "rec_1",
+        "platform_name": "LinkedIn",
+        "platform_icon_id": "icon-linkedin",
+        "images": [
+            "img-post-1.png",
+            "img-post-1-alt-a.png",
+            "img-post-1-alt-b.png",
+            "img-post-1-story.png"
+        ],
+        "full_caption": "The core idea: **I analyzed our top-performing posts and realized that raw, imperfect screenshots outperform polished graphics by a huge margin. Here’s why authenticity converts.**. \n\nThis post is intentionally structured for authentic, proven, performs well engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Tue 1:00 PM",
+            "Wed 11:00 AM",
+            "Thu 1:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#leadership",
+            "#careeradvice",
+            "#innovate",
+            "#linkedinmarketing"
+        ]
+    },
+    {
+        "id": "rec_2",
+        "platform_name": "X (Twitter)",
+        "platform_icon_id": "icon-twitter",
+        "images": [
+            "img-post-2.png",
+            "img-post-2-alt-a.png",
+            "img-post-2-alt-b.png",
+            "img-post-2-story.png"
+        ],
+        "full_caption": "The core idea: **The unpopular truth: Founders don’t need more ideas—they need sharper execution. Here’s how I cut my workload by 40% without losing output.**. \n\nThis post is intentionally structured for Bold, contrarian, high reach engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Tue 9:00 AM",
+            "Thu 1:00 PM",
+            "Sat 8:00 AM"
+        ],
+        "suggested_hashtags": [
+            "#startuptips",
+            "#bizdev",
+            "#tech",
+            "#twittermarketing"
+        ]
+    },
+    {
+        "id": "rec_3",
+        "platform_name": "LinkedIn",
+        "platform_icon_id": "icon-linkedin",
+        "images": [
+            "img-post-3.png",
+            "img-post-3-alt-a.png",
+            "img-post-3-alt-b.png",
+            "img-post-3-story.png"
+        ],
+        "full_caption": "The core idea: **I automated 60% of our onboarding using no-code tools. Here’s the exact workflow, templates, and lessons I wish I knew earlier.**. \n\nThis post is intentionally structured for Detailed, actionable, saves time engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Tue 1:00 PM",
+            "Wed 11:00 AM",
+            "Thu 1:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#leadership",
+            "#careeradvice",
+            "#innovate",
+            "#linkedinmarketing"
+        ]
+    },
+    {
+        "id": "rec_4",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-post-4.png",
+            "img-post-4-alt-a.png",
+            "img-post-4-alt-b.png",
+            "img-post-4-story.png"
+        ],
+        "full_caption": "The core idea: **The pitch email that landed our first major partnership. I’m sharing the actual template and why it consistently works.**. \n\nThis post is intentionally structured for Practical, valuable, replicable engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "rec_5",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-post-1.png",
+            "img-post-1-alt-a.png",
+            "img-post-1-alt-b.png",
+            "img-post-1-story.png"
+        ],
+        "full_caption": "The core idea: **Here’s the messy workspace I tried hiding for months. But it reminded me: perfection kills progress.**. \n\nThis post is intentionally structured for Relatable, human, engaging engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "rec_6",
+        "platform_name": "X (Twitter)",
+        "platform_icon_id": "icon-twitter",
+        "images": [
+            "img-post-2.png",
+            "img-post-2-alt-a.png",
+            "img-post-2-alt-b.png",
+            "img-post-2-story.png"
+        ],
+        "full_caption": "The core idea: **I tested deep work blocks for 30 days. These are the three changes that dramatically improved my creative output.**. \n\nThis post is intentionally structured for Productive, proven, helpful engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Tue 9:00 AM",
+            "Thu 1:00 PM",
+            "Sat 8:00 AM"
+        ],
+        "suggested_hashtags": [
+            "#startuptips",
+            "#bizdev",
+            "#tech",
+            "#twittermarketing"
+        ]
+    },
+    {
+        "id": "rec_7",
+        "platform_name": "LinkedIn",
+        "platform_icon_id": "icon-linkedin",
+        "images": [
+            "img-post-3.png",
+            "img-post-3-alt-a.png",
+            "img-post-3-alt-b.png",
+            "img-post-3-story.png"
+        ],
+        "full_caption": "The core idea: **A client story that almost broke me—and the framework I now use to prevent scope creep forever.**. \n\nThis post is intentionally structured for Story-driven, valuable, memorable engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Tue 1:00 PM",
+            "Wed 11:00 AM",
+            "Thu 1:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#leadership",
+            "#careeradvice",
+            "#innovate",
+            "#linkedinmarketing"
+        ]
+    },
+    {
+        "id": "rec_8",
+        "platform_name": "X (Twitter)",
+        "platform_icon_id": "icon-twitter",
+        "images": [
+            "img-post-4.png",
+            "img-post-4-alt-a.png",
+            "img-post-4-alt-b.png",
+            "img-post-4-story.png"
+        ],
+        "full_caption": "The core idea: **My failed launch taught me more than any win. Here’s the exact mistake and what I fixed the next time.**. \n\nThis post is intentionally structured for Honest, vulnerable, impactful engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Tue 9:00 AM",
+            "Thu 1:00 PM",
+            "Sat 8:00 AM"
+        ],
+        "suggested_hashtags": [
+            "#startuptips",
+            "#bizdev",
+            "#tech",
+            "#twittermarketing"
+        ]
+    },
+    {
+        "id": "rec_9",
+        "platform_name": "LinkedIn",
+        "platform_icon_id": "icon-linkedin",
+        "images": [
+            "img-post-1.png",
+            "img-post-1-alt-a.png",
+            "img-post-1-alt-b.png",
+            "img-post-1-story.png"
+        ],
+        "full_caption": "The core idea: **The simple psychology trick I use to keep readers on my posts until the last line—works every single time.**. \n\nThis post is intentionally structured for Psychology, retention, effective engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Tue 1:00 PM",
+            "Wed 11:00 AM",
+            "Thu 1:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#leadership",
+            "#careeradvice",
+            "#innovate",
+            "#linkedinmarketing"
+        ]
+    },
+    {
+        "id": "fj_1",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img_01.png",
+            "img_02.png",
+            "img_15.png",
+            "img_16png"
+        ],
+        "full_caption": "The core idea: **My toughest week as a founder**. \n\nThis post is intentionally structured for Relatable Story engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "fj_2",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **What my first investor meeting taught me**. \n\nThis post is intentionally structured for High Insight engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "fj_3",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **The moment my startup almost died**. \n\nThis post is intentionally structured for Emotional Pull engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "fj_4",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **The mindset shift that changed everything**. \n\nThis post is intentionally structured for Strong Hook engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "fj_5",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **A big mistake that made me better**. \n\nThis post is intentionally structured for Honest Share engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_2_1",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **How I hired my first core teammate**. \n\nThis post is intentionally structured for Founder Insight engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_2_2",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **The interview question I always ask**. \n\nThis post is intentionally structured for Useful Tip engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_2_3",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **A lesson I learned from a bad hire**. \n\nThis post is intentionally structured for Human Moment engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_2_4",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **How I build trust inside my team**. \n\nThis post is intentionally structured for Leadership Boost engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_2_5",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **Why culture matters more than skills**. \n\nThis post is intentionally structured for Founders Agree engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_3_1",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **My daily 3-task founder workflow**. \n\nThis post is intentionally structured for Clear Routine engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_3_2",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **How I plan deep work blocks**. \n\nThis post is intentionally structured for High Output engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_3_3",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **The productivity rule I never break**. \n\nThis post is intentionally structured for Founder Clarity engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_3_4",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **Small habits that compound fast**. \n\nThis post is intentionally structured for Actionable Tip engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_3_5",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **My team’s favorite async method**. \n\nThis post is intentionally structured for Efficient Flow engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_4_1",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **The feature we shipped too early**. \n\nThis post is intentionally structured for Real Lesson engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_4_2",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **Why founders must love feedback**. \n\nThis post is intentionally structured for Value Share engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_4_3",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **Three mistakes I kept repeating**. \n\nThis post is intentionally structured for Honest Growth engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_4_4",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **The moment our product finally clicked**. \n\nThis post is intentionally structured for Breakthrough engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_4_5",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **Why simplicity beats complexity**. \n\nThis post is intentionally structured for Strong Insight engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_5_1",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **The growth experiment that surprised me**. \n\nThis post is intentionally structured for Data Backed engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_5_2",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **How we improved retention in 14 days**. \n\nThis post is intentionally structured for Value Packed engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_5_3",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **The content strategy that finally worked**. \n\nThis post is intentionally structured for Scalable Tip engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_5_4",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **Why small iterations beat big changes**. \n\nThis post is intentionally structured for Founder Logic engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    },
+    {
+        "id": "topic_5_5",
+        "platform_name": "Instagram",
+        "platform_icon_id": "icon-instagram",
+        "images": [
+            "img-topic-default.png",
+            "img-topic-default-alt-a.png",
+            "img-topic-default-alt-b.png",
+            "img-topic-default-story.png"
+        ],
+        "full_caption": "The core idea: **A simple habit that boosts reach**. \n\nThis post is intentionally structured for Growth Hack engagement. It speaks directly to founders and professionals experiencing this common startup challenge. The key is to be honest, vulnerable, and provide a clear, actionable takeaway or lesson. \n\nRemember, showing the struggle is often more valuable than showing the success. \n\nWhat's your biggest insight on this topic? Share below and let's discuss!",
+        "optimal_posting_times": [
+            "Mon 11:00 AM",
+            "Wed 10:00 AM",
+            "Fri 2:00 PM"
+        ],
+        "suggested_hashtags": [
+            "#foundershift",
+            "#startuplessons",
+            "#businessgrowth",
+            "#entrepreneurship"
+        ]
+    }
+    ]
+    
+}

@@ -1,0 +1,283 @@
+//
+//  ScheduledPostsTableViewController.swift
+//  OnboardingScreens
+//
+//  Created by SDC_USER on 27/11/25.
+//
+
+import UIKit
+
+class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresentationControllerDelegate, PlatformMenuDelegate {
+    
+    @IBOutlet weak var postTableView: UITableView!
+    @IBOutlet weak var filterBarButton: UIBarButtonItem!
+    
+    // MARK: - 1. Display Data (The TableView reads these)
+    var scheduledTodayPosts: [Post] = {
+        do {
+            return try Post.loadTodayScheduledPosts(from: "Posts_data")
+        } catch {
+            print("FATAL ERROR: Could not load scheduled posts. Details: \(error)")
+            return []
+        }
+    }()
+    
+    var scheduledTomorrowPosts: [Post] = {
+        do {
+            return try Post.loadTomorrowScheduledPosts(from: "Posts_data")
+        } catch {
+            print("FATAL ERROR: Could not load scheduled posts. Details: \(error)")
+            return []
+        }
+    }()
+    
+    var scheduledLaterPosts: [Post] = {
+        do {
+            return try Post.loadScheduledPostsAfterDate(from: "Posts_data")
+        } catch {
+            print("FATAL ERROR: Could not load scheduled posts. Details: \(error)")
+            return []
+        }
+    }()
+    
+    // MARK: - 2. Backup Data (Used for Filtering)
+    // We store the original full lists here so we can restore them when "All" is selected.
+    var allTodayPosts: [Post] = []
+    var allTomorrowPosts: [Post] = []
+    var allLaterPosts: [Post] = []
+    
+    // MARK: - Lifecycle
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        tableView.backgroundColor = .white
+        
+        // 3. Save a copy of the data immediately after loading
+        allTodayPosts = scheduledTodayPosts
+        allTomorrowPosts = scheduledTomorrowPosts
+        allLaterPosts = scheduledLaterPosts
+    }
+    
+    // MARK: - PlatformMenuDelegate
+    
+    func didSelectPlatform(_ platform: String) {
+        print("Selected Platform: \(platform)")
+        // 4. Call the filter function when a selection is made
+        filterScheduledPosts(by: platform)
+    }
+    
+    // MARK: - Filtering Logic
+    
+    func filterScheduledPosts(by platform: String) {
+        print("Filter requested for: [\(platform)]")
+        
+        if platform == "All" {
+            // Restore from backup
+            scheduledTodayPosts = allTodayPosts
+            scheduledTomorrowPosts = allTomorrowPosts
+            scheduledLaterPosts = allLaterPosts
+        } else {
+            // Filter from backup
+            scheduledTodayPosts = allTodayPosts.filter { $0.platformName == platform }
+            scheduledTomorrowPosts = allTomorrowPosts.filter { $0.platformName == platform }
+            scheduledLaterPosts = allLaterPosts.filter { $0.platformName == platform }
+        }
+        
+        // Refresh the UI
+        print("Reloading table with \(scheduledTodayPosts.count + scheduledTomorrowPosts.count + scheduledLaterPosts.count) posts.")
+        postTableView.reloadData()
+    }
+    
+    // MARK: - Actions (Popover Menu)
+    
+    @IBAction func filterButtonTapped(_ sender: Any) {
+        guard let menuVC = storyboard?.instantiateViewController(withIdentifier: "PlatformMenuID") as? PlatformFilterViewController else {
+            return
+        }
+        
+        menuVC.delegate = self
+        // Set presentation style to popover
+        menuVC.modalPresentationStyle = .popover
+        
+        // Configure the Popover
+        guard let popoverPC = menuVC.popoverPresentationController else { return }
+        
+        // Anchor the popover to the filter button
+        popoverPC.barButtonItem = sender as? UIBarButtonItem
+        popoverPC.delegate = self
+        popoverPC.permittedArrowDirections = .up
+        
+        present(menuVC, animated: true, completion: nil)
+    }
+    
+    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        // Force Popover style on iPhone
+        return .none
+    }
+
+    // MARK: - Table view data source
+
+    override func numberOfSections(in tableView: UITableView) -> Int {
+        return 3
+    }
+
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if section == 0 {
+            return scheduledTodayPosts.count
+        } else if section == 1 {
+            return scheduledTomorrowPosts.count
+        } else {
+            return scheduledLaterPosts.count
+        }
+    }
+
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "scheduled_cell", for: indexPath) as? ScheduledPostsTableViewCell else {
+            fatalError("Could not dequeue ScheduledPostsTableViewCell")
+        }
+        
+        if indexPath.section == 0 {
+            let post = scheduledTodayPosts[indexPath.row]
+            cell.configure(with: post)
+            return cell
+        } else if indexPath.section == 1 {
+            let post = scheduledTomorrowPosts[indexPath.row]
+            cell.configure(with: post)
+            return cell
+        } else {
+            let post = scheduledLaterPosts[indexPath.row]
+            cell.configure(with: post)
+            return cell
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        if section == 0 {
+            return scheduledTodayPosts.isEmpty ? nil : "Today"
+        } else if section == 1 {
+            return scheduledTomorrowPosts.isEmpty ? nil : "Tomorrow"
+        } else if section == 2 {
+            return scheduledLaterPosts.isEmpty ? nil : "Later"
+        }
+        return nil
+    }
+    
+    // MARK: - Swipe Actions
+    
+    override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+              
+        // Edit Action
+        let editAction = UIContextualAction(style: .normal, title: "Edit") { [weak self] (action, view, completionHandler) in
+                    guard let self = self else {
+                        completionHandler(false)
+                        return
+                    }
+                    
+                    // ✅ THIS WAS MISSING: Trigger the segue manually
+                    // We pass 'indexPath' as sender so prepare(for segue:) knows which row data to grab
+                    self.performSegue(withIdentifier: "openEditorModal", sender: indexPath)
+                    
+                    completionHandler(true)
+                }
+                editAction.backgroundColor = .systemBlue
+                editAction.image = UIImage(systemName: "square.and.pencil")
+        
+        // Schedule Action
+        let scheduleAction = UIContextualAction(style: .normal, title: "Schedule") { [weak self] (action, view, completionHandler) in
+            guard let self = self else { return completionHandler(false) }
+            
+            // ✅ Trigger the specific segue for Scheduler
+            self.performSegue(withIdentifier: "openSchedulerModal", sender: indexPath)
+            
+            completionHandler(true)
+        }
+        scheduleAction.backgroundColor = .systemGreen
+        scheduleAction.image = UIImage(systemName: "calendar.badge.clock")
+        
+        // Delete Action
+        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] (action, view, completionHandler) in
+            guard let self = self else {
+                completionHandler(false)
+                return
+            }
+            
+            // Remove from the data source to prevent crashes
+            if indexPath.section == 0 {
+                self.scheduledTodayPosts.remove(at: indexPath.row)
+            } else if indexPath.section == 1 {
+                self.scheduledTomorrowPosts.remove(at: indexPath.row)
+            } else {
+                self.scheduledLaterPosts.remove(at: indexPath.row)
+            }
+            
+            // Update table view with animation
+            tableView.deleteRows(at: [indexPath], with: .automatic)
+            
+            completionHandler(true)
+        }
+        deleteAction.image = UIImage(systemName: "trash.fill")
+        
+        let configuration = UISwipeActionsConfiguration(actions: [deleteAction, editAction, scheduleAction])
+        configuration.performsFirstActionWithFullSwipe = false
+        
+        return configuration
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "openEditorModal" {
+            
+            // 1. Define the destination variable
+            var destinationVC: EditorSuiteViewController?
+            
+            // 2. Check if it's wrapped in a Nav Controller (The Modal Case)
+            if let navVC = segue.destination as? UINavigationController {
+                destinationVC = navVC.topViewController as? EditorSuiteViewController
+            }
+            // 3. Or if it's direct (Just in case)
+            else {
+                destinationVC = segue.destination as? EditorSuiteViewController
+            }
+            
+            // 4. Pass the data
+            if let editorVC = destinationVC, let indexPath = sender as? IndexPath {
+                 // ... Your existing data passing logic ...
+                 let selectedPost: Post
+                 if indexPath.section == 0 { selectedPost = scheduledTodayPosts[indexPath.row] }
+                 else if indexPath.section == 1 { selectedPost = scheduledTomorrowPosts[indexPath.row] }
+                 else { selectedPost = scheduledLaterPosts[indexPath.row] }
+                 
+                 let draftData = EditorDraftData(
+                     platformName: selectedPost.platformName,
+                     platformIconName: selectedPost.platformIconName,
+                     caption: selectedPost.text,
+                     images: [selectedPost.imageName],
+                     hashtags: [],
+                     postingTimes: []
+                 )
+                 
+                 editorVC.draft = draftData
+            }
+        }
+        else if segue.identifier == "openSchedulerModal" {
+                
+                // 1. Get Destination
+                if let navVC = segue.destination as? UINavigationController,
+                   let schedulerVC = navVC.topViewController as? SchedulerViewController {
+                    
+                    // 2. Get Data
+                    if let indexPath = sender as? IndexPath {
+                        let selectedPost: Post
+                        if indexPath.section == 0 { selectedPost = scheduledTodayPosts[indexPath.row] }
+                        else if indexPath.section == 1 { selectedPost = scheduledTomorrowPosts[indexPath.row] }
+                        else { selectedPost = scheduledLaterPosts[indexPath.row] }
+                        
+                        // 3. Pass Data (Mapping 'Post' -> 'Scheduler Variables')
+                        schedulerVC.postImage = UIImage(named: selectedPost.imageName) // Convert String to UIImage
+                        schedulerVC.captionText = selectedPost.text
+                        schedulerVC.platformText = selectedPost.platformName
+                    }
+                }
+        }
+    }
+}

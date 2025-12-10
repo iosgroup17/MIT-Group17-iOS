@@ -13,10 +13,51 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
-        // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let _ = (scene as? UIWindowScene) else { return }
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        
+        // 1. Create the Window manually
+        let window = UIWindow(windowScene: windowScene)
+        self.window = window
+        
+        // 2. Decide which screen to show
+        // Change this boolean to 'false' later when you are done testing!
+        let alwaysShowOnboarding = false
+        
+        let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+        
+        if alwaysShowOnboarding || !hasCompletedOnboarding {
+            // A. Show Onboarding (No Tab Bar)
+            showOnboarding(window: window)
+        } else {
+            // B. Show Main App (Tabs)
+            showMainApp(window: window)
+        }
+        
+        // 3. Make the window visible
+        window.makeKeyAndVisible()
+    }
+    
+    func showOnboarding(window: UIWindow) {
+        // 1. Get the Onboarding Storyboard
+        let storyboard = UIStoryboard(name: "Profile", bundle: nil) // Check your file name!
+        
+        // 2. Instantiate the Quiz Parent VC
+        // Ensure your OnboardingViewController has ID "OnboardingParentVC"
+        let onboardingVC = storyboard.instantiateViewController(withIdentifier: "OnboardingParentVC")
+        
+        // 3. Set as Root
+        window.rootViewController = onboardingVC
+    }
+
+    func showMainApp(window: UIWindow) {
+        // 1. Get the Main Storyboard (Where the Tab Bar is)
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        
+        // 2. Instantiate the Tab Bar Controller
+        let tabBarVC = storyboard.instantiateViewController(withIdentifier: "MainTabBarVC")
+        
+        // 3. Set as Root
+        window.rootViewController = tabBarVC
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
