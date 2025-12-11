@@ -117,35 +117,34 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
     }
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
                 
-                // 1. Define the Edit Action
                 let editAction = UIContextualAction(style: .normal, title: "Edit") { [weak self] (action, view, completionHandler) in
                     guard let self = self else {
                         completionHandler(false)
                         return
                     }
                     
+                    // ✅ THIS WAS MISSING: Trigger the segue manually
+                    // We pass 'indexPath' as sender so prepare(for segue:) knows which row data to grab
+                    self.performSegue(withIdentifier: "openEditorModal", sender: indexPath)
                     
-                    
-                    // Signal that the action was handled successfully
                     completionHandler(true)
                 }
-                
-                editAction.backgroundColor = .systemBlue // Non-destructive color
+                editAction.backgroundColor = .systemBlue
                 editAction.image = UIImage(systemName: "square.and.pencil")
-        let scheduleAction = UIContextualAction(style: .normal, title: "Schedule") { [weak self] (action, view, completionHandler) in
-            guard let self = self else {
-                completionHandler(false)
-                return
-            }
-           
-            
-            // Signal that the action was handled successfully
-            completionHandler(true)
-            
-        }
         
+        // Schedule Action
+        let scheduleAction = UIContextualAction(style: .normal, title: "Schedule") { [weak self] (action, view, completionHandler) in
+            guard let self = self else { return completionHandler(false) }
+            
+            // ✅ Trigger the specific segue for Scheduler
+            self.performSegue(withIdentifier: "openSchedulerModal", sender: indexPath)
+            
+            completionHandler(true)
+        }
         scheduleAction.backgroundColor = .systemGreen
         scheduleAction.image = UIImage(systemName: "calendar.badge.clock")
+        
+        
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] (action, view, completionHandler) in
                     guard let self = self else {
                         completionHandler(false)
@@ -167,6 +166,58 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
                 configuration.performsFirstActionWithFullSwipe = false
                 
                 return configuration
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "openEditorModal" {
+            
+            // 1. Define the destination variable
+            var destinationVC: EditorSuiteViewController?
+            
+            // 2. Check if it's wrapped in a Nav Controller (The Modal Case)
+            if let navVC = segue.destination as? UINavigationController {
+                destinationVC = navVC.topViewController as? EditorSuiteViewController
+            }
+            // 3. Or if it's direct (Just in case)
+            else {
+                destinationVC = segue.destination as? EditorSuiteViewController
+            }
+            
+            // 4. Pass the data
+            if let editorVC = destinationVC, let indexPath = sender as? IndexPath {
+                 // ... Your existing data passing logic ...
+                 let selectedPost: Post
+                 selectedPost = savedPosts[indexPath.row]
+                 let draftData = EditorDraftData(
+                     platformName: selectedPost.platformName,
+                     platformIconName: selectedPost.platformIconName,
+                     caption: selectedPost.text,
+                     images: [selectedPost.imageName],
+                     hashtags: [],
+                     postingTimes: []
+                 )
+                 
+                 editorVC.draft = draftData
+            }
+        }
+        else if segue.identifier == "openSchedulerModal" {
+                
+                // 1. Get Destination
+                if let navVC = segue.destination as? UINavigationController,
+                   let schedulerVC = navVC.topViewController as? SchedulerViewController {
+                    
+                    // 2. Get Data
+                    if let indexPath = sender as? IndexPath {
+                        let selectedPost: Post
+                        selectedPost = savedPosts[indexPath.row]
+                        
+                        // 3. Pass Data (Mapping 'Post' -> 'Scheduler Variables')
+                        schedulerVC.postImage = UIImage(named: selectedPost.imageName) // Convert String to UIImage
+                        schedulerVC.captionText = selectedPost.text
+                        schedulerVC.platformText = selectedPost.platformName
+                    }
+                }
+        }
     }
     /*
     // Override to support rearranging the table view.

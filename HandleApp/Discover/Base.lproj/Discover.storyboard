@@ -115,7 +115,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hjg-p5-3eo">
-                                <rect key="frame" x="0.0" y="178" width="402" height="628"/>
+                                <rect key="frame" x="0.0" y="230" width="402" height="527"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="4dy-69-Rw6">
                                         <rect key="frame" x="0.0" y="0.0" width="402" height="915.33333333333337"/>
@@ -168,7 +168,7 @@
                                                 </cells>
                                             </collectionView>
                                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="hek-gE-fig">
-                                                <rect key="frame" x="16" y="302.33333333333331" width="370" height="100"/>
+                                                <rect key="frame" x="16" y="302.33333333333337" width="370" height="100"/>
                                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="100" id="HYP-Kp-zBm"/>
@@ -627,7 +627,7 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="xCD-Xp-The"/>
+        <segue reference="DwR-tX-FwO"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="chevron.right" catalog="system" width="97" height="128"/>
