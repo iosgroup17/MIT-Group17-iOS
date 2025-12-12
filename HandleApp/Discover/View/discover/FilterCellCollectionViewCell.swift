@@ -29,6 +29,7 @@ class FilterCellCollectionViewCell: UICollectionViewCell {
         self.backgroundColor = .clear
         self.contentView.backgroundColor = .clear
         
+        
         allButtons = [buttonAll, buttonInstagram, buttonLinkedIn, buttonX]
         setupDesign()
         // Initialization code
@@ -43,7 +44,9 @@ class FilterCellCollectionViewCell: UICollectionViewCell {
             btn.layer.shadowColor = UIColor.black.cgColor
             btn.layer.shadowOpacity = 0.1
             btn.layer.shadowOffset = CGSize(width: 0, height: 4)
-            btn.layer.shadowRadius = 32
+            btn.layer.shadowRadius = 16
+            
+            btn.setTitleColor(.black, for: .normal)
         }
         
         // select "All" by default
@@ -72,13 +75,15 @@ class FilterCellCollectionViewCell: UICollectionViewCell {
         for btn in allButtons {
             
             if btn == selectedButton {
-                btn.backgroundColor = UIColor(red: 0.29, green: 0.69, blue: 0.75, alpha: 1.0)
-                btn.setTitleColor(.white, for: .normal)
+                btn.backgroundColor = UIColor.systemTeal.withAlphaComponent(0.25)
+                btn.layer.borderWidth = 1
+                btn.layer.borderColor = UIColor.systemTeal.cgColor
                 btn.layer.shadowOpacity = 0.05
                 
             } else {
                 btn.backgroundColor = .white
-                btn.setTitleColor(.black, for: .normal)
+                btn.layer.borderWidth = 1
+                btn.layer.borderColor = UIColor.white.cgColor
                 btn.layer.shadowOpacity = 0.15
             }
         }

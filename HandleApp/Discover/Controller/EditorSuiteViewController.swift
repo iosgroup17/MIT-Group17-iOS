@@ -41,25 +41,30 @@ class EditorSuiteViewController: UIViewController {
         setupNavigationButtons()
         
     }
-    func setupNavigationButtons() {
-            // LOGIC: If this View Controller is the FIRST one in the navigation stack,
-            // it means we are in the Modal (Wrapped) mode.
-            // If we were pushed from Discover, we would be 2nd or 3rd, so this would be false.
-            
-        func setupNavigationButtons() {
-            if self.navigationController?.viewControllers.first == self {
-                
-                // 1. Correct way to create Cancel button
-                let cancelButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancelButtonTapped))
-                
-                // 2. Correct way to create Done button
-                let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(doneButtonTapped))
-                
-                self.navigationItem.leftBarButtonItem = cancelButton
-                self.navigationItem.rightBarButtonItem = doneButton
-            }
-        }
-        }
+            func setupNavigationButtons() {
+                    if self.navigationController?.viewControllers.first == self {
+                        
+                        // Define your custom Teal color once
+
+                        // 1. Create Cancel button (X)
+                        // This button will inherit the default navigation bar tint color (e.g., system blue).
+                        let cancelImage = UIImage(systemName: "xmark")
+                        let cancelButton = UIBarButtonItem(image: cancelImage, style: .plain, target: self, action: #selector(cancelButtonTapped))
+
+                        // 2. Create Done button (✓) using the *unfilled* checkmark
+                        let doneImage = UIImage(systemName: "checkmark")
+                        let doneButton = UIBarButtonItem(image: doneImage, style: .plain, target: self, action: #selector(doneButtonTapped))
+
+                        // 3. APPLY TEAL COLOR *ONLY* TO THE DONE BUTTON
+                        // Setting the tintColor directly on the UIBarButtonItem only affects that item.
+                        doneButton.tintColor = .systemTeal
+
+                        self.navigationItem.leftBarButtonItem = cancelButton
+                        self.navigationItem.rightBarButtonItem = doneButton
+                    }
+                }
+
+
     @objc func cancelButtonTapped() {
             // Just close the modal
             dismiss(animated: true, completion: nil)
@@ -134,6 +139,22 @@ class EditorSuiteViewController: UIViewController {
             hashtagCollectionView.reloadData()
             timeCollectionView.reloadData()
         }
+    
+    // MARK: - Share Sheet / Publish Action
+    @IBAction func publishButtonTapped(_ sender: UIButton) {
+        
+        var itemsToShare: [Any] = []
+        
+        if let text = captionTextView.text, !text.isEmpty {
+            itemsToShare.append(text)
+        }
+        
+        itemsToShare.append(contentsOf: displayedImages)
+        
+        let activityViewController = UIActivityViewController(activityItems: itemsToShare, applicationActivities: nil)
+        
+        self.present(activityViewController, animated: true, completion: nil)
+    }
 
 }
 

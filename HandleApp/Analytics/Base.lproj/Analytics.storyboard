@@ -105,24 +105,27 @@
                                                         <rect key="frame" x="124.66666666666666" y="0.0" width="112.66666666666666" height="80"/>
                                                         <subviews>
                                                             <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="5Z4-kQ-eeS">
-                                                                <rect key="frame" x="6" y="27.333333333333314" width="100.66666666666667" height="25.333333333333329"/>
+                                                                <rect key="frame" x="8.3333333333333428" y="28" width="96" height="24"/>
                                                                 <subviews>
                                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" image="icon-instagram" translatesAutoresizingMaskIntoConstraints="NO" id="AT8-Va-aWd">
-                                                                        <rect key="frame" x="0.0" y="0.66666666666668561" width="24" height="24"/>
+                                                                        <rect key="frame" x="0.0" y="0.0" width="24" height="24"/>
                                                                         <constraints>
                                                                             <constraint firstAttribute="height" constant="24" id="QgM-7H-o5p"/>
                                                                             <constraint firstAttribute="width" constant="24" id="od0-64-BRe"/>
                                                                         </constraints>
                                                                     </imageView>
-                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="4.2% " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mBS-r2-hjo">
-                                                                        <rect key="frame" x="28" y="0.0" width="52" height="25.333333333333332"/>
-                                                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="21"/>
+                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="4.2% " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.29999999999999999" translatesAutoresizingMaskIntoConstraints="NO" id="mBS-r2-hjo">
+                                                                        <rect key="frame" x="28" y="1.3333333333333144" width="49" height="21.666666666666668"/>
+                                                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="18"/>
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
                                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" image="arrow.up" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="zXb-zs-gfB">
-                                                                        <rect key="frame" x="84" y="4.0000000000000178" width="16.666666666666671" height="18"/>
+                                                                        <rect key="frame" x="81" y="3.3333333333333321" width="15" height="18"/>
                                                                         <color key="tintColor" systemColor="systemGreenColor"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="width" constant="15" id="URZ-yo-mDx"/>
+                                                                        </constraints>
                                                                     </imageView>
                                                                 </subviews>
                                                             </stackView>
@@ -780,6 +783,7 @@
                                                 </subviews>
                                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                 <constraints>
+                                                    <constraint firstItem="3xL-Zj-6lp" firstAttribute="leading" secondItem="9jl-Vh-tq2" secondAttribute="leading" constant="2" id="0Ch-dC-wdS"/>
                                                     <constraint firstAttribute="height" constant="250" id="Ibi-ZT-KsD"/>
                                                     <constraint firstItem="jVI-Ma-SAf" firstAttribute="top" secondItem="9jl-Vh-tq2" secondAttribute="top" constant="1" id="KmG-mw-xE1"/>
                                                     <constraint firstItem="jVI-Ma-SAf" firstAttribute="leading" secondItem="9jl-Vh-tq2" secondAttribute="leading" constant="16" id="jIp-ev-J7j"/>

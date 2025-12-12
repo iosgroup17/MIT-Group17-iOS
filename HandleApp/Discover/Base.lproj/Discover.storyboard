@@ -296,6 +296,9 @@
                                                         <color key="tintColor" name="Color"/>
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="filled" title="Publish"/>
+                                                        <connections>
+                                                            <action selector="publishButtonTapped:" destination="5Es-wD-mmQ" eventType="touchUpInside" id="in7-tb-k7j"/>
+                                                        </connections>
                                                     </button>
                                                 </subviews>
                                                 <constraints>

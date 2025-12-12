@@ -9,7 +9,7 @@
         {
             "id": "idea_2",
             "caption": "One hiring mistake every founder learns too late",
-            "image": "image2",
+            "image": "img-post-2",
             "platform_icon": "icon-twitter"
         },
         {
@@ -322,7 +322,7 @@
             "id": "rec_2",
             "caption": "The unpopular truth: Founders don’t need more ideas—they need sharper execution. Here’s how I cut my workload by 40% without losing output.",
             "why_this_post": "Bold, contrarian, high reach",
-            "image": "image2",
+            "image": "img-post-1",
             "platform_icon": "X"
         },
         {
@@ -343,35 +343,35 @@
             "id": "rec_5",
             "caption": "Here’s the messy workspace I tried hiding for months. But it reminded me: perfection kills progress.",
             "why_this_post": "Relatable, human, engaging",
-            "image": "img-post-1",
+            "image": "img-post-5",
             "platform_icon": "Instagram"
         },
         {
             "id": "rec_6",
             "caption": "I tested deep work blocks for 30 days. These are the three changes that dramatically improved my creative output.",
             "why_this_post": "Productive, proven, helpful",
-            "image": "img-post-2",
+            "image": "img-post-6",
             "platform_icon": "X"
         },
         {
             "id": "rec_7",
             "caption": "A client story that almost broke me—and the framework I now use to prevent scope creep forever.",
             "why_this_post": "Story-driven, valuable, memorable",
-            "image": "img-post-3",
+            "image": "img-post-7",
             "platform_icon": "LinkedIn"
         },
         {
             "id": "rec_8",
             "caption": "My failed launch taught me more than any win. Here’s the exact mistake and what I fixed the next time.",
             "why_this_post": "Honest, vulnerable, impactful",
-            "image": "img-post-4",
+            "image": "img-post-8",
             "platform_icon": "X"
         },
         {
             "id": "rec_9",
             "caption": "The simple psychology trick I use to keep readers on my posts until the last line—works every single time.",
             "why_this_post": "Psychology, retention, effective",
-            "image": "img-post-1",
+            "image": "img-post-9",
             "platform_icon": "LinkedIn"
         }
     ],

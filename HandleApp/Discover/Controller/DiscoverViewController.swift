@@ -394,7 +394,6 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
                 postingTimes: fullDetails.optimalPostingTimes ?? []
             )
             
-            // 4. Send it!
             performSegue(withIdentifier: "ShowEditorSegue", sender: draft)
         }
         

@@ -7,10 +7,11 @@
 
 import UIKit
 
-class SavedPostsTableViewController: UITableViewController, UIPopoverPresentationControllerDelegate, PlatformMenuDelegate {
+class SavedPostsTableViewController: UITableViewController, UIPopoverPresentationControllerDelegate {
     func didSelectPlatform(_ platform: String) {
         print("Selected Platform: \(platform)")
-    filterSavedPosts(by: platform)
+            self.currentPlatformFilter = platform // <--- NEW: Save the selected state
+            filterSavedPosts(by: platform)
     }
     
     @IBOutlet weak var postTableView: UITableView!
@@ -23,6 +24,7 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
         }
     }()
     var displayedPosts: [Post] = []
+    var currentPlatformFilter: String = "All"
     func filterSavedPosts(by platform: String) {
         print("Filter requested for: [\(platform)]") // Check the input string
 
@@ -49,27 +51,44 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
     }
     @IBAction func filterButtonTapped(_ sender: Any) {
-        guard let menuVC = storyboard?.instantiateViewController(withIdentifier: "PlatformMenuID") as? PlatformFilterViewController else {
-                    return
-                }
-        menuVC.delegate = self
-                // 2. Set the Presentation Style to Popover
-                menuVC.modalPresentationStyle = .popover
-                
-                // 3. Configure the Popover Presentation Controller
-                guard let popoverPC = menuVC.popoverPresentationController else { return }
-                
-                // Set the anchor point: This tells the popover where to appear from.
-        popoverPC.barButtonItem = sender as? UIBarButtonItem // Anchor it to the UIBarButtonItem
-                
-                // Set the delegate for custom behavior (optional, but good practice)
-                popoverPC.delegate = self
-                
-                // Customize the arrow direction (optional, but standard for menus)
-                popoverPC.permittedArrowDirections = .up
-                
-                // 4. Present the view controller
-                present(menuVC, animated: true, completion: nil)
+        let alertController = UIAlertController(title: "Filter by Platform", message: nil, preferredStyle: .actionSheet)
+                    
+                    let platforms = ["All", "LinkedIn", "Instagram", "X"]
+                    
+                    for platform in platforms {
+                        
+                        let isSelected = (platform == self.currentPlatformFilter)
+                        
+                        // Prepend the checkmark symbol if selected
+                        let displayTitle = isSelected ? "✓ \(platform)" : platform
+                        
+                        let action = UIAlertAction(title: displayTitle, style: .default) { [weak self] _ in
+                            self?.didSelectPlatform(platform)
+                        }
+                        
+                        alertController.addAction(action)
+                    }
+                    
+                    // Add the Cancel action
+                    let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+                    alertController.addAction(cancelAction)
+                    
+                    // 5. iPad Support - ANCHORING FIX
+                    // Check if we have a popover controller (i.e., we are on iPad or Mac catalyst)
+                    if let popover = alertController.popoverPresentationController {
+                        
+                        // FIX: Explicitly use the IBOutlet for the bar button item.
+                        // This is safer than relying on casting 'sender' for anchoring.
+                        popover.barButtonItem = self.filterBarButton
+                        
+                        // Ensure the table view controller is set as the delegate
+                        popover.delegate = self // ScheduledPostsTableViewController must be the delegate
+                        
+                        popover.permittedArrowDirections = .up
+                    }
+                    
+                    // 6. Present the Alert Controller
+                    present(alertController, animated: true, completion: nil)
     }
     func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
             // Force the Popover style instead of defaulting to full screen on iPhone
