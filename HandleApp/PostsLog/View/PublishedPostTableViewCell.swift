@@ -44,45 +44,31 @@ class PublishedPostTableViewCell: UITableViewCell {
         platformIconImageView.image = UIImage(named: post.platformIconName)
         thumbnailImageView.image = UIImage(named: post.imageName)
         if let scheduledDate = post.date, let timeString = post.time, !timeString.isEmpty {
-            
-            // 1. Parse the timeString into a time Date object
             if let timePart = PublishedPostTableViewCell.timeFormatter.date(from: timeString) {
-                
                 let calendar = Calendar.current
-                
-                // 2. Extract components from the time part (hour, minute)
                 let timeComponents = calendar.dateComponents([.hour, .minute], from: timePart)
-                // This is safer and more explicit than passing the DateComponents struct.
                 if let hour = timeComponents.hour, let minute = timeComponents.minute {
-                    
                     if let combinedDateTime = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: scheduledDate) {
-                    
-                        // 4. Format the final combined date/time object
                         dateTimeLabel.text = PublishedPostTableViewCell.dateFormatter.string(from: combinedDateTime)
-                        
                     } else {
-                        dateTimeLabel.text = "Time Combination Error" // Fallback if combining fails
+                        dateTimeLabel.text = "Time Combination Error" 
                     }
                 }
             } else {
-                // If time parsing fails, show the raw scheduled date
                 dateTimeLabel.text = PublishedPostTableViewCell.dateFormatter.string(from: scheduledDate)
             }
             
         }
-            
-            // Configure analytics labels (assuming Post has these properties)
         likesLabel.text = "\(post.likes ?? "")"
         commentsLabel.text = "\(post.comments ?? "")"
         sharesLabel.text = "\(post.shares ?? "")"
         repostsLabel.text = "\(post.reposts ?? "")"
         viewsLabel.text = "\(post.views ?? "")"
         engagementLabel.text = "\(post.engagementScore ?? "")"
-            analyticsHeightConstraint.constant = isExpanded ? expandedHeight : 0
-            analyticsContainerView.alpha = isExpanded ? 1.0 : 0.0
-            
-            // Ensure the layout updates immediately
-            contentView.layoutIfNeeded()
-        }
+        analyticsHeightConstraint.constant = isExpanded ? expandedHeight : 0
+        analyticsContainerView.alpha = isExpanded ? 1.0 : 0.0
+        
+        contentView.layoutIfNeeded()
+    }
 
 }

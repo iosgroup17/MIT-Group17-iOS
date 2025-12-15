@@ -21,7 +21,6 @@ class RecommendationsCollectionViewCell: UICollectionViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
         
         shadowView.layer.shadowColor = UIColor.black.cgColor
         shadowView.layer.shadowOffset = CGSize(width: 0, height: 4)
@@ -61,11 +60,7 @@ class RecommendationsCollectionViewCell: UICollectionViewCell {
         
             
         tagContainerView.backgroundColor = themeColor.withAlphaComponent(0.1)
-        
-        // Text gets the color
         tagLabel.textColor = themeColor
-        
-        // Icon gets the color (Since the image is static in XIB, we just tint it)
         tagIcon.tintColor = themeColor
         }
     

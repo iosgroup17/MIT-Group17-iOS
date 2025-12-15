@@ -65,22 +65,6 @@ class DiscoverViewController: UIViewController {
         
         collectionView.setCollectionViewLayout(generateLayout(), animated: true)
     }
-    
-    func applyFilter() {
-        //everything
-        if currentPlatformFilter == "All" {
-            recommendations = allRecommendations
-        } else {
-        // 2. Filter by name (Instagram, LinkedIn, X)
-            recommendations = allRecommendations.filter { rec in
-                return rec.platformIcon == currentPlatformFilter
-            }
-        }
-        
-        if let cv = collectionView {
-            cv.reloadSections(IndexSet(integer: 3))
-        }
-    }
 
     func generateLayout() -> UICollectionViewLayout {
         
@@ -223,6 +207,22 @@ class DiscoverViewController: UIViewController {
             }
             
             return nil
+        }
+    }
+
+    func applyFilter() {
+        //everything
+        if currentPlatformFilter == "All" {
+            recommendations = allRecommendations
+        } else {
+        // 2. Filter by name (Instagram, LinkedIn, X)
+            recommendations = allRecommendations.filter { rec in
+                return rec.platformIcon == currentPlatformFilter
+            }
+        }
+        
+        if let cv = collectionView {
+            cv.reloadSections(IndexSet(integer: 3))
         }
     }
 

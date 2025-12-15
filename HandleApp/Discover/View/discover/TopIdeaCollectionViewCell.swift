@@ -18,10 +18,8 @@ class TopIdeaCollectionViewCell: UICollectionViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         
-            // SHADOW CONTAINER
             ShadowContainer.layer.cornerRadius = 20
             
-            // Figma shadow (converted perfectly)
             ShadowContainer.layer.shadowColor = UIColor.black.withAlphaComponent(0.10).cgColor
             ShadowContainer.layer.shadowOpacity = 1
             ShadowContainer.layer.shadowRadius = 32
@@ -32,20 +30,19 @@ class TopIdeaCollectionViewCell: UICollectionViewCell {
     
     func configure(with image: UIImage?, caption: String, platformIcon: UIImage?) {
         
-        // CARD VIEW
         ShadowContainer.layer.cornerRadius = 20
         //cardView.layer.masksToBounds = true
         
-        // IMAGE VIEW
+        
         mainImageView.image = image
         mainImageView.layer.cornerRadius = 16
 
         
-        // CAPTION LABEL
+        
         captionLabel.text = caption
         captionLabel.numberOfLines = 0
         
-        // PLATFORM ICON (small square logo beside label)
+        
         platformIconView.image = platformIcon
         platformIconView.layer.cornerRadius = 4
 

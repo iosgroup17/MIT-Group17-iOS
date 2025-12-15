@@ -13,7 +13,7 @@ class SavedPostsTableViewCell: UITableViewCell {
     @IBOutlet weak var thumbNailImage: UIImageView!
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
+
         thumbNailImage.layer.cornerRadius = 8
         thumbNailImage.clipsToBounds = true
         self.selectionStyle = .none

@@ -24,103 +24,23 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
         }
     }()
     var currentTimeFilter: String = "All"
-    @IBAction func filerButtonTapped(_ sender: Any) {
-        let alertController = UIAlertController(title: "View Activity From", message: nil, preferredStyle: .actionSheet)
-                    
-                    let timePeriods = ["All", "Last 7 Days", "Last 30 Days"]
-                    
-                    for period in timePeriods {
-                        
-                        let isSelected = (period == self.currentTimeFilter)
-                        let displayTitle = isSelected ? "✓ \(period)" : period
-                        
-                        let action = UIAlertAction(title: displayTitle, style: .default) { [weak self] _ in
-                            // Use the base period string for filtering
-                            self?.filterPostsByTime(timePeriod: period)
-                        }
-                        
-                        alertController.addAction(action)
-                    }
-                    
-                    let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-                    alertController.addAction(cancelAction)
-                    
-                    // iPad Support: Anchor to the bar button item
-                    if let popover = alertController.popoverPresentationController {
-                        popover.barButtonItem = sender as? UIBarButtonItem // Use the sender (the new filter button)
-                        popover.delegate = self // Since PublishedPostViewController conforms to UITableViewDelegate/DataSource,
-                                                // it should also conform to UIPopoverPresentationControllerDelegate if needed for popovers.
-                        popover.permittedArrowDirections = .up
-                    }
-                    
-                    present(alertController, animated: true, completion: nil)
-    }
-    func getDate(daysAgo: Int) -> Date {
-            return Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date())!
-        }
     var displayedPosts: [Post] = []
-    func filterPostsByTime(timePeriod: String) {
-            self.currentTimeFilter = timePeriod // Update the state
-            
-            // 1. Start with the current platform-filtered posts
-            var postsToFilter = publishedPosts
-            if currentPlatformFilter != "All" {
-                postsToFilter = publishedPosts.filter { $0.platformName == currentPlatformFilter }
-            }
-            
-            // 2. Apply time filtering
-            switch timePeriod {
-            case "All":
-                displayedPosts = postsToFilter
-            case "Last 7 Days":
-                let date7DaysAgo = getDate(daysAgo: 7)
-                displayedPosts = postsToFilter.filter { post in
-                    return post.date! >= date7DaysAgo
-                }
-            case "Last 30 Days":
-                let date30DaysAgo = getDate(daysAgo: 30)
-                displayedPosts = postsToFilter.filter { post in
-                    return post.date! >= date30DaysAgo
-                }
-            default:
-                displayedPosts = postsToFilter
-            }
-
-            publishedTableView.reloadData()
-        }
-    var currentPlatformFilter: String = "All" {
-        didSet {
-            updateCapsuleAppearance()
-            filterPublishedPosts(by: currentPlatformFilter)
-        }
-    }
-    
-    // For cell expansion/collapse logic
     var expandedPost: String? = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // 1. Set up Table View delegates
         self.publishedTableView.delegate = self
         self.publishedTableView.dataSource = self
-        
-        // 2. Initialize displayedPosts (will be fully set in viewDidAppear)
         displayedPosts = publishedPosts
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
-        // This triggers the didSet, running the initial filtering and styling.
         currentPlatformFilter = "All"
-        
-        // Ensure table view reloads with the initial "All" data.
         publishedTableView.reloadData()
     }
 
-    // MARK: - Action Methods (USING TAGS)
-    
+    //Platform wise filter
     @IBAction func buttonTapped(_ sender: UIButton) {
         let tag = sender.tag
         var selectedPlatform: String?
@@ -138,56 +58,98 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
             print("ERROR: Unknown button tag: \(tag)")
             return
         }
-        
-        // Use selectedPlatform here
         guard let platform = selectedPlatform else { return }
         
         print("ACTION: Tag \(tag) selected. Platform: \(platform)")
 
         if platform != currentPlatformFilter {
-            // Setting this property triggers the didSet block, which handles the filtering/styling
             currentPlatformFilter = platform
         }
     }
 
-
+    var currentPlatformFilter: String = "All" {
+        didSet {
+            updateCapsuleAppearance()
+            filterPublishedPosts(by: currentPlatformFilter)
+        }
+    }
     
     func filterPublishedPosts(by platform: String) {
-        // Guard against running before the View/Outlets are ready (for early didSet call)
         guard isViewLoaded else { return }
-
         if platform == "All" {
             displayedPosts = publishedPosts
         } else {
-            // Filter posts where the platformName matches the selected capsule string
             displayedPosts = publishedPosts.filter { post in
                 return post.platformName == platform
             }
         }
-
         publishedTableView.reloadData()
     }
     
     func updateCapsuleAppearance() {
-        // Retrieve the button's title (using the visual text for comparison/display)
         for case let button as UIButton in filterStackView.arrangedSubviews {
             guard let platform = button.title(for: .normal) else { continue }
-            
             let isSelected = (platform == currentPlatformFilter)
-            
-            // Apply capsule styling based on selected state
             button.layer.cornerRadius = 14.0
             button.backgroundColor = isSelected ? UIColor.systemTeal.withAlphaComponent(0.25) : UIColor.systemGray5
             button.layer.borderWidth = isSelected ? 1.0 : 0.0
             button.layer.borderColor = isSelected ? UIColor.systemTeal.cgColor : UIColor.clear.cgColor
             button.setTitleColor(.black, for: .normal)
-            
-            
         }
     }
     
- 
+    //Time wise filter
+    @IBAction func filerButtonTapped(_ sender: Any) {
+        let alertController = UIAlertController(title: "View Activity From", message: nil, preferredStyle: .actionSheet)
+        let timePeriods = ["All", "Last 7 Days", "Last 30 Days"]
+        for period in timePeriods {
+            let isSelected = (period == self.currentTimeFilter)
+            let displayTitle = isSelected ? "✓ \(period)" : period
+            let action = UIAlertAction(title: displayTitle, style: .default) { [weak self] _ in
+                self?.filterPostsByTime(timePeriod: period)
+            }
+            alertController.addAction(action)
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        alertController.addAction(cancelAction)
+        if let popover = alertController.popoverPresentationController {
+            popover.barButtonItem = sender as? UIBarButtonItem // Use the sender (the new filter button)
+            popover.delegate = self 
+            popover.permittedArrowDirections = .up
+        }
+        present(alertController, animated: true, completion: nil)
+    }
 
+    func getDate(daysAgo: Int) -> Date {
+        return Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date())!
+    }
+
+    func filterPostsByTime(timePeriod: String) {
+            self.currentTimeFilter = timePeriod
+            var postsToFilter = publishedPosts
+            if currentPlatformFilter != "All" {
+                postsToFilter = publishedPosts.filter { $0.platformName == currentPlatformFilter }
+            }
+            switch timePeriod {
+            case "All":
+                displayedPosts = postsToFilter
+            case "Last 7 Days":
+                let date7DaysAgo = getDate(daysAgo: 7)
+                displayedPosts = postsToFilter.filter { post in
+                    return post.date! >= date7DaysAgo
+                }
+            case "Last 30 Days":
+                let date30DaysAgo = getDate(daysAgo: 30)
+                displayedPosts = postsToFilter.filter { post in
+                    return post.date! >= date30DaysAgo
+                }
+            default:
+                displayedPosts = postsToFilter
+            }
+            publishedTableView.reloadData()
+    }
+
+    //Table View
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
@@ -211,7 +173,7 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
         return cell
     }
 
-
+    //For collapsible analytics view height constraint.
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         let post = displayedPosts[indexPath.row]
         let baseHeight: CGFloat = 60
@@ -224,7 +186,8 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
             return baseHeight
         }
     }
-
+    
+    //Analytics for selected post.
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         

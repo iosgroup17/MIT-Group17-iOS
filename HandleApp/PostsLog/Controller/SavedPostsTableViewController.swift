@@ -8,13 +8,10 @@
 import UIKit
 
 class SavedPostsTableViewController: UITableViewController, UIPopoverPresentationControllerDelegate {
-    func didSelectPlatform(_ platform: String) {
-        print("Selected Platform: \(platform)")
-            self.currentPlatformFilter = platform // <--- NEW: Save the selected state
-            filterSavedPosts(by: platform)
-    }
+    
     
     @IBOutlet weak var postTableView: UITableView!
+    @IBOutlet weak var filterBarButton: UIBarButtonItem!
     var savedPosts: [Post] = {
         do {
             return try Post.loadSavedPosts(from: "Posts_data")
@@ -25,85 +22,70 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
     }()
     var displayedPosts: [Post] = []
     var currentPlatformFilter: String = "All"
-    func filterSavedPosts(by platform: String) {
-        print("Filter requested for: [\(platform)]") // Check the input string
-
-            if platform == "All" {
-                displayedPosts = savedPosts
-            } else {
-                displayedPosts = savedPosts.filter { post in
-                    print("Post platformName: [\(post.platformName)] vs Target: [\(platform)]")
-                    return post.platformName == platform
-                }
-            }
-
-            print("Posts displayed after filter: \(displayedPosts.count)")
-        postTableView.reloadData( )
-            }
-    @IBOutlet weak var filterBarButton: UIBarButtonItem!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         displayedPosts = savedPosts
     }
+    
+    //Filter by platform.
+    func didSelectPlatform(_ platform: String) {
+        print("Selected Platform: \(platform)")
+            self.currentPlatformFilter = platform 
+            filterSavedPosts(by: platform)
+    }
+
+    func filterSavedPosts(by platform: String) {
+        print("Filter requested for: [\(platform)]") 
+        if platform == "All" {
+            displayedPosts = savedPosts
+        } else {
+            displayedPosts = savedPosts.filter { post in
+                print("Post platformName: [\(post.platformName)] vs Target: [\(platform)]")
+                return post.platformName == platform
+            }
+        }
+        print("Posts displayed after filter: \(displayedPosts.count)")
+        postTableView.reloadData( )
+    }
+
     @IBAction func filterButtonTapped(_ sender: Any) {
         let alertController = UIAlertController(title: "Filter by Platform", message: nil, preferredStyle: .actionSheet)
-                    
-                    let platforms = ["All", "LinkedIn", "Instagram", "X"]
-                    
-                    for platform in platforms {
-                        
-                        let isSelected = (platform == self.currentPlatformFilter)
-                        
-                        // Prepend the checkmark symbol if selected
-                        let displayTitle = isSelected ? "✓ \(platform)" : platform
-                        
-                        let action = UIAlertAction(title: displayTitle, style: .default) { [weak self] _ in
-                            self?.didSelectPlatform(platform)
-                        }
-                        
-                        alertController.addAction(action)
-                    }
-                    
-                    // Add the Cancel action
-                    let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-                    alertController.addAction(cancelAction)
-                    
-                    // 5. iPad Support - ANCHORING FIX
-                    // Check if we have a popover controller (i.e., we are on iPad or Mac catalyst)
-                    if let popover = alertController.popoverPresentationController {
-                        
-                        popover.barButtonItem = self.filterBarButton
-                     
-                        popover.delegate = self
-                        
-                        popover.permittedArrowDirections = .up
-                    }
-                    
-                    // 6. Present the Alert Controller
-                    present(alertController, animated: true, completion: nil)
+        let platforms = ["All", "LinkedIn", "Instagram", "X"]
+        for platform in platforms {
+            let isSelected = (platform == self.currentPlatformFilter)
+            let displayTitle = isSelected ? "✓ \(platform)" : platform
+            let action = UIAlertAction(title: displayTitle, style: .default) { [weak self] _ in
+                self?.didSelectPlatform(platform)
+            }
+            alertController.addAction(action)
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        alertController.addAction(cancelAction)
+        if let popover = alertController.popoverPresentationController {
+            popover.barButtonItem = self.filterBarButton
+            popover.delegate = self
+            popover.permittedArrowDirections = .up
+        }
+        present(alertController, animated: true, completion: nil)
     }
     func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
-            // Force the Popover style instead of defaulting to full screen on iPhone
-            return .none
-        }
+        return .none
+    }
     
-
+    //Table view
     override func numberOfSections(in tableView: UITableView) -> Int {
-       
         return 1
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-     
         return displayedPosts.count
     }
 
-    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "saved_cell", for: indexPath) as? SavedPostsTableViewCell else {
             fatalError("Could not dequeue SavedPostsTableViewCell")
-        }
-            
+        }    
         let post = displayedPosts[indexPath.row]
         cell.configure(with: post)
         return cell
@@ -123,73 +105,61 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
             tableView.deleteRows(at: [indexPath], with: .fade)
         }
     }
+
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-                
-                let editAction = UIContextualAction(style: .normal, title: "Edit") { [weak self] (action, view, completionHandler) in
-                    guard let self = self else {
-                        completionHandler(false)
-                        return
-                    }
-                    self.performSegue(withIdentifier: "openEditorModal", sender: indexPath)
-                    
-                    completionHandler(true)
-                }
-                editAction.backgroundColor = .systemBlue
-                editAction.image = UIImage(systemName: "square.and.pencil")
+
+        //Edit action
+        let editAction = UIContextualAction(style: .normal, title: "Edit") { [weak self] (action, view, completionHandler) in
+            guard let self = self else {
+                completionHandler(false)
+                return
+            }
+            self.performSegue(withIdentifier: "openEditorModal", sender: indexPath)
+            completionHandler(true)
+        }
+        editAction.backgroundColor = .systemBlue
+        editAction.image = UIImage(systemName: "square.and.pencil")
         
         // Schedule Action
         let scheduleAction = UIContextualAction(style: .normal, title: "Schedule") { [weak self] (action, view, completionHandler) in
             guard let self = self else { return completionHandler(false) }
             self.performSegue(withIdentifier: "openSchedulerModal", sender: indexPath)
-            
             completionHandler(true)
         }
         scheduleAction.backgroundColor = .systemGreen
         scheduleAction.image = UIImage(systemName: "calendar.badge.clock")
         
-        
+        //Delete action
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] (action, view, completionHandler) in
-                    guard let self = self else {
-                        completionHandler(false)
-                        return
-                    }
-                    
-                    // Update data model
-                    self.displayedPosts.remove(at: indexPath.row)
-                    
-                    // Update table view with animation
-                    tableView.deleteRows(at: [indexPath], with: .automatic)
-                    
-                    completionHandler(true)
-                }
-                deleteAction.image = UIImage(systemName: "trash.fill")
+            guard let self = self else {
+                completionHandler(false)
+                return
+            }
+            self.displayedPosts.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .automatic)
+            completionHandler(true)
+        }
+        deleteAction.image = UIImage(systemName: "trash.fill")
+
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction, editAction, scheduleAction])
+        configuration.performsFirstActionWithFullSwipe = false
                 
-                // Set to false so that a full swipe only reveals the actions, instead of triggering Delete immediately.
-                configuration.performsFirstActionWithFullSwipe = false
-                
-                return configuration
+        return configuration
     }
     
+    //Pass data to scheduler and Editor suite VC.
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "openEditorModal" {
-            
-            // 1. Define the destination variable
             var destinationVC: EditorSuiteViewController?
-            
-            // 2. Check if it's wrapped in a Nav Controller (The Modal Case)
             if let navVC = segue.destination as? UINavigationController {
                 destinationVC = navVC.topViewController as? EditorSuiteViewController
             }
-            // 3. Or if it's direct (Just in case)
             else {
                 destinationVC = segue.destination as? EditorSuiteViewController
             }
-            
-            // 4. Pass the data
             if let editorVC = destinationVC, let indexPath = sender as? IndexPath {
-                 let selectedPost: Post
-                 selectedPost = displayedPosts[indexPath.row]
+                let selectedPost: Post
+                selectedPost = displayedPosts[indexPath.row]
                 let draftData = EditorDraftData(
                     platformName: selectedPost.platformName,
                     platformIconName: selectedPost.platformIconName,
@@ -203,22 +173,16 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
             }
         }
         else if segue.identifier == "openSchedulerModal" {
-                
-                // 1. Get Destination
-                if let navVC = segue.destination as? UINavigationController,
-                   let schedulerVC = navVC.topViewController as? SchedulerViewController {
-                    
-                    // 2. Get Data
+            if let navVC = segue.destination as? UINavigationController,
+                let schedulerVC = navVC.topViewController as? SchedulerViewController {
                     if let indexPath = sender as? IndexPath {
                         let selectedPost: Post
                         selectedPost = displayedPosts[indexPath.row]
-                        
-                        // 3. Pass Data (Mapping 'Post' -> 'Scheduler Variables')
-                        schedulerVC.postImage = UIImage(named: selectedPost.imageName) // Convert String to UIImage
+                        schedulerVC.postImage = UIImage(named: selectedPost.imageName) 
                         schedulerVC.captionText = selectedPost.text
                         schedulerVC.platformText = selectedPost.platformName
                     }
-                }
+            }
         }
     }
     /*

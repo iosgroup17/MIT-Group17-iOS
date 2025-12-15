@@ -41,24 +41,6 @@ class EditorSuiteViewController: UIViewController {
         setupNavigationButtons()
         
     }
-            func setupNavigationButtons() {
-                    if self.navigationController?.viewControllers.first == self {
-
-
-                        let cancelImage = UIImage(systemName: "xmark")
-                        let cancelButton = UIBarButtonItem(image: cancelImage, style: .plain, target: self, action: #selector(cancelButtonTapped))
-
-
-                        let doneImage = UIImage(systemName: "checkmark")
-                        let doneButton = UIBarButtonItem(image: doneImage, style: .plain, target: self, action: #selector(doneButtonTapped))
-
-
-                        doneButton.tintColor = .systemTeal
-
-                        self.navigationItem.leftBarButtonItem = cancelButton
-                        self.navigationItem.rightBarButtonItem = doneButton
-                    }
-                }
 
 
     @objc func cancelButtonTapped() {
@@ -130,6 +112,34 @@ class EditorSuiteViewController: UIViewController {
 
             hashtagCollectionView.reloadData()
             timeCollectionView.reloadData()
+        }
+
+    func setupNavigationButtons() {
+            if self.navigationController?.viewControllers.first == self {
+
+
+                let cancelImage = UIImage(systemName: "xmark")
+                let cancelButton = UIBarButtonItem(image: cancelImage, style: .plain, target: self, action: #selector(cancelButtonTapped))
+
+
+                let doneImage = UIImage(systemName: "checkmark")
+                let doneButton = UIBarButtonItem(image: doneImage, style: .plain, target: self, action: #selector(doneButtonTapped))
+
+
+                doneButton.tintColor = .systemTeal
+
+                self.navigationItem.leftBarButtonItem = cancelButton
+                self.navigationItem.rightBarButtonItem = doneButton
+            }
+        }
+        @objc func cancelButtonTapped() {
+        
+            dismiss(animated: true, completion: nil) // close modal
+        }
+
+        @objc func doneButtonTapped() {
+            
+            dismiss(animated: true, completion: nil)
         }
     
     // Share action

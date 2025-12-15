@@ -99,24 +99,30 @@ class SchedulerViewController: UIViewController {
     }
     
     @IBAction func datePickerChanged(_ sender: UIDatePicker) {
-            updateDateLabel()
-        }
-        
-        @IBAction func timePickerChanged(_ sender: UIDatePicker) {
-            updateTimeLabel()
-        }
-    
-    func updateDateLabel() {
+            //updateDateLabel()
             let formatter = DateFormatter()
             formatter.dateFormat = "E, MMM d, yyyy"
             dateDetailLabel.text = formatter.string(from: datePicker.date)
         }
+        
+        @IBAction func timePickerChanged(_ sender: UIDatePicker) {
+            //updateTimeLabel()
+            let formatter = DateFormatter()
+            formatter.timeStyle = .short
+            timeDetailLabel.text = formatter.string(from: timePicker.date)
+        }
     
-    func updateTimeLabel() {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        timeDetailLabel.text = formatter.string(from: timePicker.date)
-    }
+    // func updateDateLabel() {
+    //         let formatter = DateFormatter()
+    //         formatter.dateFormat = "E, MMM d, yyyy"
+    //         dateDetailLabel.text = formatter.string(from: datePicker.date)
+    //     }
+    
+    // func updateTimeLabel() {
+    //     let formatter = DateFormatter()
+    //     formatter.timeStyle = .short
+    //     timeDetailLabel.text = formatter.string(from: timePicker.date)
+    // }
     
     @IBAction func closeButtonTapped(_ sender: UIBarButtonItem) {
             dismiss(animated: true, completion: nil)

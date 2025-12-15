@@ -30,7 +30,7 @@ class TopicIdeaCollectionViewCell: UICollectionViewCell {
         self.contentView.clipsToBounds = false
                 
         
-        // Initialization code
+        
         setupUI()
     }
     
@@ -55,7 +55,6 @@ class TopicIdeaCollectionViewCell: UICollectionViewCell {
     
     func configure(with idea: TopicIdea) {
             
-            // 1. Basic Data Assignment
             captionLabel.text = idea.caption
             badgeLabel.text = idea.whyThisPost
             
