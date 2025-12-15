@@ -14,7 +14,7 @@ class AnalyticsCardView: UIView {
         setupCardDesign()
     }
 //awakefromnib is called when the view is loaded from a nib or storyboard file.
-// nib files are basically interface builder files that store a set of user interface objects. this is different from viewdidload which is called when a view controller's view is loaded into memory. but awakefromnib is specifically for views loaded from nibs or storyboards and viewdidload is for view controllers. the difference is important because views and view controllers have different lifecycles and responsibilities in an app. awakefromnib is used to perform additional setup or initialization for views after they have been loaded from a nib or storyboard. while viewdidload is used to set up the overall view hierarchy and configure the view controller's properties and behaviors.
+//awakefromnib is specifically for views loaded from nibs or storyboards and viewdidload is for view controllers. awakefromnib is used to perform additional setup or initialization for views after they have been loaded from a nib or storyboard. while viewdidload is used to set up the overall view hierarchy and configure the view controller's properties and behaviors.
     
     private func setupCardDesign() {
 
