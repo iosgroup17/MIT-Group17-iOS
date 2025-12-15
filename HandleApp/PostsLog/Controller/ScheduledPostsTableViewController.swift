@@ -271,10 +271,10 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
                  let draftData = EditorDraftData(
                      platformName: selectedPost.platformName,
                      platformIconName: selectedPost.platformIconName,
-                     caption: selectedPost.text,
+                     caption: selectedPost.fullCaption ?? "",
                      images: [selectedPost.imageName],
-                     hashtags: [],
-                     postingTimes: []
+                     hashtags: selectedPost.suggestedHashtags ?? [],
+                     postingTimes: selectedPost.optimalPostingTimes ?? []
                  )
                  
                  editorVC.draft = draftData

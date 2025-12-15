@@ -207,14 +207,14 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
                  // ... Your existing data passing logic ...
                  let selectedPost: Post
                  selectedPost = displayedPosts[indexPath.row]
-                 let draftData = EditorDraftData(
-                     platformName: selectedPost.platformName,
-                     platformIconName: selectedPost.platformIconName,
-                     caption: selectedPost.text,
-                     images: [selectedPost.imageName],
-                     hashtags: [],
-                     postingTimes: []
-                 )
+                let draftData = EditorDraftData(
+                    platformName: selectedPost.platformName,
+                    platformIconName: selectedPost.platformIconName,
+                    caption: selectedPost.fullCaption ?? "",
+                    images: [selectedPost.imageName],
+                    hashtags: selectedPost.suggestedHashtags ?? [],
+                    postingTimes: selectedPost.optimalPostingTimes ?? []
+                )
                  
                  editorVC.draft = draftData
             }

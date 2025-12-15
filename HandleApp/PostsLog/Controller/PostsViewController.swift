@@ -356,14 +356,14 @@ extension PostsViewController: UITableViewDataSource, UITableViewDelegate {
                  // ... Your existing data passing logic ...
                  let selectedPost: Post
                  selectedPost = todayScheduledPosts[indexPath.row]
-                 let draftData = EditorDraftData(
-                     platformName: selectedPost.platformName,
-                     platformIconName: selectedPost.platformIconName,
-                     caption: selectedPost.text,
-                     images: [selectedPost.imageName],
-                     hashtags: [],
-                     postingTimes: []
-                 )
+                let draftData = EditorDraftData(
+                    platformName: selectedPost.platformName,
+                    platformIconName: selectedPost.platformIconName,
+                    caption: selectedPost.fullCaption ?? "",
+                    images: [selectedPost.imageName],
+                    hashtags: selectedPost.suggestedHashtags ?? [],
+                    postingTimes: selectedPost.optimalPostingTimes ?? []
+                )
                  
                  editorVC.draft = draftData
             }
