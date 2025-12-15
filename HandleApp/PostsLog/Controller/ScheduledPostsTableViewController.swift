@@ -195,8 +195,7 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
                         return
                     }
                     
-                    // ✅ THIS WAS MISSING: Trigger the segue manually
-                    // We pass 'indexPath' as sender so prepare(for segue:) knows which row data to grab
+                    
                     self.performSegue(withIdentifier: "openEditorModal", sender: indexPath)
                     
                     completionHandler(true)
@@ -208,7 +207,7 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
         let scheduleAction = UIContextualAction(style: .normal, title: "Schedule") { [weak self] (action, view, completionHandler) in
             guard let self = self else { return completionHandler(false) }
             
-            // ✅ Trigger the specific segue for Scheduler
+          
             self.performSegue(withIdentifier: "openSchedulerModal", sender: indexPath)
             
             completionHandler(true)

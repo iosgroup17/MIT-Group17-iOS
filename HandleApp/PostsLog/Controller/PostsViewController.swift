@@ -134,8 +134,6 @@ class PostsViewController: UIViewController {
             
     func addWeekdayLabels() {
         let daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
-        
-        // NOTE: Corrected IBOutlet name to weekDayStackView
         weekDayStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
             
         for day in daysOfWeek {
@@ -151,7 +149,7 @@ class PostsViewController: UIViewController {
             
     func addDateViews(startingFrom startDate: Date) {
         let calendar = Calendar.current
-        let selectedDate = Date() // Logic for currently selected date
+        let selectedDate = Date()
             
         dateStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
             
@@ -289,8 +287,6 @@ extension PostsViewController: UITableViewDataSource, UITableViewDelegate {
                         completionHandler(false)
                         return
                     }
-                    
-                    // We pass 'indexPath' as sender so prepare(for segue:) knows which row data to grab
                     self.performSegue(withIdentifier: "openEditorModal", sender: indexPath)
                     
                     completionHandler(true)
@@ -349,7 +345,6 @@ extension PostsViewController: UITableViewDataSource, UITableViewDelegate {
             
             // 4. Pass the data
             if let editorVC = destinationVC, let indexPath = sender as? IndexPath {
-                 // ... Your existing data passing logic ...
                  let selectedPost: Post
                  selectedPost = todayScheduledPosts[indexPath.row]
                 let draftData = EditorDraftData(

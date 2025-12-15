@@ -272,7 +272,7 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
     
 }
 
-// MARK: - Image Picker & Navigation
+// Image Picker & Navigation
 extension EditorSuiteViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     func showImagePickerOptions() {

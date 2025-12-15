@@ -70,15 +70,19 @@ class ProfileViewController: UIViewController {
         // 1. Update Progress
         completionProgress.setProgress(store.completionPercentage, animated: false)
         
-        // 2. Clear Old Rows (Critical: Prevents duplicates when reloading)
-        accountStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        detailsStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        socialStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        
-        // -----------------------------
-        // SECTION 1: ACCOUNT (Text Input)
-        // -----------------------------
-        
+        // 2. Clear Old Rows
+        accountStack.arrangedSubviews.forEach { subview in
+            subview.removeFromSuperview()
+        }
+
+        detailsStack.arrangedSubviews.forEach { subview in
+            subview.removeFromSuperview()
+        }
+
+        socialStack.arrangedSubviews.forEach { subview in
+            subview.removeFromSuperview()
+        }
+
         // Display Name Row
         addRow(to: accountStack, title: "Display Name", value: store.displayName ?? "", showIcon: false) {
             self.showTextInput(title: "Edit Name", currentValue: store.displayName) { text in
@@ -94,13 +98,8 @@ class ProfileViewController: UIViewController {
                 self.loadData()
             }
         }
-        
-        // -----------------------------
-        // SECTION 2: DETAILS (Quiz Navigation)
-        // -----------------------------
-        
+      
         // Role (Step 0)
-        // Note: Quiz answers are saved as [String], so we take the .first item
         let role = (store.userAnswers[0] as? [String])?.first ?? ""
         addRow(to: detailsStack, title: "Role", value: role) {
             self.openEditor(forStep: 0)
@@ -127,12 +126,11 @@ class ProfileViewController: UIViewController {
         }
         
         // 3. TARGET AUDIENCE (Assuming Step 3)
-        // Check your OnboardingDataStore to confirm if Audience is index 3 or 4
         let audienceList = store.userAnswers[5] as? [String]
         let audience = audienceList?.joined(separator: ", ") ?? "General"
         
         addRow(to: detailsStack, title: "Audience", value: audience) {
-            self.openEditor(forStep: 5) // Make sure this index matches your "Audience" step!
+            self.openEditor(forStep: 5)
         }
         
      
@@ -147,20 +145,11 @@ class ProfileViewController: UIViewController {
                 self.openEditor(forStep: 4)
             }
         }
-        
-        // -----------------------------
-        // SECTION 3: SOCIALS (Toggles)
-        // -----------------------------
-        
+     
         for (platform, isConnected) in store.socialStatus {
             addRow(to: socialStack, title: platform, value: "", isToggle: true, isConnected: isConnected) {
                 // This block runs when toggle is switched (handled inside ProfileRow technically)
             }
-            
-            // Note: Since the Row handles the toggle visual, we need to sync data
-            // We usually handle toggle logic inside the row's configuration,
-            // but for simplicity, we rely on the row visual state.
-            // *Ideally, update your ProfileRow to take a callback for the switch.*
         }
         
         hideLastSeparator(in: socialStack)
@@ -172,14 +161,12 @@ class ProfileViewController: UIViewController {
         
         // 1. Create the Row
         let row = ProfileRow()
-        // Note: Since we set File's Owner, init() automatically loads the XIB!
         
         // 2. Configure Data
         row.configure(title: title, value: value, isToggle: isToggle, isConnected: isConnected, showIcon: showIcon)
         
         // 3. Assign Tap Action
         row.tapAction = action
-        
         
         // 5. Layout Constraints
         row.translatesAutoresizingMaskIntoConstraints = false

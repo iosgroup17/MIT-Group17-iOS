@@ -27,6 +27,6 @@ class PostTableViewCell: UITableViewCell {
         timeLabel.text = post.time
             
         platformIconImageView.image = UIImage(named: post.platformIconName)
-        thumbnailImageView.image = UIImage(named: post.imageName ?? "")
+        thumbnailImageView.image = UIImage(named: post.imageName)
     }
 }

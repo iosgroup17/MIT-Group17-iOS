@@ -21,7 +21,7 @@ class SavedPostsTableViewCell: UITableViewCell {
     func configure(with post: Post) {
         self.platformLabel.text = post.platformName
         self.postLabel.text = post.text
-        self.thumbNailImage.image = UIImage(named: post.imageName ?? "")
+        self.thumbNailImage.image = UIImage(named: post.imageName)
     }
 
 }

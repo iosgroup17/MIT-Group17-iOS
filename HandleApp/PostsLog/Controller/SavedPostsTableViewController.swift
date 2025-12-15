@@ -44,11 +44,6 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
     override func viewDidLoad() {
         super.viewDidLoad()
         displayedPosts = savedPosts
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
     }
     @IBAction func filterButtonTapped(_ sender: Any) {
         let alertController = UIAlertController(title: "Filter by Platform", message: nil, preferredStyle: .actionSheet)
@@ -77,12 +72,9 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
                     // Check if we have a popover controller (i.e., we are on iPad or Mac catalyst)
                     if let popover = alertController.popoverPresentationController {
                         
-                        // FIX: Explicitly use the IBOutlet for the bar button item.
-                        // This is safer than relying on casting 'sender' for anchoring.
                         popover.barButtonItem = self.filterBarButton
-                        
-                        // Ensure the table view controller is set as the delegate
-                        popover.delegate = self // ScheduledPostsTableViewController must be the delegate
+                     
+                        popover.delegate = self
                         
                         popover.permittedArrowDirections = .up
                     }
@@ -95,15 +87,14 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
             return .none
         }
     
-    // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
+       
         return 1
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
+     
         return displayedPosts.count
     }
 
@@ -126,8 +117,6 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
     }
     */
 
-    
-    // Override to support editing the table view.
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             savedPosts.remove(at: indexPath.row)
@@ -141,9 +130,6 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
                         completionHandler(false)
                         return
                     }
-                    
-                    // ✅ THIS WAS MISSING: Trigger the segue manually
-                    // We pass 'indexPath' as sender so prepare(for segue:) knows which row data to grab
                     self.performSegue(withIdentifier: "openEditorModal", sender: indexPath)
                     
                     completionHandler(true)
@@ -154,8 +140,6 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
         // Schedule Action
         let scheduleAction = UIContextualAction(style: .normal, title: "Schedule") { [weak self] (action, view, completionHandler) in
             guard let self = self else { return completionHandler(false) }
-            
-            // ✅ Trigger the specific segue for Scheduler
             self.performSegue(withIdentifier: "openSchedulerModal", sender: indexPath)
             
             completionHandler(true)
@@ -204,7 +188,6 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
             
             // 4. Pass the data
             if let editorVC = destinationVC, let indexPath = sender as? IndexPath {
-                 // ... Your existing data passing logic ...
                  let selectedPost: Post
                  selectedPost = displayedPosts[indexPath.row]
                 let draftData = EditorDraftData(

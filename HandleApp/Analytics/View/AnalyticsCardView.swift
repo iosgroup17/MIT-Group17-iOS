@@ -16,8 +16,7 @@ class AnalyticsCardView: UIView {
 //
     
     private func setupCardDesign() {
-        // 1. Background & Shape
-        self.backgroundColor = .white
+
         self.layer.cornerRadius = 16
         
         // 2. BORDER / STROKE

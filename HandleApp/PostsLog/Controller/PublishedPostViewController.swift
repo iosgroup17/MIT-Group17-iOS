@@ -7,17 +7,14 @@
 
 import UIKit
 
-// ⚠️ ASSUMPTION: You must define your Post struct and the loadPublishedPosts function
-// somewhere in your project. Post objects must have a 'platformName' property (String).
+
 
 class PublishedPostViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPopoverPresentationControllerDelegate {
-    
-    // MARK: - IBOutlets
-    // ⚠️ CRITICAL: Ensure these are connected in the Storyboard!
+
     @IBOutlet weak var publishedTableView: UITableView!
     @IBOutlet weak var filterStackView: UIStackView!
 
-    // MARK: - Data Properties
+    
     var publishedPosts: [Post] = {
         do {
             return try Post.loadPublishedPosts(from: "Posts_data")
@@ -50,7 +47,7 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
                     
                     // iPad Support: Anchor to the bar button item
                     if let popover = alertController.popoverPresentationController {
-                        popover.barButtonItem = sender as! UIBarButtonItem // Use the sender (the new filter button)
+                        popover.barButtonItem = sender as? UIBarButtonItem // Use the sender (the new filter button)
                         popover.delegate = self // Since PublishedPostViewController conforms to UITableViewDelegate/DataSource,
                                                 // it should also conform to UIPopoverPresentationControllerDelegate if needed for popovers.
                         popover.permittedArrowDirections = .up
@@ -73,18 +70,16 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
             
             // 2. Apply time filtering
             switch timePeriod {
-            case "All Time":
+            case "All":
                 displayedPosts = postsToFilter
             case "Last 7 Days":
                 let date7DaysAgo = getDate(daysAgo: 7)
                 displayedPosts = postsToFilter.filter { post in
-                    // ⚠️ ASSUMPTION: Post has a 'datePublished' property
                     return post.date! >= date7DaysAgo
                 }
             case "Last 30 Days":
                 let date30DaysAgo = getDate(daysAgo: 30)
                 displayedPosts = postsToFilter.filter { post in
-                    // ⚠️ ASSUMPTION: Post has a 'datePublished' property
                     return post.date! >= date30DaysAgo
                 }
             default:
@@ -93,10 +88,8 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
 
             publishedTableView.reloadData()
         }
-    // Tracks the active filter's string value, triggering UI and data updates.
     var currentPlatformFilter: String = "All" {
         didSet {
-            // This runs whenever the filter changes
             updateCapsuleAppearance()
             filterPublishedPosts(by: currentPlatformFilter)
         }
@@ -104,8 +97,6 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
     
     // For cell expansion/collapse logic
     var expandedPost: String? = nil
-    
-    // MARK: - View Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -121,7 +112,6 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        // 3. FINAL FIX: Set the filter state *after* the view is loaded to ensure outlets are ready.
         // This triggers the didSet, running the initial filtering and styling.
         currentPlatformFilter = "All"
         
@@ -134,8 +124,7 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
     @IBAction func buttonTapped(_ sender: UIButton) {
         let tag = sender.tag
         var selectedPlatform: String?
-        
-        // ⚠️ CRITICAL: Ensure these tags match the tags set on your Storyboard buttons (1, 2, 3, 4)
+
         switch tag {
         case 1:
             selectedPlatform = "All"
@@ -161,7 +150,7 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
         }
     }
 
-    // MARK: - Filtering and UI Update Logic
+
     
     func filterPublishedPosts(by platform: String) {
         // Guard against running before the View/Outlets are ready (for early didSet call)
@@ -197,7 +186,7 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
         }
     }
     
-    // MARK: - Table view data source
+ 
 
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
@@ -208,7 +197,7 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        // ⚠️ CRITICAL: Ensure "published_cell" matches the Storyboard cell identifier
+      
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "published_cell", for: indexPath) as? PublishedPostTableViewCell else {
             fatalError("Could not dequeue PublishedPostTableViewCell")
         }
@@ -222,7 +211,6 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
         return cell
     }
 
-    // MARK: - Table view delegate (Cell Expansion Logic)
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         let post = displayedPosts[indexPath.row]

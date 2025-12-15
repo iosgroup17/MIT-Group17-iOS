@@ -21,19 +21,18 @@ class ScheduledPostsTableViewCell: UITableViewCell {
     }
     private static let dateFormatter: DateFormatter = {
             let formatter = DateFormatter()
-            // Example format: "3rd October, 9:30 AM"
             formatter.dateFormat = "d MMM, h:mm a"
             return formatter
         }()
     private static let timeFormatter: DateFormatter = {
             let formatter = DateFormatter()
-            formatter.dateFormat = "h:mm a" // Match the format of post.time (e.g., "9:30 AM")
+            formatter.dateFormat = "h:mm a" 
             return formatter
         }()
     func configure(with post: Post) {
         postsLabel.text = post.text
         platformIconImageView.image = UIImage(named: post.platformIconName)
-        thumbnailImageView.image = UIImage(named: post.imageName ?? "")
+        thumbnailImageView.image = UIImage(named: post.imageName)
         if let scheduledDate = post.date, let timeString = post.time, !timeString.isEmpty {
             
             // 1. Parse the timeString into a time Date object
@@ -43,8 +42,6 @@ class ScheduledPostsTableViewCell: UITableViewCell {
                 
                 // 2. Extract components from the time part (hour, minute)
                 let timeComponents = calendar.dateComponents([.hour, .minute], from: timePart)
-                
-                // 💡 FIX: Use date(bySettingHour:minute:second:of:)
                 // This is safer and more explicit than passing the DateComponents struct.
                 if let hour = timeComponents.hour, let minute = timeComponents.minute {
                     
