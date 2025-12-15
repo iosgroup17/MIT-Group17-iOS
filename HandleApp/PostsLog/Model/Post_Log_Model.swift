@@ -13,6 +13,7 @@ import UIKit
 struct Post: Decodable {
     
     let text: String
+    let fullCaption: String?
     let time: String?
     let date: Date?
     let platformIconName: String
@@ -25,6 +26,8 @@ struct Post: Decodable {
     let shares: String?
     let views: String?
     let engagementScore: String?
+    let suggestedHashtags: [String]?
+    let optimalPostingTimes: [String]?
 }
 
 extension Post {
