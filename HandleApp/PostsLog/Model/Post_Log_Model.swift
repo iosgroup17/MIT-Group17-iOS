@@ -63,13 +63,12 @@ extension Post {
         let data = try Data(contentsOf: url)
         let posts = try standardDecoder.decode([Post].self, from: data)
         let today = Date()
-        guard let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today) else { return [] 
-        return posts.filter { post in
-            guard let postDate = post.date, let time = post.time, !time.isEmpty else { return false }
-            return Calendar.current.isDate(postDate, inSameDayAs: tomorrow)
+        guard let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today) else { return [] }
+            return posts.filter { post in
+                guard let postDate = post.date, let time = post.time, !time.isEmpty else { return false }
+                return Calendar.current.isDate(postDate, inSameDayAs: tomorrow)
+            }
         }
-    }
-    
     //Load posts scheduled for later
     static func loadScheduledPostsAfterDate(from filename: String = "Posts_data") throws -> [Post] {
         guard let url = Bundle.main.url(forResource: filename, withExtension: "json") else {

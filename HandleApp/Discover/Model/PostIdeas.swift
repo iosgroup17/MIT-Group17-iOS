@@ -104,14 +104,14 @@ struct Recommendation: Codable, Identifiable {
     let caption: String
     let whyThisPost: String
     let image: String
-    let platformIcon: String
+    let platform: String
 
     enum CodingKeys: String, CodingKey {
         case id
         case caption
         case whyThisPost = "why_this_post"
         case image
-        case platformIcon = "platform_icon"
+        case platform = "platform_icon"
     }
 
 }

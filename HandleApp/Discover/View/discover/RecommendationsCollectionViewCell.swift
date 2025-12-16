@@ -37,14 +37,13 @@ class RecommendationsCollectionViewCell: UICollectionViewCell {
     }
 
     func configure(platform: String, image: UIImage?, caption: String, whyText: String) {
-            
-            // Basic Data Assignment
+      
             platformLabel.text = "\(platform) Post"
             postImageView.image = image
             captionLabel.text = caption
             tagLabel.text = whyText
             
-            // --- Platform Color & Icon Logic ---
+        
             let themeColor: UIColor
                 
                 switch platform.lowercased() {

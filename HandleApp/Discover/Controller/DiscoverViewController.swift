@@ -69,8 +69,7 @@ class DiscoverViewController: UIViewController {
     func generateLayout() -> UICollectionViewLayout {
         
         return UICollectionViewCompositionalLayout { section, env -> NSCollectionLayoutSection? in
-            
-            // SECTION 0 — TOP IDEAS
+
             if section == 0 {
                 
                 let headerSize = NSCollectionLayoutSize(
@@ -217,7 +216,7 @@ class DiscoverViewController: UIViewController {
         } else {
         // 2. Filter by name (Instagram, LinkedIn, X)
             recommendations = allRecommendations.filter { rec in
-                return rec.platformIcon == currentPlatformFilter
+                return rec.platform == currentPlatformFilter
             }
         }
         
@@ -294,7 +293,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
                     let rec = recommendations[indexPath.row]
                     
                     cell.configure(
-                        platform: rec.platformIcon,
+                        platform: rec.platform,
                         image: UIImage(named: rec.image),
                         caption: rec.caption,
                         whyText: rec.whyThisPost
@@ -353,8 +352,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
             }
             
             var selectedID = ""
-            
-            // ID selection
+ 
             if indexPath.section == 0 {
                 selectedID = topIdeas[indexPath.row].id
             } else if indexPath.section == 3 {

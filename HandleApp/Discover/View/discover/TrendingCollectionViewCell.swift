@@ -45,8 +45,7 @@ class TrendingCollectionViewCell: UICollectionViewCell {
         iconImage.layer.cornerRadius = 6
         iconImage.clipsToBounds = true
 
-
-           // LABEL
+        
         topicLabel.text = topic.name
 
        }

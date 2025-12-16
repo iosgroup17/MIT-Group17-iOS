@@ -46,14 +46,13 @@ class SchedulerViewController: UIViewController {
             datePicker.datePickerMode = .date
             timePicker.datePickerMode = .time
             
-            // Ensure switches match the hidden state of pickers initially
             dateSwitch.isOn = !datePicker.isHidden
             timeSwitch.isOn = !timePicker.isHidden
         
         }
 
     @IBAction func dateSwitchToggled(_ sender: UISwitch) {
-        view.endEditing(true)
+
 
                 if sender.isOn {
                     updateDateLabel()
@@ -66,7 +65,7 @@ class SchedulerViewController: UIViewController {
                     self.datePicker.isHidden = !sender.isOn
                     self.datePicker.alpha = sender.isOn ? 1.0 : 0.0
                     
-                    // Accordion: Close Time picker if opening Date
+                    //close time picker if opening date
                     if sender.isOn {
                         self.timePicker.isHidden = true
                         self.timePicker.alpha = 0.0
@@ -76,7 +75,6 @@ class SchedulerViewController: UIViewController {
     }
     
     @IBAction func timeSwitchToggled(_ sender: UISwitch) {
-        view.endEditing(true)
                 
                 if sender.isOn {
                     updateTimeLabel()
@@ -89,7 +87,7 @@ class SchedulerViewController: UIViewController {
                     self.timePicker.isHidden = !sender.isOn
                     self.timePicker.alpha = sender.isOn ? 1.0 : 0.0
                     
-                    // Accordion: Close Date picker if opening Time
+                    //Close date picker if opening Time
                     if sender.isOn {
                         self.datePicker.isHidden = true
                         self.datePicker.alpha = 0.0
@@ -99,30 +97,24 @@ class SchedulerViewController: UIViewController {
     }
     
     @IBAction func datePickerChanged(_ sender: UIDatePicker) {
-            //updateDateLabel()
-            let formatter = DateFormatter()
-            formatter.dateFormat = "E, MMM d, yyyy"
-            dateDetailLabel.text = formatter.string(from: datePicker.date)
+            updateDateLabel()
         }
         
         @IBAction func timePickerChanged(_ sender: UIDatePicker) {
-            //updateTimeLabel()
-            let formatter = DateFormatter()
-            formatter.timeStyle = .short
-            timeDetailLabel.text = formatter.string(from: timePicker.date)
+            updateTimeLabel()
         }
     
-    // func updateDateLabel() {
-    //         let formatter = DateFormatter()
-    //         formatter.dateFormat = "E, MMM d, yyyy"
-    //         dateDetailLabel.text = formatter.string(from: datePicker.date)
-    //     }
+     func updateDateLabel() {
+             let formatter = DateFormatter()
+             formatter.dateFormat = "E, MMM d, yyyy"
+             dateDetailLabel.text = formatter.string(from: datePicker.date)
+         }
     
-    // func updateTimeLabel() {
-    //     let formatter = DateFormatter()
-    //     formatter.timeStyle = .short
-    //     timeDetailLabel.text = formatter.string(from: timePicker.date)
-    // }
+     func updateTimeLabel() {
+         let formatter = DateFormatter()
+         formatter.timeStyle = .short
+         timeDetailLabel.text = formatter.string(from: timePicker.date)
+     }
     
     @IBAction func closeButtonTapped(_ sender: UIBarButtonItem) {
             dismiss(animated: true, completion: nil)

@@ -42,16 +42,6 @@ class EditorSuiteViewController: UIViewController {
         
     }
 
-
-    @objc func cancelButtonTapped() {
-        
-            dismiss(animated: true, completion: nil) // close modal
-        }
-
-        @objc func doneButtonTapped() {
-            
-            dismiss(animated: true, completion: nil)
-        }
     func setupCollectionViews() {
 
             imagesCollectionView.dataSource = self
@@ -142,7 +132,7 @@ class EditorSuiteViewController: UIViewController {
             dismiss(animated: true, completion: nil)
         }
     
-    // Share action
+
     @IBAction func publishButtonTapped(_ sender: UIButton) {
         
         var itemsToShare: [Any] = []
@@ -190,8 +180,7 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
                     }
                     return cell
             
-            
-            // Handle Tags & Timings
+    
         case hashtagCollectionView, timeCollectionView:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HashtagCollectionViewCell", for: indexPath) as! HashtagCollectionViewCell
             

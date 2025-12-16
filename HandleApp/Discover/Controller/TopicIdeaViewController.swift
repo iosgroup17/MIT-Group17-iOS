@@ -34,19 +34,16 @@ class TopicIdeaViewController: UIViewController {
     
     func generateLayout() -> UICollectionViewLayout {
             return UICollectionViewCompositionalLayout { (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
-                
-                // Item (The Card)
+
                 let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.5),
                                                       heightDimension: .absolute(240))
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 item.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
-                
-                // Group (The Row)
+ 
                 let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                        heightDimension: .absolute(240))
                 let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
-                
-                // Section (The Container)
+    
                 let section = NSCollectionLayoutSection(group: group)
                 section.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: 8, bottom: 16, trailing: 8)
                 
@@ -83,13 +80,13 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
             
             print("Selected ID: \(selectedIdea.id)")
             
-            //Look up the full details in the master list using the ID
+
             guard let detail = allPostDetails.first(where: { $0.id == selectedIdea.id }) else {
                 print("❌ Details not found for ID: \(selectedIdea.id). Check your JSON IDs.")
                 return
             }
             
-            //Create the Draft Object
+
             let draft = EditorDraftData(
                 platformName: detail.platformName ?? "Instagram",
                 platformIconName: detail.platformIconId ?? "icon-instagram",
@@ -99,7 +96,7 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
                 postingTimes: detail.optimalPostingTimes ?? []
             )
             
-            //Navigate to Editor
+
             let storyboard = UIStoryboard(name: "Discover", bundle: nil)
             if let editorVC = storyboard.instantiateViewController(withIdentifier: "EditorSuiteViewController") as? EditorSuiteViewController {
                 
