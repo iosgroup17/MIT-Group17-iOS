@@ -46,7 +46,7 @@ class TopicIdeaCollectionViewCell: UICollectionViewCell {
 //            cardView.backgroundColor = .white
 //            cardView.layer.cornerRadius = 20
             
-            badgeContainerView.layer.cornerRadius = 16
+            badgeContainerView.layer.cornerRadius = 12
         
             imageView.layer.cornerRadius = 16
             
@@ -71,7 +71,7 @@ class TopicIdeaCollectionViewCell: UICollectionViewCell {
             
             
             let tealColor = UIColor(red: 0/255, green: 195/255, blue: 208/255, alpha: 1.0)
-            badgeContainerView.backgroundColor = tealColor.withAlphaComponent(0.1)
+            badgeContainerView.backgroundColor = tealColor.withAlphaComponent(0.15)
 
         }
 
