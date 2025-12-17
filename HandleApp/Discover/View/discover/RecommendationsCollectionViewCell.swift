@@ -33,7 +33,7 @@ class RecommendationsCollectionViewCell: UICollectionViewCell {
         
         postImageView.layer.cornerRadius = 12
         
-        tagContainerView.layer.cornerRadius = 16
+        tagContainerView.layer.cornerRadius = 10
     }
 
     func configure(platform: String, image: UIImage?, caption: String, whyText: String) {

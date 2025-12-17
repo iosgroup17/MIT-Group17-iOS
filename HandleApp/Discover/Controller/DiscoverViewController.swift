@@ -127,12 +127,12 @@ class DiscoverViewController: UIViewController {
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 
                 // Wider card style for the "Why this post" content
-                let groupSize = NSCollectionLayoutSize(widthDimension: .absolute(230), heightDimension: .absolute(250))
+                let groupSize = NSCollectionLayoutSize(widthDimension: .absolute(190), heightDimension: .absolute(190))
                 let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
                 
                 let sectionLayout = NSCollectionLayoutSection(group: group)
                 sectionLayout.orthogonalScrollingBehavior = .continuous
-                sectionLayout.interGroupSpacing = 18
+                sectionLayout.interGroupSpacing = 14
                 sectionLayout.contentInsets = NSDirectionalEdgeInsets(top: 4, leading: 16, bottom: 16, trailing: 16)
                 
                 return sectionLayout
@@ -246,7 +246,7 @@ class DiscoverViewController: UIViewController {
         }
         
         if let cv = collectionView {
-            cv.reloadSections(IndexSet(integer: 3))
+            cv.reloadSections(IndexSet(integer: 4))
         }
     }
 

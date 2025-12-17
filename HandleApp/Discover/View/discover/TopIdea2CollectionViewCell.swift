@@ -12,7 +12,8 @@ class TopIdea2CollectionViewCell: UICollectionViewCell {
         @IBOutlet weak var shadowContainer: UIView!
         @IBOutlet weak var imageView: UIImageView!
         @IBOutlet weak var captionLabel: UILabel!
-        @IBOutlet weak var tagLabel: UILabel!
+    @IBOutlet weak var tagContainer: UIView!
+    @IBOutlet weak var tagLabel: UILabel!
         
         override func awakeFromNib() {
             super.awakeFromNib()
@@ -33,6 +34,8 @@ class TopIdea2CollectionViewCell: UICollectionViewCell {
             
             imageView.layer.cornerRadius = 12
             imageView.layer.masksToBounds = true
+            
+            tagContainer.layer.cornerRadius = 10
       
         }
         
@@ -63,6 +66,7 @@ class TopIdea2CollectionViewCell: UICollectionViewCell {
             }
 
             tagLabel.textColor = themeColor
+            tagContainer.backgroundColor = themeColor.withAlphaComponent(0.1)
         }
         
 
