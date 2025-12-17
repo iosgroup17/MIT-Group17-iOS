@@ -21,7 +21,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         // 2. Decide which screen to show
         // Change this boolean to 'false' later when you are done testing!
-        let alwaysShowOnboarding = true
+        let alwaysShowOnboarding = false
         
         let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
         

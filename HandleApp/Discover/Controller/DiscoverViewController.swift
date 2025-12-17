@@ -17,6 +17,7 @@ class DiscoverViewController: UIViewController {
     var recommendations: [Recommendation] = []
     var allRecommendations: [Recommendation] = []
     var topicGroups: [TopicIdeaGroup] = []
+    var topIdeas2: [TrendingSuggestion] = []
     
     var currentPlatformFilter: String = "All" {
             didSet {
@@ -32,6 +33,7 @@ class DiscoverViewController: UIViewController {
         recommendations = ideasResponse.recommendations
         allRecommendations = ideasResponse.recommendations
         topicGroups = ideasResponse.topicIdeas
+        topIdeas2 = ideasResponse.topIdeas2
        
         collectionView.delegate = self
         collectionView.dataSource = self
@@ -40,6 +42,11 @@ class DiscoverViewController: UIViewController {
                 UINib(nibName: "TopIdeaCollectionViewCell", bundle: nil),
                 forCellWithReuseIdentifier: "TopIdeaCollectionViewCell"
             )
+        
+        collectionView.register(
+            UINib(nibName: "TopIdea2CollectionViewCell", bundle: nil),
+            forCellWithReuseIdentifier: "TopIdea2CollectionViewCell"
+        )
         
         collectionView.register(
                     UINib(nibName: "TrendingCollectionViewCell", bundle: nil),
@@ -61,7 +68,8 @@ class DiscoverViewController: UIViewController {
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
             withReuseIdentifier: "HeaderCollectionReusableView"
         )
-
+        
+       
         
         collectionView.setCollectionViewLayout(generateLayout(), animated: true)
     }
@@ -114,6 +122,23 @@ class DiscoverViewController: UIViewController {
             }
             
             if section == 1 {
+                
+                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                
+                // Wider card style for the "Why this post" content
+                let groupSize = NSCollectionLayoutSize(widthDimension: .absolute(230), heightDimension: .absolute(250))
+                let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+                
+                let sectionLayout = NSCollectionLayoutSection(group: group)
+                sectionLayout.orthogonalScrollingBehavior = .continuous
+                sectionLayout.interGroupSpacing = 18
+                sectionLayout.contentInsets = NSDirectionalEdgeInsets(top: 4, leading: 16, bottom: 16, trailing: 16)
+                
+                return sectionLayout
+            }
+            
+            if section == 2 {
 
                 let headerSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
@@ -160,7 +185,7 @@ class DiscoverViewController: UIViewController {
                 return sectionLayout
             }
             
-            if section == 2 {
+            if section == 3 {
                 
                 let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
@@ -190,7 +215,7 @@ class DiscoverViewController: UIViewController {
                 return sectionLayout
             }
 
-            if section == 3 {
+            if section == 4 {
                 let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 
@@ -234,14 +259,15 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
     
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 4
+        return 5
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if section == 0 { return topIdeas.count }
-        if section == 1 { return min(trendingTopics.count, 6) }
-        if section == 2 { return 1 }
-        if section == 3 { return recommendations.count }
+        if section == 1 { return topIdeas2.count }
+        if section == 2 { return min(trendingTopics.count, 6) }
+        if section == 3 { return 1 }
+        if section == 4 { return recommendations.count }
         
         return 0
     }
@@ -266,6 +292,21 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
                 }
         
         if indexPath.section == 1 {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TopIdea2CollectionViewCell", for: indexPath) as! TopIdea2CollectionViewCell
+            
+            // Updated Variable usage
+            let suggestion = topIdeas2[indexPath.row]
+            
+            cell.configure(
+                imageName: suggestion.image,
+                caption: suggestion.caption,
+                whyText: suggestion.whyThisPost,
+                platform: suggestion.platformName
+            )
+            return cell
+        }
+        
+        if indexPath.section == 2 {
                     let cell = collectionView.dequeueReusableCell(
                         withReuseIdentifier: "TrendingCollectionViewCell",
                         for: indexPath
@@ -276,7 +317,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
                     return cell
                 }
         
-        if indexPath.section == 2 {
+        if indexPath.section == 3 {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "FilterCellCollectionViewCell", for: indexPath) as! FilterCellCollectionViewCell
             
             cell.delegate = self
@@ -284,7 +325,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
             return cell
         }
  
-        if indexPath.section == 3 {
+        if indexPath.section == 4 {
                     let cell = collectionView.dequeueReusableCell(
                         withReuseIdentifier: "RecommendationsCollectionViewCell",
                         for: indexPath
@@ -317,9 +358,9 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
 
             if indexPath.section == 0 {
                 header.titleLabel.text = "Top Post Ideas For You"
-            } else if indexPath.section == 1 {
-                header.titleLabel.text = "Trending Topics"
             } else if indexPath.section == 2 {
+                header.titleLabel.text = "Trending Topics"
+            } else if indexPath.section == 3 {
                 header.titleLabel.text = "Recommended For You"
             }
 
@@ -328,7 +369,9 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
 
         func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
             
-            if indexPath.section == 1 {
+            if indexPath.section == 1 { return }
+            
+            if indexPath.section == 2 {
                 let selectedTopic = trendingTopics[indexPath.row]
                 let selectedID = selectedTopic.id
                 let selectedName = selectedTopic.name
@@ -355,7 +398,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
  
             if indexPath.section == 0 {
                 selectedID = topIdeas[indexPath.row].id
-            } else if indexPath.section == 3 {
+            } else if indexPath.section == 4 {
                 selectedID = recommendations[indexPath.row].id
             } else {
                 return

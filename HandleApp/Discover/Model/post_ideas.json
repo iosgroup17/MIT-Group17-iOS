@@ -62,6 +62,37 @@
         }
     ],
     
+    "trending_suggestions": [
+        {
+            "id": "trend_1",
+            "image": "img-post-7",
+            "caption": "Revenue is down 15% this month. It hurts, but here is exactly why it happened and the 3 fixes we are implementing today.",
+            "why_this_post": "Authentic #buildinpublic transparency",
+            "platform_name": "Twitter / X"
+        },
+        {
+            "id": "trend_2",
+            "image": "img-post-9",
+            "caption": "We rejected a $500k investment offer yesterday. It wasn't easy, but our freedom is worth more than a quick scale-up.",
+            "why_this_post": "Contrarian take for high engagement",
+            "platform_name": "LinkedIn"
+        },
+        {
+            "id": "trend_3",
+            "image": "img-post-5",
+            "caption": "Instagram vs. Reality. Swipe to see the chaos of cables behind this 'perfect' desk setup.",
+            "why_this_post": "Relatable and humanizes the brand",
+            "platform_name": "Instagram"
+        },
+        {
+            "id": "trend_4",
+            "image": "img-post-8",
+            "caption": "Stop over-optimizing your to-do list. Here is the 'lazy' framework I use to actually get deep work done.",
+            "why_this_post": "Trending anti-hustle advice",
+            "platform_name": "LinkedIn"
+        }
+    ],
+    
     "trending_topics": [
         { "id": "topic_1", "name": "Founder Story", "icon": "figure.walk" },
         { "id": "topic_2", "name": "Milestones", "icon": "person.3.sequence" },
