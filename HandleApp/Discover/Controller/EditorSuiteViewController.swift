@@ -27,6 +27,8 @@ class EditorSuiteViewController: UIViewController {
     @IBOutlet weak var timeTitleLabel: UILabel!
     @IBOutlet weak var timeCollectionView: UICollectionView!
     
+    private let captionService: CaptionGenerator = RegenerateCaption()
+    
     var draft: EditorDraftData?
     
     var displayedImages: [UIImage] = []
@@ -132,7 +134,29 @@ class EditorSuiteViewController: UIViewController {
             dismiss(animated: true, completion: nil)
         }
     
+    @IBAction func regenerateTapped(_ sender: UIButton) {
+        guard let currentText = captionTextView.text else { return }
 
+                sender.isEnabled = false
+                
+        Task {
+            do {
+                // 2. Ask the service
+                let newCaption = try await captionService.regenerate(currentText, tone: "professional")
+                
+                // 3. Update UI
+                await MainActor.run {
+                    self.captionTextView.text = newCaption
+                    sender.isEnabled = true
+                }
+            } catch {
+                print("oops: \(error)")
+                await MainActor.run { sender.isEnabled = true }
+            }
+        }
+        
+    }
+    
     @IBAction func publishButtonTapped(_ sender: UIButton) {
         
         var itemsToShare: [Any] = []
