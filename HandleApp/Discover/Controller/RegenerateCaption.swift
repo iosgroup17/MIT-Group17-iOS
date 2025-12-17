@@ -21,11 +21,20 @@ actor RegenerateCaption: CaptionGenerator {
         
         let model = SystemLanguageModel.default
         
-        // This check usually prevents the crash, but if assets are corrupt, it might pass.
+         //This check usually prevents the crash, but if assets are corrupt, it might pass.
 //        guard await model.availability == .available else {
 //            throw CaptionError.deviceNotSupported
 //        }
-        
+//        let availability = await model.availability
+//        switch availability {
+//        case .available:
+//            // Proceed with session creation
+//        case .downloading(let progress):
+//            print("Model is still downloading: \(progress)%")
+//            throw CaptionError.modelStillDownloading
+//        default:
+//            throw CaptionError.deviceNotSupported
+//        }
         let newSession = LanguageModelSession(model: model)
         self.session = newSession
         return newSession
@@ -60,6 +69,8 @@ actor RegenerateCaption: CaptionGenerator {
         }
 #endif
     }
+    
+
 }
 
 enum CaptionError: Error {
