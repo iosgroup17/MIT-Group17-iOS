@@ -35,7 +35,7 @@ class TopIdeaCollectionViewCell: UICollectionViewCell {
             imageView.layer.cornerRadius = 12
             imageView.layer.masksToBounds = true
             
-            tagContainer.layer.cornerRadius = 10
+            tagContainer.layer.cornerRadius = 8
       
         }
         
