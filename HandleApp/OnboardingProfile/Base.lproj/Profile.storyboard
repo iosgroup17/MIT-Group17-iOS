@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24412" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina6_3" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24405"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -126,13 +126,13 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Bk8-ph-LAA">
-                                <rect key="frame" x="0.0" y="124" width="402" height="633"/>
+                                <rect key="frame" x="0.0" y="124" width="402" height="750"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="DaD-dS-bKO" userLabel="Content View">
-                                        <rect key="frame" x="0.0" y="0.0" width="402" height="698"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="402" height="688"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="NpP-c7-VCN" userLabel="Main Stack">
-                                                <rect key="frame" x="16" y="40" width="370" height="638"/>
+                                                <rect key="frame" x="16" y="30" width="370" height="638"/>
                                                 <subviews>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="I7s-Io-cjA" userLabel="Header">
                                                         <rect key="frame" x="0.0" y="0.0" width="370" height="88"/>
@@ -143,16 +143,10 @@
                                                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" translatesAutoresizingMaskIntoConstraints="NO" id="Nzs-KT-vMk">
                                                                         <rect key="frame" x="0.0" y="0.0" width="278" height="80"/>
                                                                         <subviews>
-                                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Profile" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="K5j-Jz-kwh">
-                                                                                <rect key="frame" x="0.0" y="0.0" width="102.33333333333333" height="63"/>
+                                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Profile" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="K5j-Jz-kwh">
+                                                                                <rect key="frame" x="0.0" y="0.0" width="102.33333333333333" height="80"/>
                                                                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="34"/>
                                                                                 <nil key="textColor"/>
-                                                                                <nil key="highlightedColor"/>
-                                                                            </label>
-                                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Update as you grow" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="njH-R3-GtT">
-                                                                                <rect key="frame" x="0.0" y="63" width="128.66666666666666" height="17"/>
-                                                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                                                <color key="textColor" systemColor="secondaryLabelColor"/>
                                                                                 <nil key="highlightedColor"/>
                                                                             </label>
                                                                         </subviews>
@@ -280,7 +274,7 @@
                                         <constraints>
                                             <constraint firstItem="NpP-c7-VCN" firstAttribute="leading" secondItem="DaD-dS-bKO" secondAttribute="leading" constant="16" id="C4f-Sv-WAz"/>
                                             <constraint firstAttribute="trailing" secondItem="NpP-c7-VCN" secondAttribute="trailing" constant="16" id="RXc-Xm-erL"/>
-                                            <constraint firstItem="NpP-c7-VCN" firstAttribute="top" secondItem="DaD-dS-bKO" secondAttribute="top" constant="40" id="neq-0P-tX7"/>
+                                            <constraint firstItem="NpP-c7-VCN" firstAttribute="top" secondItem="DaD-dS-bKO" secondAttribute="top" constant="30" id="neq-0P-tX7"/>
                                             <constraint firstAttribute="bottom" secondItem="NpP-c7-VCN" secondAttribute="bottom" constant="20" id="vFm-IG-3fs"/>
                                         </constraints>
                                     </view>
@@ -300,8 +294,8 @@
                         <color key="backgroundColor" systemColor="tableBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="Bk8-ph-LAA" firstAttribute="leading" secondItem="XA9-x2-jFc" secondAttribute="leading" id="1JO-us-OOm"/>
-                            <constraint firstItem="XA9-x2-jFc" firstAttribute="bottom" secondItem="Bk8-ph-LAA" secondAttribute="bottom" id="cQO-UB-Rvf"/>
                             <constraint firstItem="XA9-x2-jFc" firstAttribute="trailing" secondItem="Bk8-ph-LAA" secondAttribute="trailing" id="gSK-ci-PKQ"/>
+                            <constraint firstAttribute="bottom" secondItem="Bk8-ph-LAA" secondAttribute="bottom" id="i4W-BO-3Nh"/>
                             <constraint firstItem="Bk8-ph-LAA" firstAttribute="top" secondItem="XA9-x2-jFc" secondAttribute="top" id="olW-cu-VFp"/>
                         </constraints>
                     </view>
@@ -583,9 +577,6 @@
         </namedColor>
         <systemColor name="opaqueSeparatorColor">
             <color red="0.77647058820000003" green="0.77647058820000003" blue="0.7843137255" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </systemColor>
-        <systemColor name="secondaryLabelColor">
-            <color red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

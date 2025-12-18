@@ -1,52 +1,73 @@
 //
-//  TopIdeaCollectionViewCell.swift
-//  OnboardingScreens
+//  TopIdea2CollectionViewCell.swift
+//  HandleApp
 //
-//  Created by SDC-USER on 25/11/25.
+//  Created by SDC-USER on 16/12/25.
 //
 
 import UIKit
 
 class TopIdeaCollectionViewCell: UICollectionViewCell {
-    
-    @IBOutlet weak var ShadowContainer: UIView!
-    @IBOutlet weak var mainImageView: UIImageView!
-    @IBOutlet weak var captionLabel: UILabel!
-    @IBOutlet weak var platformIconView: UIImageView!
 
-
-    override func awakeFromNib() {
-        super.awakeFromNib()
+        @IBOutlet weak var shadowContainer: UIView!
+        @IBOutlet weak var imageView: UIImageView!
+        @IBOutlet weak var captionLabel: UILabel!
+    @IBOutlet weak var tagContainer: UIView!
+    @IBOutlet weak var tagLabel: UILabel!
         
-            ShadowContainer.layer.cornerRadius = 20
+        override func awakeFromNib() {
+            super.awakeFromNib()
             
-            ShadowContainer.layer.shadowColor = UIColor.black.withAlphaComponent(0.10).cgColor
-            ShadowContainer.layer.shadowOpacity = 1
-            ShadowContainer.layer.shadowRadius = 32
-            ShadowContainer.layer.shadowOffset = .zero
+            shadowContainer.layer.cornerRadius = 12
+            
+            shadowContainer.layer.masksToBounds = false
+            
+            shadowContainer.backgroundColor = .systemBackground
+            
+            shadowContainer.layer.shadowColor = UIColor.black.withAlphaComponent(0.10).cgColor
+            shadowContainer.layer.shadowOpacity = 1
+            shadowContainer.layer.shadowRadius = 32
+            shadowContainer.layer.shadowOffset = CGSize(width: 0, height: 4)
 
+           // shadowContainer.layer.shadowOffset = .zero
 
-    }
-    
-    func configure(with image: UIImage?, caption: String, platformIcon: UIImage?) {
+            
+            imageView.layer.cornerRadius = 12
+            imageView.layer.masksToBounds = true
+            
+            tagContainer.layer.cornerRadius = 10
+      
+        }
         
-        ShadowContainer.layer.cornerRadius = 20
-        //cardView.layer.masksToBounds = true
-        
-        
-        mainImageView.image = image
-        mainImageView.layer.cornerRadius = 16
+        func configure(imageName: String, caption: String, whyText: String, platform: String) {
 
-        
-        
-        captionLabel.text = caption
-        captionLabel.numberOfLines = 0
-        
-        
-        platformIconView.image = platformIcon
-        platformIconView.layer.cornerRadius = 4
+            imageView.image = UIImage(named: imageName)
+            captionLabel.text = caption
+            tagLabel.text = whyText
+            
+            let themeColor: UIColor
+            
+            let platformKey = platform.lowercased()
+            
+            if platformKey.contains("instagram") {
+                
+                themeColor = UIColor(red: 225/255, green: 48/255, blue: 108/255, alpha: 1.0)
+                
+            } else if platformKey.contains("linkedin") {
+                
+                themeColor = UIColor(red: 10/255, green: 102/255, blue: 194/255, alpha: 1.0)
+                
+            } else if platformKey.contains("x") || platformKey.contains("twitter") {
+                
+                themeColor = .black
+                
+            } else {
+                themeColor = .gray
+            }
 
-    }
-
+            tagLabel.textColor = themeColor
+            tagContainer.backgroundColor = themeColor.withAlphaComponent(0.1)
+        }
+        
 
 }

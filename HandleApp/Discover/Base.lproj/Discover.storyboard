@@ -19,7 +19,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="LbN-rb-MbT">
-                                <rect key="frame" x="0.0" y="178" width="402" height="579"/>
+                                <rect key="frame" x="0.0" y="178" width="402" height="696"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="eSs-xM-VHo">
                                     <size key="itemSize" width="128" height="128"/>
@@ -45,7 +45,7 @@
                             <constraint firstItem="LbN-rb-MbT" firstAttribute="trailing" secondItem="tFg-UB-Pfr" secondAttribute="trailing" id="14Z-5v-9WY"/>
                             <constraint firstItem="LbN-rb-MbT" firstAttribute="top" secondItem="tFg-UB-Pfr" secondAttribute="top" id="BQ0-F4-WBM"/>
                             <constraint firstItem="LbN-rb-MbT" firstAttribute="leading" secondItem="tFg-UB-Pfr" secondAttribute="leading" id="gmX-we-fJT"/>
-                            <constraint firstItem="LbN-rb-MbT" firstAttribute="bottom" secondItem="tFg-UB-Pfr" secondAttribute="bottom" id="zCb-Ei-nyh"/>
+                            <constraint firstItem="LbN-rb-MbT" firstAttribute="bottom" secondItem="meX-g9-SqN" secondAttribute="bottom" id="zCb-Ei-nyh"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Discover" id="Asq-6C-4Ih"/>

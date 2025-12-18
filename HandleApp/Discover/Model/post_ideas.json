@@ -1,97 +1,78 @@
 {
-    "top_ideas": [
+      "top_ideas": [
         {
-            "id": "idea_1",
-            "caption": "The mindset shift that changed my startup forever",
-            "image": "image1",
-            "platform_icon": "icon-instagram"
+          "id": "idea_1",
+          "caption": "The mindset shift that changed my startup forever",
+          "image": "image1",
+          "why_this_post": "Mindset-driven stories resonate strongly with founders and position the creator as a reflective, experienced entrepreneur.",
+          "platform_name": "instagram"
         },
         {
-            "id": "idea_2",
-            "caption": "One hiring mistake every founder learns too late",
-            "image": "img-post-2",
-            "platform_icon": "icon-twitter"
+          "id": "idea_2",
+          "caption": "One hiring mistake every founder learns too late",
+          "image": "img-post-2",
+          "why_this_post": "Hiring lessons are highly relatable and encourage shares, especially among early-stage founders.",
+          "platform_name": "twitter"
         },
         {
-            "id": "idea_3",
-            "caption": "What my 2025 founder desk setup really looks like",
-            "image": "img-post-3",
-            "platform_icon": "icon-linkedin"
+          "id": "idea_3",
+          "caption": "What my 2025 founder desk setup really looks like",
+          "image": "img-post-3",
+          "why_this_post": "Behind-the-scenes content humanizes the founder and performs well as aspirational yet authentic content.",
+          "platform_name": "linkedin"
         },
         {
-            "id": "idea_4",
-            "caption": "The hook formula I use for all my content",
-            "image": "img-post-4",
-            "platform_icon": "icon-twitter"
+          "id": "idea_4",
+          "caption": "The hook formula I use for all my content",
+          "image": "img-post-4",
+          "why_this_post": "Educational, tactical posts build authority and attract creators looking for actionable advice.",
+          "platform_name": "twitter"
         },
         {
-            "id": "idea_5",
-            "caption": "A behind-the-scenes look at our latest product release",
-            "image": "img-post-1",
-            "platform_icon": "icon-instagram"
+          "id": "idea_5",
+          "caption": "A behind-the-scenes look at our latest product release",
+          "image": "img-post-1",
+          "why_this_post": "Product transparency builds trust and helps the audience feel involved in the journey.",
+          "platform_name": "instagram"
         },
         {
-            "id": "idea_6",
-            "caption": "Why leaving my safe job was the best decision",
-            "image": "img-post-2",
-            "platform_icon": "icon-linkedin"
+          "id": "idea_6",
+          "caption": "Why leaving my safe job was the best decision",
+          "image": "img-post-2",
+          "why_this_post": "Career transition stories inspire engagement and spark discussion among professionals.",
+          "platform_name": "linkedin"
         },
         {
-            "id": "idea_7",
-            "caption": "The habit that keeps my startup running smoothly",
-            "image": "img-post-3",
-            "platform_icon": "icon-instagram"
+          "id": "idea_7",
+          "caption": "The habit that keeps my startup running smoothly",
+          "image": "img-post-3",
+          "why_this_post": "Habit-based content is practical, repeatable, and positions the founder as disciplined and intentional.",
+          "platform_name": "instagram"
         },
         {
-            "id": "idea_8",
-            "caption": "Three founder fears I finally addressed this year",
-            "image": "img-post-4",
-            "platform_icon": "icon-twitter"
+          "id": "idea_8",
+          "caption": "Three founder fears I finally addressed this year",
+          "image": "img-post-4",
+          "why_this_post": "Vulnerability-driven posts create emotional connection and encourage replies and conversations.",
+          "platform_name": "twitter"
         },
         {
-            "id": "idea_9",
-            "caption": "The simple routine that doubled my focus",
-            "image": "img-post-2",
-            "platform_icon": "icon-linkedin"
+          "id": "idea_9",
+          "caption": "The simple routine that doubled my focus",
+          "image": "img-post-2",
+          "why_this_post": "Productivity content consistently performs well and attracts a wide professional audience.",
+          "platform_name": "linkedin"
         },
         {
-            "id": "idea_10",
-            "caption": "What I learned launching my product too early",
-            "image": "img-post-4",
-            "platform_icon": "icon-twitter"
+          "id": "idea_10",
+          "caption": "What I learned launching my product too early",
+          "image": "img-post-4",
+          "why_this_post": "Failure lessons feel authentic and help other founders avoid similar mistakes.",
+          "platform_name": "twitter"
         }
-    ],
+      ],
+
     
-    "trending_suggestions": [
-        {
-            "id": "trend_1",
-            "image": "img-post-7",
-            "caption": "A behind-the-scenes look at our latest product release",
-            "why_this_post": "Authentic #buildinpublic transparency",
-            "platform_name": "Twitter / X"
-        },
-        {
-            "id": "trend_2",
-            "image": "img-post-9",
-            "caption": "We rejected a $500k investment offer yesterday. It wasn't easy, but our freedom is worth more than a quick scale-up.",
-            "why_this_post": "Contrarian take for high engagement",
-            "platform_name": "LinkedIn"
-        },
-        {
-            "id": "trend_3",
-            "image": "img-post-5",
-            "caption": "Instagram vs. Reality. Swipe to see the chaos of cables behind this 'perfect' desk setup.",
-            "why_this_post": "Relatable and humanizes the brand",
-            "platform_name": "Instagram"
-        },
-        {
-            "id": "trend_4",
-            "image": "img-post-8",
-            "caption": "Stop over-optimizing your to-do list. Here is the 'lazy' framework I use to actually get deep work done.",
-            "why_this_post": "Trending anti-hustle advice",
-            "platform_name": "LinkedIn"
-        }
-    ],
     
     "trending_topics": [
         { "id": "topic_1", "name": "Founder Story", "icon": "figure.walk" },

@@ -15,7 +15,6 @@ struct PostIdeasResponse: Codable {
     var topicIdeas: [TopicIdeaGroup] = []
     var recommendations: [Recommendation] = []
     var selectedPostDetails: [PostDetail] = []
-    var topIdeas2: [TrendingSuggestion] = []
 
     init() {
         do {
@@ -25,7 +24,6 @@ struct PostIdeasResponse: Codable {
             topicIdeas = response.topicIdeas
             recommendations = response.recommendations
             selectedPostDetails = response.selectedPostDetails
-            topIdeas2 = response.topIdeas2
         } catch {
             print("JSON Load Error:", error.localizedDescription)
         }
@@ -37,11 +35,10 @@ enum CodingKeys: String, CodingKey {
         case topicIdeas = "topic_ideas"
         case recommendations
         case selectedPostDetails = "selected_post_details"
-        case topIdeas2 = "trending_suggestions"
     }
 }
 
-struct TrendingSuggestion: Codable, Identifiable {
+struct TopIdea: Codable, Identifiable {
     let id: String
     let image: String
     let caption: String
@@ -57,20 +54,6 @@ struct TrendingSuggestion: Codable, Identifiable {
     }
 }
 
-struct TopIdea: Codable, Identifiable {
-    let id: String
-    let caption: String
-    let image: String
-    let platformIcon: String
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case caption
-        case image
-        case platformIcon = "platform_icon"
-    }
-
-}
 
 struct TrendingTopic: Codable, Identifiable {
     let id: String
