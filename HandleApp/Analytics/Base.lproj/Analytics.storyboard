@@ -1050,6 +1050,7 @@
                                                 </buttonConfiguration>
                                                 <connections>
                                                     <action selector="didTapSkip:" destination="XvG-Wc-XIz" eventType="touchUpInside" id="vaz-3u-T6L"/>
+                                                    <action selector="skipButtonTapped:" destination="XvG-Wc-XIz" eventType="touchUpInside" id="WO3-RH-w9m"/>
                                                 </connections>
                                             </button>
                                         </subviews>

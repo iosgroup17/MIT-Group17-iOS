@@ -8,12 +8,22 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
 
     // Create a variable to hold the browser session
     var webAuthSession: ASWebAuthenticationSession?
+    var onCompletion: ((Bool) -> Void)?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Hides the top navigation bar as it is not needed on this screen
         navigationController?.setNavigationBarHidden(true, animated: false)
     }
+    
+    @IBAction func skipButtonTapped(_ sender: Any) {
+        onCompletion?(false)
+        dismiss(animated: true)
+    }
+    
+    // When success in linkedIn instagram button function
+    // onCompletion?(true)
+    // dismiss(animated: true)
 
     // This function can handle ANY platform (LinkedIn, X, Insta)
     func startAuth(authURL: String, callbackScheme: String) {

@@ -45,7 +45,7 @@ class ProfileRow: UIView {
             valueLabel.isHidden = true
             actionSwitch.isHidden = false
             arrowIcon.isHidden = true
-            
+            actionSwitch.addTarget(self, action: #selector(handleSwitchChange), for: .valueChanged)
             actionSwitch.isOn = isConnected
             
             self.isUserInteractionEnabled = true
@@ -64,6 +64,10 @@ class ProfileRow: UIView {
             
             self.isUserInteractionEnabled = true
         }
+    }
+    
+    @objc func handleSwitchChange() {
+        tapAction?()
     }
     
     @objc func handleTap(){

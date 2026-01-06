@@ -17,11 +17,13 @@ class ProfileViewController: UIViewController {
     @IBOutlet weak var detailsStack: UIStackView!
     @IBOutlet weak var socialStack: UIStackView!
     
+    let store = OnboardingDataStore.shared
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         // Refresh data every time we appear (in case user returns from editing)
@@ -143,11 +145,7 @@ class ProfileViewController: UIViewController {
             }
         }
      
-        for (platform, isConnected) in store.socialStatus {
-            addRow(to: socialStack, title: platform, value: "", isToggle: true, isConnected: isConnected) {
-                // block is empty so that the tap action does nothing
-            }
-        }
+        setupSocialRows()
         
         hideLastSeparator(in: socialStack)
         hideLastSeparator(in: detailsStack)
@@ -230,4 +228,72 @@ class ProfileViewController: UIViewController {
         
         present(editorVC, animated: true)
     }
+
+    func setupSocialRows() {
+        socialStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        
+        for (platform, isConnected) in store.socialStatus {
+            
+            addRow(to: socialStack, title: platform, value: "", isToggle: true, isConnected: isConnected) { [weak self] in
+                
+                let currentStatus = self?.store.socialStatus[platform] ?? false
+                
+                if currentStatus == true {
+                    self?.store.socialStatus[platform] = false
+                    print("Disconnected")
+                    self?.setupSocialRows()
+                } else {
+                    self?.openConnectionScreen(platformName: platform)
+                }
+            }
+        }
+    }
+    
+    func openConnectionScreen(platformName: String) {
+        let storyboard = UIStoryboard(name: "Analytics", bundle: nil)
+        
+        guard let connectionVC = storyboard.instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController else {
+            return
+        }
+        
+        connectionVC.onCompletion = { [weak self] isSuccess in
+            guard let self = self else { return }
+            
+            if isSuccess {
+                print("Success! Connecting \(platformName)")
+                store.socialStatus[platformName] = true
+                
+            } else {
+                print("User skipped. Reverting switch.")
+            }
+
+            self.reloadSocialSection()
+        }
+        
+        connectionVC.modalPresentationStyle = .pageSheet
+        if let sheet = connectionVC.sheetPresentationController {
+            sheet.detents = [.large()]
+        }
+        present(connectionVC, animated: true)
+    }
+
+    func reloadSocialSection() {
+        socialStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        
+        for (platform, isConnected) in store.socialStatus {
+                
+                addRow(to: socialStack, title: platform, value: "", isToggle: true, isConnected: isConnected) { [weak self] in
+                    
+                    let currentStatus = self?.store.socialStatus[platform] ?? false
+                    
+                    if currentStatus == true {
+                        self?.store.socialStatus[platform] = false
+                        print("Disconnected")
+                        self?.setupSocialRows()
+                    } else {
+                        self?.openConnectionScreen(platformName: platform)
+                    }
+                }
+            }
+        }
 }
