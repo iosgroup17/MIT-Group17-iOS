@@ -40,6 +40,8 @@ class PostsViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        navigationController? .hidesBarsOnSwipe = false
             
         let calendar = Calendar.current
         currentWeekStartDate = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())) ?? Date()

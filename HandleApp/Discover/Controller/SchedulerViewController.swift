@@ -28,13 +28,13 @@ class SchedulerViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+      
         setupInitialUI()
         // Do any additional setup after loading the view.
     }
     
     private func setupInitialUI() {
-            // Populate preview data
+
             previewImageView.image = postImage
             previewImageView.layer.cornerRadius = 8
 
@@ -52,48 +52,46 @@ class SchedulerViewController: UIViewController {
         }
 
     @IBAction func dateSwitchToggled(_ sender: UISwitch) {
+        if sender.isOn {
+            updateDateLabel()
+            dateDetailLabel.isHidden = false
+        } else {
+            dateDetailLabel.isHidden = true
+        }
 
-
-                if sender.isOn {
-                    updateDateLabel()
-                    dateDetailLabel.isHidden = false
-                } else {
-                    dateDetailLabel.isHidden = true
-                }
-
-                UIView.animate(withDuration: 0.3) {
-                    self.datePicker.isHidden = !sender.isOn
-                    self.datePicker.alpha = sender.isOn ? 1.0 : 0.0
-                    
-                    //close time picker if opening date
-                    if sender.isOn {
-                        self.timePicker.isHidden = true
-                        self.timePicker.alpha = 0.0
-                    }
-                    self.view.layoutIfNeeded()
-                }
+        UIView.animate(withDuration: 0.3) {
+            self.datePicker.isHidden = !sender.isOn
+            self.datePicker.alpha = sender.isOn ? 1.0 : 0.0
+            
+            //close time picker if opening date
+            if sender.isOn {
+                self.timePicker.isHidden = true
+                self.timePicker.alpha = 0.0
+            }
+            self.view.layoutIfNeeded()
+        }
+        
     }
     
     @IBAction func timeSwitchToggled(_ sender: UISwitch) {
-                
-                if sender.isOn {
-                    updateTimeLabel()
-                    timeDetailLabel.isHidden = false
-                } else {
-                    timeDetailLabel.isHidden = true
-                }
+        if sender.isOn {
+            updateTimeLabel()
+            timeDetailLabel.isHidden = false
+        } else {
+            timeDetailLabel.isHidden = true
+        }
 
-                UIView.animate(withDuration: 0.3) {
-                    self.timePicker.isHidden = !sender.isOn
-                    self.timePicker.alpha = sender.isOn ? 1.0 : 0.0
-                    
-                    //Close date picker if opening Time
-                    if sender.isOn {
-                        self.datePicker.isHidden = true
-                        self.datePicker.alpha = 0.0
-                    }
-                    self.view.layoutIfNeeded()
-                }
+        UIView.animate(withDuration: 0.3) {
+            self.timePicker.isHidden = !sender.isOn
+            self.timePicker.alpha = sender.isOn ? 1.0 : 0.0
+            
+            //Close date picker if opening Time
+            if sender.isOn {
+                self.datePicker.isHidden = true
+                self.datePicker.alpha = 0.0
+            }
+            self.view.layoutIfNeeded()
+        }
     }
     
     @IBAction func datePickerChanged(_ sender: UIDatePicker) {
