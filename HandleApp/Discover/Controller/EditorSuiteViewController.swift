@@ -88,12 +88,12 @@ class EditorSuiteViewController: UIViewController {
             
 
             platformNameLabel.text = data.platformName
-            platformIconImageView.image = UIImage(named: data.platformIconName)
+            platformIconImageView.image = UIImage(named: data.platformIconName ?? "")
             captionTextView.text = data.caption
             
         displayedImages.removeAll()
             
-            for imageName in data.images {
+            for imageName in data.images ?? []{
                 if let img = UIImage(named: imageName) {
                     displayedImages.append(img)
                 }
@@ -183,8 +183,8 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
         switch collectionView {
         case imagesCollectionView:
                     return displayedImages.count + 1
-        case hashtagCollectionView: return draft?.hashtags.count ?? 0
-        case timeCollectionView:    return draft?.postingTimes.count ?? 0
+        case hashtagCollectionView: return draft?.hashtags?.count ?? 0
+        case timeCollectionView:    return draft?.postingTimes?.count ?? 0
         default: return 0
         }
     }
@@ -209,11 +209,11 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HashtagCollectionViewCell", for: indexPath) as! HashtagCollectionViewCell
             
             if collectionView == hashtagCollectionView {
-                if let tag = draft?.hashtags[indexPath.row] {
+                if let tag = draft?.hashtags?[indexPath.row] {
                     cell.configure(text: tag)
                 }
             } else {
-                if let time = draft?.postingTimes[indexPath.row] {
+                if let time = draft?.postingTimes?[indexPath.row] {
                     cell.configure(text: time)
                 }
             }
@@ -253,9 +253,9 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
             
             var text = ""
             if collectionView == hashtagCollectionView {
-                text = draft?.hashtags[indexPath.row] ?? ""
+                text = draft?.hashtags?[indexPath.row] ?? ""
             } else {
-                text = draft?.postingTimes[indexPath.row] ?? ""
+                text = draft?.postingTimes?[indexPath.row] ?? ""
             }
             
             let font = UIFont.systemFont(ofSize: 13, weight: .medium)
@@ -274,7 +274,7 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
                let destinationVC = navVC.topViewController as? SchedulerViewController {
                 
 
-                if let firstImageName = draft?.images.first {
+                if let firstImageName = draft?.images?.first {
                     // Convert the String name to a UIImage
                     destinationVC.postImage = UIImage(named: firstImageName)
                 }

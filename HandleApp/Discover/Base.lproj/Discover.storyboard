@@ -38,13 +38,28 @@
                                     </collectionViewCell>
                                 </cells>
                             </collectionView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ZTa-Gq-WqU">
+                                <rect key="frame" x="346" y="748" width="36" height="36"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="36" id="fgw-F3-v5K"/>
+                                    <constraint firstAttribute="width" constant="36" id="nec-IR-YLX"/>
+                                </constraints>
+                                <color key="tintColor" systemColor="labelColor"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="tinted" image="plus" catalog="system"/>
+                                <connections>
+                                    <segue destination="7Z4-VN-6a4" kind="show" id="630-NM-8aD"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="tFg-UB-Pfr"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="LbN-rb-MbT" firstAttribute="trailing" secondItem="tFg-UB-Pfr" secondAttribute="trailing" id="14Z-5v-9WY"/>
+                            <constraint firstAttribute="bottom" secondItem="ZTa-Gq-WqU" secondAttribute="bottom" constant="90" id="6a5-0o-4wp"/>
                             <constraint firstItem="LbN-rb-MbT" firstAttribute="top" secondItem="tFg-UB-Pfr" secondAttribute="top" id="BQ0-F4-WBM"/>
                             <constraint firstItem="LbN-rb-MbT" firstAttribute="leading" secondItem="tFg-UB-Pfr" secondAttribute="leading" id="gmX-we-fJT"/>
+                            <constraint firstItem="tFg-UB-Pfr" firstAttribute="trailing" secondItem="ZTa-Gq-WqU" secondAttribute="trailing" constant="20" id="jGU-NQ-KNf"/>
                             <constraint firstItem="LbN-rb-MbT" firstAttribute="bottom" secondItem="meX-g9-SqN" secondAttribute="bottom" id="zCb-Ei-nyh"/>
                         </constraints>
                     </view>
@@ -58,6 +73,22 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="BZP-dp-xlz" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1054" y="806"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="UyH-uY-cUP">
+            <objects>
+                <viewController id="7Z4-VN-6a4" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="oq4-ov-dAV">
+                        <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="vQZ-PJ-3jW"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="hNm-NS-biA"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Fcn-L8-KB2" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="192" y="1507"/>
         </scene>
         <!--Trending Topics-->
         <scene sceneID="XfL-ZM-tNa">
@@ -670,6 +701,7 @@
     </inferredMetricsTieBreakers>
     <resources>
         <image name="chevron.right" catalog="system" width="97" height="128"/>
+        <image name="plus" catalog="system" width="128" height="113"/>
         <image name="wand.and.sparkles.inverse" catalog="system" width="128" height="112"/>
         <namedColor name="Color">
             <color red="0.0" green="0.76470588235294112" blue="0.81568627450980391" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
