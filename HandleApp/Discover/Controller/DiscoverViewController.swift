@@ -131,7 +131,7 @@ class DiscoverViewController: UIViewController {
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 
                 let groupSize = NSCollectionLayoutSize(
-                    widthDimension: .absolute(190),
+                    widthDimension: .absolute(210),
                     heightDimension: .absolute(190)
                 )
                 
@@ -299,7 +299,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
                     cell.configure(
                         imageName: idea.image ?? "",
                         caption: idea.caption,
-                        whyText: idea.whyThisPost,
+                        hashtags: idea.whyThisPost,
                         platform: idea.platformName
                     )
 

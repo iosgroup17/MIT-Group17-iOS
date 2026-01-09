@@ -69,9 +69,8 @@ class TopicIdeaCollectionViewCell: UICollectionViewCell {
                 platformIconView.image = icon
             }
             
-            
-            let tealColor = UIColor(red: 0/255, green: 195/255, blue: 208/255, alpha: 1.0)
-            badgeContainerView.backgroundColor = tealColor.withAlphaComponent(0.15)
+         
+        badgeContainerView.backgroundColor = .clear
 
         }
 

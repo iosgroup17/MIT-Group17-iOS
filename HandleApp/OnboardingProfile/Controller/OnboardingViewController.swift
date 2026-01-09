@@ -1,4 +1,5 @@
 import UIKit
+import Supabase
 
 class OnboardingViewController: UIViewController {
     
@@ -15,6 +16,7 @@ class OnboardingViewController: UIViewController {
     var currentChildViewController: UIViewController?
     var isEditMode: Bool = false
     var onDismiss: (() -> Void)?
+    let client = SupabaseManager.shared.client
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,22 +43,44 @@ class OnboardingViewController: UIViewController {
     }
     
     @IBAction func nextButtonTapped(_ sender: UIButton) {
-        // check if current step has an answer
+        //check if current step has an answer
         let hasAnswer = OnboardingDataStore.shared.userAnswers[currentStepIndex] != nil
         
-        // checking required steps and adding alert
+        //required steps
         if currentStepIndex < 2 && !hasAnswer {
             showAlert(message: "This step is required. Please select an option.")
             return
         }
         
-        if isEditMode {
-            // run the onDismiss closure to notify parent
-            onDismiss?()
-
-            dismiss(animated: true, completion: nil)
+        let rawAnswer = OnboardingDataStore.shared.userAnswers[currentStepIndex]
+        let selectedOptions: [String]
+        
+        if let singleValue = rawAnswer as? String {
+            selectedOptions = [singleValue]
+        } else if let multiValue = rawAnswer as? [String] {
+            selectedOptions = multiValue
         } else {
-            goToNextStep()
+            selectedOptions = []
+        }
+        
+        //bg task to update supabase
+        Task {
+            print("Syncing Step \(currentStepIndex) to Supabase...")
+            
+            //test id call
+            await SupabaseManager.shared.savePreference(
+                stepIndex: currentStepIndex,
+                selections: selectedOptions
+            )
+            
+            DispatchQueue.main.async {
+                if self.isEditMode {
+                    self.onDismiss?()
+                    self.dismiss(animated: true, completion: nil)
+                } else {
+                    self.goToNextStep()
+                }
+            }
         }
     }
     
@@ -176,6 +200,33 @@ class OnboardingViewController: UIViewController {
             sceneDelegate.showMainApp(window: window)
             
             UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: nil, completion: nil)
+        }
+    }
+    
+    func savePreferenceToCloud(stepIndex: Int, selections: [String]) {
+        guard let userId = client.auth.currentUser?.id else { return }
+        
+        let response = OnboardingResponse(
+            user_id: userId,
+            step_index: stepIndex,
+            selection_tags: selections
+        )
+        
+        Task {
+            do {
+                // .upsert handles both initial saving AND updates/changes
+                try await client
+                    .from("onboarding_responses")
+                    .upsert(response)
+                    .execute()
+                
+                print("Successfully synced step \(stepIndex) to Supabase")
+                self.goToNextStep()
+                
+            } catch {
+                print("Database error: \(error)")
+                // Handle error (e.g., show an alert)
+            }
         }
     }
 }

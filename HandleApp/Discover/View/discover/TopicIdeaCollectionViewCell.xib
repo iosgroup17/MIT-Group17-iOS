@@ -49,25 +49,25 @@
                                         <rect key="frame" x="7" y="193" width="185" height="28"/>
                                         <subviews>
                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="number" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="mxn-rc-EDd">
-                                                <rect key="frame" x="8" y="8" width="14" height="12"/>
-                                                <color key="tintColor" systemColor="labelColor"/>
+                                                <rect key="frame" x="0.0" y="8" width="14" height="12"/>
+                                                <color key="tintColor" systemColor="systemGrayColor"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="14" id="1Bx-Li-WaA"/>
                                                     <constraint firstAttribute="width" constant="14" id="C5P-QY-HnK"/>
                                                 </constraints>
                                             </imageView>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zla-VA-EYI">
-                                                <rect key="frame" x="26" y="4" width="151" height="20"/>
+                                                <rect key="frame" x="18" y="4" width="159" height="20"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="13"/>
-                                                <nil key="textColor"/>
+                                                <color key="textColor" systemColor="systemGrayColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                         </subviews>
-                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="185" id="2ak-1j-sdh"/>
                                             <constraint firstAttribute="trailing" secondItem="zla-VA-EYI" secondAttribute="trailing" constant="8" id="Qb9-Nh-9S7"/>
-                                            <constraint firstItem="mxn-rc-EDd" firstAttribute="leading" secondItem="ML5-aG-4IM" secondAttribute="leading" constant="8" id="fjs-bQ-2Ec"/>
+                                            <constraint firstItem="mxn-rc-EDd" firstAttribute="leading" secondItem="ML5-aG-4IM" secondAttribute="leading" id="fjs-bQ-2Ec"/>
                                             <constraint firstAttribute="bottom" secondItem="zla-VA-EYI" secondAttribute="bottom" constant="4" id="mgn-K9-8jJ"/>
                                             <constraint firstItem="zla-VA-EYI" firstAttribute="leading" secondItem="mxn-rc-EDd" secondAttribute="trailing" constant="4" id="nRZ-Nt-PY1"/>
                                             <constraint firstItem="zla-VA-EYI" firstAttribute="top" secondItem="ML5-aG-4IM" secondAttribute="top" constant="4" id="rap-uP-yVN"/>
@@ -125,11 +125,11 @@
     </objects>
     <resources>
         <image name="number" catalog="system" width="128" height="123"/>
-        <systemColor name="labelColor">
-            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemGrayColor">
+            <color red="0.5568627451" green="0.5568627451" blue="0.57647058819999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

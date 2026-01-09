@@ -68,7 +68,7 @@ struct TopIdea: Codable, Identifiable {
     let id: String
     let caption: String
     let image: String? // Optional in DB
-    let whyThisPost: String
+    let whyThisPost: [String]
     let platformName: String
 
     enum CodingKeys: String, CodingKey {
@@ -153,7 +153,7 @@ struct PostDetail: Codable {
 }
 
 // MARK: - Local UI Models (Not in DB)
-struct EditorDraftData {
+struct EditorDraftData: Codable {
     let platformName: String
     let platformIconName: String?
     let caption: String?
@@ -161,3 +161,4 @@ struct EditorDraftData {
     let hashtags: [String]?
     let postingTimes: [String]?
 }
+
