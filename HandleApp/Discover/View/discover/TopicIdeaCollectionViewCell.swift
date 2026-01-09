@@ -59,7 +59,7 @@ class TopicIdeaCollectionViewCell: UICollectionViewCell {
             badgeLabel.text = idea.whyThisPost
             
             
-            if let image = UIImage(named: idea.image) {
+        if let image = UIImage(named: idea.image ?? "") {
                 imageView.image = image
             } else {
                 imageView.backgroundColor = .systemGray5 // Fallback

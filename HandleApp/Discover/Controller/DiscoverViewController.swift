@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Supabase
 
 class DiscoverViewController: UIViewController {
 
@@ -66,7 +67,43 @@ class DiscoverViewController: UIViewController {
        
         
         collectionView.setCollectionViewLayout(generateLayout(), animated: true)
+        
+        Task {
+                    await loadSupabaseData()
+                }
     }
+    
+    func loadSupabaseData() async {
+            print("--- 🚀 Starting Supabase Fetch ---")
+            
+            do {
+                // 1. Call the Loader we created in the previous step
+                let fetchedData = try await PostIdeasLoader.shared.loadFromSupabase()
+                
+                // 2. Update UI on the Main Thread
+                await MainActor.run {
+                    print("✅ Data Received! Updating UI...")
+                    
+                    // Update the Master Object
+                    self.ideasResponse = fetchedData
+                    
+                    // Update the Arrays used by CollectionView
+                    self.topIdeas = fetchedData.topIdeas
+                    self.trendingTopics = fetchedData.trendingTopics
+                    self.topicGroups = fetchedData.topicIdeas
+                    
+                    // Handle Recommendations + Filtering
+                    self.allRecommendations = fetchedData.recommendations
+                    self.recommendations = fetchedData.recommendations // Default to all
+                    
+                    // 3. IMPORTANT: Refresh the view
+                    self.collectionView.reloadData()
+                }
+                
+            } catch {
+                print("❌ Error loading data: \(error.localizedDescription)")
+            }
+        }
 
     func generateLayout() -> UICollectionViewLayout {
         
@@ -260,7 +297,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
                     let idea = topIdeas[indexPath.row]
 
                     cell.configure(
-                        imageName: idea.image,
+                        imageName: idea.image ?? "",
                         caption: idea.caption,
                         whyText: idea.whyThisPost,
                         platform: idea.platformName
@@ -299,7 +336,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
                     
                     cell.configure(
                         platform: rec.platform,
-                        image: UIImage(named: rec.image),
+                        image: UIImage(named: rec.image ?? ""),
                         caption: rec.caption,
                         whyText: rec.whyThisPost
                     )
