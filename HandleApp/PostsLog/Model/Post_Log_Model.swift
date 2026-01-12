@@ -7,29 +7,92 @@
 
 // ScheduledPostModel.swift
 
+//
+//  Post_Log_Model.swift
+//  OnboardingScreens
+//
+//  Created by SDC_USER on 25/11/25.
+//
+
+// ScheduledPostModel.swift
+
 import Foundation
 import UIKit
+import Supabase
 
-struct Post: Decodable {
+struct Post: Codable {
+    let id: String? // Changed to String as schema shows 'text' type
+    let status: String? // Matches 'post_status' custom type
+    let postText: String // Matches 'post_text'
+    let fullCaption: String? // Matches 'full_caption'
+    let imageName: String // Matches 'image_name'
+    let platformName: String // Matches 'platform_name'
+    let platformIconName: String // Matches 'platform_icon_name'
+    let scheduledAt: Date? // Matches 'scheduled_at' (timestamptz)
+    let publishedAt: Date? // Matches 'published_at' (timestamptz)
+    let suggestedHashtags: [String]? // Matches '_text' array
+    let optimalPostingTimes: [String]? // Matches '_text' array
     
-    let text: String
-    let fullCaption: String?
-    let time: String?
-    let date: Date?
-    let platformIconName: String
-    let platformName: String
-    let imageName: String
-    let isPublished: Bool
-    let likes: String?
-    let comments: String?
-    let reposts: String?
-    let shares: String?
-    let views: String?
-    let engagementScore: String?
-    let suggestedHashtags: [String]?
-    let optimalPostingTimes: [String]?
+    // Numeric metrics are now Int to match 'int4'
+    let likes: Int?
+    let comments: Int?
+    let reposts: Int?
+    let shares: Int?
+    let views: Int?
+    let engagementScore: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case id, status, likes, comments, reposts, shares, views
+        case postText = "post_text"
+        case fullCaption = "full_caption"
+        case imageName = "image_name"
+        case platformName = "platform_name"
+        case platformIconName = "platform_icon_name"
+        case scheduledAt = "scheduled_at"
+        case publishedAt = "published_at"
+        case suggestedHashtags = "suggested_hashtags"
+        case optimalPostingTimes = "optimal_posting_times"
+        case engagementScore = "engagement_score"
+    }
 }
 
+extension SupabaseManager {
+    
+    // Fetch all posts for the current user
+    func fetchPosts() async -> [Post] {
+        // No guard for userId needed anymore!
+        
+        do {
+            let posts: [Post] = try await client
+                .from("social_media_posts")
+                .select()
+                // ❌ Removed: .eq("id", value: userId)
+                // Added: Show newest first
+                .execute()
+                .value
+                
+            print("✅ Successfully fetched \(posts.count) global posts")
+            return posts
+        } catch {
+            print("❌ Error fetching global posts: \(error)")
+            return []
+        }
+    }
+
+    // Delete a post from Supabase
+    func deletePost(id: String) async {
+        do {
+            try await client
+                .from("posts")
+                .delete()
+                .eq("id", value: id)
+                .execute()
+            print("✅ Post deleted")
+        } catch {
+            print("❌ Delete error: \(error)")
+        }
+    }
+}
 extension Post {
     private static var standardDecoder: JSONDecoder {
         let decoder = JSONDecoder()
@@ -41,63 +104,50 @@ extension Post {
         return decoder
     }
 
-    //Load posts scheduled for Today
-    static func loadTodayScheduledPosts(from filename: String = "Posts_data") throws -> [Post] {
-        guard let url = Bundle.main.url(forResource: filename, withExtension: "json") else {
-            return []
-        }
-        let data = try Data(contentsOf: url)
-        let posts = try standardDecoder.decode([Post].self, from: data)
-        let today = Date()
-        return posts.filter { post in
-            guard let postDate = post.date, let time = post.time, !time.isEmpty else { return false }
-            return Calendar.current.isDate(postDate, inSameDayAs: today)
-        }
-    }
     
     //Load posts scheduled for tomorrow
-    static func loadTomorrowScheduledPosts(from filename: String = "Posts_data") throws -> [Post] {
-        guard let url = Bundle.main.url(forResource: filename, withExtension: "json") else {
-            return []
-        }
-        let data = try Data(contentsOf: url)
-        let posts = try standardDecoder.decode([Post].self, from: data)
+    // Load posts specifically for Tomorrow
+    static func loadTomorrowScheduledPosts(from allPosts: [Post]) -> [Post] {
         let today = Date()
         guard let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today) else { return [] }
-            return posts.filter { post in
-                guard let postDate = post.date, let time = post.time, !time.isEmpty else { return false }
-                return Calendar.current.isDate(postDate, inSameDayAs: tomorrow)
-            }
+        
+        return allPosts.filter { post in
+            // 1. CHECK STATUS FIRST
+            let status = post.status?.uppercased() ?? ""
+            guard status == "SCHEDULED" else { return false }
+            
+            // 2. CHECK DATE
+            guard let scheduleDate = post.scheduledAt else { return false }
+            return Calendar.current.isDate(scheduleDate, inSameDayAs: tomorrow)
         }
-    //Load posts scheduled for later
-    static func loadScheduledPostsAfterDate(from filename: String = "Posts_data") throws -> [Post] {
-        guard let url = Bundle.main.url(forResource: filename, withExtension: "json") else {
-            return []
-        }
-        let data = try Data(contentsOf: url)
-        let posts = try standardDecoder.decode([Post].self, from: data)
+    }
+
+    // Load posts scheduled for later
+    static func loadScheduledPostsAfterDate(from allPosts: [Post]) -> [Post] {
         let today = Date()
         guard let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today),
               let endOfTomorrow = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: tomorrow) else {
             return []
         }
-        let filteredPosts = posts.filter { post in
-            guard let postDate = post.date, let time = post.time, !time.isEmpty else { return false }
-            return postDate > endOfTomorrow
-        }
-        return filteredPosts.sorted { $0.date! < $1.date! }
-    }
-
-    //Load Published Posts
-    static func loadPublishedPosts(from filename: String = "Posts_data") throws -> [Post] {
-        guard let url = Bundle.main.url(forResource: filename, withExtension: "json") else {
-            return []
-        }
-        let data = try Data(contentsOf: url)
-        let posts = try standardDecoder.decode([Post].self, from: data)
         
-        return posts.filter { $0.isPublished }
+        return allPosts.filter { post in
+            // 1. CHECK STATUS FIRST
+            let status = post.status?.uppercased() ?? ""
+            guard status == "SCHEDULED" else { return false }
+            
+            // 2. CHECK DATE
+            guard let scheduleDate = post.scheduledAt else { return false }
+            return scheduleDate > endOfTomorrow
+        }
+        .sorted { ($0.scheduledAt ?? Date()) < ($1.scheduledAt ?? Date()) }
     }
+    //Load Published Posts
+    static func loadPublishedPosts(from allPosts: [Post]) -> [Post] {
+            return allPosts.filter { post in
+                // Check the 'status' column or if 'publishedAt' has a value
+                return post.status == "PUBLISHED" || post.publishedAt != nil
+            }
+        }
     
     //Load all posts
     static func loadAllPosts(from fileName: String) throws -> [Post] {
@@ -109,29 +159,8 @@ extension Post {
     }
 
     //Load saved posts
-    static func loadSavedPosts(from filename: String = "Posts_data") throws -> [Post] {
-        guard let url = Bundle.main.url(forResource: filename, withExtension: "json") else {
-            throw NSError(domain: "Post_Log_Model", code: 404,
-                        userInfo: [NSLocalizedDescriptionKey: "Couldn't find \(filename).json file."])
-        }
-        let data = try Data(contentsOf: url)
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        do {
-            let posts = try decoder.decode([Post].self, from: data)
-            let filteredPosts = posts.filter { post in
-                if let time = post.time, !time.isEmpty {
-                    return false
-                }
-                return true
-            }
-            if filteredPosts.isEmpty {
-                print("DEBUG: Successfully decoded JSON, but the array is empty.")
-            }
-            return filteredPosts
-        } catch {
-            print("Decoding Failed: \(error.localizedDescription)")
-            throw error
+    static func loadSavedPosts(from allPosts: [Post]) -> [Post] {
+            return allPosts.filter { $0.status?.uppercased() == "SAVED" }
         }
     }
-}
+

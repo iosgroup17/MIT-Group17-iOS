@@ -20,35 +20,25 @@ class ScheduledPostsTableViewCell: UITableViewCell {
         self.selectionStyle = .none
     }
     private static let dateFormatter: DateFormatter = {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "d MMM, h:mm a"
-            return formatter
-        }()
-    private static let timeFormatter: DateFormatter = {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "h:mm a" 
-            return formatter
-        }()
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium   // "Oct 12, 2023"
+        formatter.timeStyle = .short    // "10:30 AM"
+        return formatter
+    }()
     func configure(with post: Post) {
-        postsLabel.text = post.text
+        // 1. Update text property name to match your schema
+        postsLabel.text = post.postText
+        
         platformIconImageView.image = UIImage(named: post.platformIconName)
         thumbnailImageView.image = UIImage(named: post.imageName)
-        if let scheduledDate = post.date, let timeString = post.time, !timeString.isEmpty {
-            if let timePart = ScheduledPostsTableViewCell.timeFormatter.date(from: timeString) {
-                let calendar = Calendar.current
-                let timeComponents = calendar.dateComponents([.hour, .minute], from: timePart)
-                if let hour = timeComponents.hour, let minute = timeComponents.minute {
-                    if let combinedDateTime = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: scheduledDate) {
-                        dateTimeLabel.text = ScheduledPostsTableViewCell.dateFormatter.string(from: combinedDateTime)
-                    } else {
-                        dateTimeLabel.text = "Time Combination Error" 
-                    }
-                }
-            } else {
-                dateTimeLabel.text = ScheduledPostsTableViewCell.dateFormatter.string(from: scheduledDate)
-            }
-            
+        
+        // 2. Simplified Date Handling
+        // Using the 'scheduled_at' timestamp directly from the database
+        if let scheduledDate = post.scheduledAt {
+            // Use a formatter that shows both Date and Time (e.g., "Oct 12, 10:30 AM")
+            dateTimeLabel.text = ScheduledPostsTableViewCell.dateFormatter.string(from: scheduledDate)
+        } else {
+            dateTimeLabel.text = "Unscheduled"
         }
     }
-
 }

@@ -5,6 +5,13 @@
 //  Created by SDC_USER on 25/11/25.
 //
 
+//
+//  PostsViewController.swift
+//  OnboardingScreens
+//
+//  Created by SDC_USER on 25/11/25.
+//
+
 import UIKit
 
 class PostsViewController: UIViewController {
@@ -18,23 +25,8 @@ class PostsViewController: UIViewController {
     @IBOutlet weak var savedStackView: UIStackView!
     @IBOutlet weak var postsTableView: UITableView!
     @IBOutlet weak var tableViewHeightConstraint: NSLayoutConstraint!
-    var todayScheduledPosts: [Post] = {
-        do {
-            return try Post.loadTodayScheduledPosts(from: "Posts_data")
-        } catch {
-            print("FATAL ERROR: Could not load scheduled posts. Details: \(error)")
-            return []
-        }
-    }()
-    var allPosts: [Post] = {
-        do {
-            // We need to load ALL posts to populate the calendar dots,
-            // not just "todayScheduledPosts"
-            return try Post.loadAllPosts(from: "Posts_data")
-        } catch {
-            return []
-        }
-    }()
+    var todayScheduledPosts: [Post] = []
+    var allPosts: [Post] = []
 
     var currentWeekStartDate: Date = Calendar.current.startOfDay(for: Date())
     
@@ -66,7 +58,30 @@ class PostsViewController: UIViewController {
         postsTableView.dataSource = self
         postsTableView.delegate = self
     }
+    override func viewWillAppear(_ animated: Bool) {
+            super.viewWillAppear(animated)
+            refreshData() // Refresh every time the view appears
+    }
     
+    func refreshData() {
+            Task {
+                let fetchedPosts = await SupabaseManager.shared.fetchPosts()
+                self.allPosts = fetchedPosts
+                
+                // Filter for today locally to keep the UI snappy
+                self.todayScheduledPosts = fetchedPosts.filter { post in
+                    guard let scheduleDate = post.scheduledAt else { return false }
+                    return Calendar.current.isDate(scheduleDate, inSameDayAs: Date())
+                }
+                
+                // UI Updates must be on Main Thread
+                await MainActor.run {
+                    self.postsTableView.reloadData()
+                    self.updateTableViewHeight()
+                    self.setupCustomCalendar(for: self.currentWeekStartDate)
+                }
+        }
+    }
     //Setting up the weekly calendar
     func setupCustomCalendar(for startDate: Date) {
             let dateFormatter = DateFormatter()
@@ -144,7 +159,7 @@ class PostsViewController: UIViewController {
             container.heightAnchor.constraint(equalToConstant: 36).isActive = true
         }
         
-        // Handle Indicator Dotselected 
+        // Handle Indicator Dotselected
         if indicatorColor != .clear && !isSelected {
             let indicator = UIView()
             indicator.backgroundColor = indicatorColor
@@ -171,7 +186,7 @@ class PostsViewController: UIViewController {
         
         //Check if any post in 'allPosts' has the same day as 'dateToCheck'
         let hasPostOnDate = allPosts.contains { post in
-            guard let postDate = post.date else { return false }
+            guard let postDate = post.scheduledAt else { return false }
             return calendar.isDate(postDate, inSameDayAs: dateToCheck)
         }
         
@@ -208,13 +223,13 @@ class PostsViewController: UIViewController {
         stackView.layer.shadowColor = UIColor.black.cgColor
         stackView.layer.shadowOpacity = 0.1
         stackView.layer.shadowOffset = CGSize(width: 0, height: 2)
-        stackView.layer.shadowRadius = 4 
+        stackView.layer.shadowRadius = 4
     }
 
     //Functions to navigate to the specific posts screen.
     @objc func savedStackTapped() {
         let storyboard = UIStoryboard(name: "Posts", bundle: nil)
-        if let destinationVC = storyboard.instantiateViewController(withIdentifier: "SavedPostsViewControllerID") as? SavedPostsTableViewController { 
+        if let destinationVC = storyboard.instantiateViewController(withIdentifier: "SavedPostsViewControllerID") as? SavedPostsTableViewController {
             self.navigationController?.pushViewController(destinationVC, animated: true)
         } else {
             print("Error: Could not find View Controller with ID 'SavedPostsViewControllerID'")
@@ -223,7 +238,7 @@ class PostsViewController: UIViewController {
 
     @objc func scheduledStackTapped() {
         let storyboard = UIStoryboard(name: "Posts", bundle: nil)
-        if let destinationVC = storyboard.instantiateViewController(withIdentifier: "ScheduledPostsViewControllerID") as? ScheduledPostsTableViewController { 
+        if let destinationVC = storyboard.instantiateViewController(withIdentifier: "ScheduledPostsViewControllerID") as? ScheduledPostsTableViewController {
             self.navigationController?.pushViewController(destinationVC, animated: true)
         } else {
             print("Error: Could not find View Controller with ID 'SavedPostsViewControllerID'")
@@ -232,7 +247,7 @@ class PostsViewController: UIViewController {
 
     @objc func publishedStackTapped() {
         let storyboard = UIStoryboard(name: "Posts", bundle: nil)
-        if let destinationVC = storyboard.instantiateViewController(withIdentifier: "PublishedPostsViewControllerID") as? PublishedPostViewController { 
+        if let destinationVC = storyboard.instantiateViewController(withIdentifier: "PublishedPostsViewControllerID") as? PublishedPostViewController {
             self.navigationController?.pushViewController(destinationVC, animated: true)
         } else {
             print("Error: Could not find View Controller with ID 'SavedPostsViewControllerID'")
@@ -272,7 +287,7 @@ extension PostsViewController: UITableViewDataSource, UITableViewDelegate {
     }
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
 
-        //Edit action        
+        //Edit action
         let editAction = UIContextualAction(style: .normal, title: "Edit") { [weak self] (action, view, completionHandler) in
             guard let self = self else {
                 completionHandler(false)
@@ -295,13 +310,21 @@ extension PostsViewController: UITableViewDataSource, UITableViewDelegate {
         
         //Delete action
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] (action, view, completionHandler) in
-            guard let self = self else {
-                completionHandler(false)
-                return
-            }
-            self.todayScheduledPosts.remove(at: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: .automatic)
-            completionHandler(true)
+            guard let self = self else { return }
+                    
+                    let postToDelete = self.todayScheduledPosts[indexPath.row]
+                    
+                    if let postId = postToDelete.id {
+                        Task {
+                            await SupabaseManager.shared.deletePost(id: postId)
+                            await MainActor.run {
+                                self.todayScheduledPosts.remove(at: indexPath.row)
+                                tableView.deleteRows(at: [indexPath], with: .automatic)
+                                self.updateTableViewHeight()
+                                completionHandler(true)
+                            }
+                        }
+                    }
         }
         deleteAction.image = UIImage(systemName: "trash.fill")
 
@@ -340,12 +363,11 @@ extension PostsViewController: UITableViewDataSource, UITableViewDelegate {
                     if let indexPath = sender as? IndexPath {
                         let selectedPost: Post
                         selectedPost = todayScheduledPosts[indexPath.row]
-                        schedulerVC.postImage = UIImage(named: selectedPost.imageName) 
-                        schedulerVC.captionText = selectedPost.text
+                        schedulerVC.postImage = UIImage(named: selectedPost.imageName)
+                        schedulerVC.captionText = selectedPost.fullCaption ?? ""
                         schedulerVC.platformText = selectedPost.platformName
                     }
             }
         }
     }
 }
-

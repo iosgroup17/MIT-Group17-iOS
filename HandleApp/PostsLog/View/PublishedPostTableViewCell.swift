@@ -30,44 +30,35 @@ class PublishedPostTableViewCell: UITableViewCell {
         self.selectionStyle = .none
     }
     private static let dateFormatter: DateFormatter = {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "d MMM, h:mm a"
-            return formatter
-        }()
-    private static let timeFormatter: DateFormatter = {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "h:mm a" 
-            return formatter
-        }()
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium   // "Oct 12, 2023"
+        formatter.timeStyle = .short    // "10:30 AM"
+        return formatter
+    }()
     func configure(with post: Post, isExpanded: Bool) {
-            postLabel.text = post.text
+        // 1. Basic Content
+        postLabel.text = post.postText
         platformIconImageView.image = UIImage(named: post.platformIconName)
         thumbnailImageView.image = UIImage(named: post.imageName)
-        if let scheduledDate = post.date, let timeString = post.time, !timeString.isEmpty {
-            if let timePart = PublishedPostTableViewCell.timeFormatter.date(from: timeString) {
-                let calendar = Calendar.current
-                let timeComponents = calendar.dateComponents([.hour, .minute], from: timePart)
-                if let hour = timeComponents.hour, let minute = timeComponents.minute {
-                    if let combinedDateTime = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: scheduledDate) {
-                        dateTimeLabel.text = PublishedPostTableViewCell.dateFormatter.string(from: combinedDateTime)
-                    } else {
-                        dateTimeLabel.text = "Time Combination Error" 
-                    }
-                }
-            } else {
-                dateTimeLabel.text = PublishedPostTableViewCell.dateFormatter.string(from: scheduledDate)
-            }
-            
+        
+        // 2. Simplified Date Handling
+        // Using the 'published_at' timestamptz from Supabase
+        if let publishDate = post.publishedAt {
+            dateTimeLabel.text = PublishedPostTableViewCell.dateFormatter.string(from: publishDate)
         }
-        likesLabel.text = "\(post.likes ?? "")"
-        commentsLabel.text = "\(post.comments ?? "")"
-        sharesLabel.text = "\(post.shares ?? "")"
-        repostsLabel.text = "\(post.reposts ?? "")"
-        viewsLabel.text = "\(post.views ?? "")"
-        engagementLabel.text = "\(post.engagementScore ?? "")"
+        // 3. Metrics (Now Ints from schema)
+        likesLabel.text = "\(post.likes ?? 0)"
+        commentsLabel.text = "\(post.comments ?? 0)"
+        sharesLabel.text = "\(post.shares ?? 0)"
+        repostsLabel.text = "\(post.reposts ?? 0)"
+        viewsLabel.text = "\(post.views ?? 0)"
+        engagementLabel.text = "\(post.engagementScore ?? 0)"
+        
+        // 5. Expansion Logic
         analyticsHeightConstraint.constant = isExpanded ? expandedHeight : 0
         analyticsContainerView.alpha = isExpanded ? 1.0 : 0.0
         
+        // Update layout without animation here (animation is handled by the TableView)
         contentView.layoutIfNeeded()
     }
 
