@@ -27,7 +27,20 @@ class SupabaseManager {
     private init() {
         self.client = SupabaseClient(
             supabaseURL: supabaseURL,
-            supabaseKey: supabaseKey
+            supabaseKey: supabaseKey,
+            options: SupabaseClientOptions(
+                            db: .init(
+                                decoder: {
+                                    let decoder = JSONDecoder()
+                                                        // 1. USE DEFAULT KEYS (because you have CodingKeys now)
+                                                        decoder.keyDecodingStrategy = .useDefaultKeys
+                                                        
+                                                        // 2. HANDLE SUPABASE DATES
+                                                        decoder.dateDecodingStrategy = .iso8601
+                                                        return decoder
+                                }()
+                            )
+                        )
         )
     }
     

@@ -57,8 +57,9 @@ class UserIdeaViewController: UIViewController {
     func navigateToEditor(with draft: EditorDraftData) {
         print("🚀 Moving to Editor with caption: \(draft.caption ?? "")")
         
+        
         // Option A: If using Storyboard ID
-        if let editorVC = storyboard?.instantiateViewController(withIdentifier: "EditorViewController") as? EditorSuiteViewController {
+        if let editorVC = storyboard?.instantiateViewController(withIdentifier: "EditorSuiteViewController") as? EditorSuiteViewController {
             
             // Pass the data!
             // editorVC.draftData = draft
@@ -79,26 +80,21 @@ extension UserIdeaViewController: UITableViewDelegate, UITableViewDataSource {
         let cellIdentifier = message.isUser ? "UserCell" : "BotCell"
         
         guard let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath) as? ChatCellTableViewCell else {
-            fatalError("Check Storyboard Class")
-        }
+                return UITableViewCell()
+            }
         
         cell.messageLabel.text = message.text
         
-        // --- NEW LOGIC START ---
-        
-        // 1. Check if this message has draft data attached
-        if let draftData = message.draft {
-            // If yes, show button
-            cell.editorButton.isHidden = false
-            
-            // 2. Define what happens when clicked
-            cell.onEditorButtonTapped = { [weak self] in
-                self?.navigateToEditor(with: draftData)
+        if let btn = cell.editorButton {
+            if let draftData = message.draft {
+                btn.isHidden = false
+                cell.onEditorButtonTapped = { [weak self] in
+                    self?.navigateToEditor(with: draftData)
+                }
+            } else {
+                btn.isHidden = true
             }
-        } else {
-            cell.editorButton.isHidden = true
-        }
-        
+        } 
         
         return cell
     }

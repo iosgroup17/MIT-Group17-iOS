@@ -10,33 +10,40 @@ import UIKit
 class SavedPostsTableViewController: UITableViewController, UIPopoverPresentationControllerDelegate {
     
     
-    @IBOutlet weak var postTableView: UITableView!
     @IBOutlet weak var filterBarButton: UIBarButtonItem!
-    var savedPosts: [Post] = {
-        do {
-            return try Post.loadSavedPosts(from: "Posts_data")
-        } catch {
-            print("FATAL ERROR: Could not load saved posts. Details: \(error)")
-            return []
-        }
-    }()
-    var displayedPosts: [Post] = []
+    var savedPosts: [Post] = [] // Cache of all drafts from Supabase
+    var displayedPosts: [Post] = [] // What is currently shown (filtered)
     var currentPlatformFilter: String = "All"
     
     override func viewDidLoad() {
         super.viewDidLoad()
         displayedPosts = savedPosts
+        fetchSavedPosts()
     }
-    
+    func fetchSavedPosts() {
+        Task {
+            let posts = await SupabaseManager.shared.fetchPosts()
+            
+            // 1. Filter ONLY for saved status
+            self.savedPosts = posts.filter { $0.status?.lowercased() == "saved" }
+            
+            print("✅ Corrected 'Saved' count: \(self.savedPosts.count)")
+
+            await MainActor.run {
+                // 2. Apply the current platform filter (All, Instagram, etc.)
+                self.filterSavedPosts(by: self.currentPlatformFilter)
+            }
+        }
+    }
     //Filter by platform.
     func didSelectPlatform(_ platform: String) {
         print("Selected Platform: \(platform)")
-            self.currentPlatformFilter = platform 
+            self.currentPlatformFilter = platform
             filterSavedPosts(by: platform)
     }
 
     func filterSavedPosts(by platform: String) {
-        print("Filter requested for: [\(platform)]") 
+        print("Filter requested for: [\(platform)]")
         if platform == "All" {
             displayedPosts = savedPosts
         } else {
@@ -46,7 +53,7 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
             }
         }
         print("Posts displayed after filter: \(displayedPosts.count)")
-        postTableView.reloadData( )
+        self.tableView.reloadData()
     }
 
     @IBAction func filterButtonTapped(_ sender: Any) {
@@ -85,7 +92,7 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "saved_cell", for: indexPath) as? SavedPostsTableViewCell else {
             fatalError("Could not dequeue SavedPostsTableViewCell")
-        }    
+        }
         let post = displayedPosts[indexPath.row]
         cell.configure(with: post)
         return cell
@@ -131,14 +138,31 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
         
         //Delete action
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] (action, view, completionHandler) in
-            guard let self = self else {
-                completionHandler(false)
-                return
+                guard let self = self else { return }
+                
+                let post = self.displayedPosts[indexPath.row]
+                guard let postId = post.id else {
+                    completionHandler(false)
+                    return
+                }
+
+                Task {
+                    // 1. Delete from Supabase
+                    await SupabaseManager.shared.deletePost(id: postId)
+                    
+                    await MainActor.run {
+                        // 2. Update local arrays
+                        if let indexInAll = self.savedPosts.firstIndex(where: { $0.id == postId }) {
+                            self.savedPosts.remove(at: indexInAll)
+                        }
+                        self.displayedPosts.remove(at: indexPath.row)
+                        
+                        // 3. Update UI
+                        tableView.deleteRows(at: [indexPath], with: .automatic)
+                        completionHandler(true)
+                    }
+                }
             }
-            self.displayedPosts.remove(at: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: .automatic)
-            completionHandler(true)
-        }
         deleteAction.image = UIImage(systemName: "trash.fill")
 
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction, editAction, scheduleAction])
@@ -178,8 +202,8 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
                     if let indexPath = sender as? IndexPath {
                         let selectedPost: Post
                         selectedPost = displayedPosts[indexPath.row]
-                        schedulerVC.postImage = UIImage(named: selectedPost.imageName) 
-                        schedulerVC.captionText = selectedPost.text
+                        schedulerVC.postImage = UIImage(named: selectedPost.imageName)
+                        schedulerVC.captionText = selectedPost.fullCaption
                         schedulerVC.platformText = selectedPost.platformName
                     }
             }

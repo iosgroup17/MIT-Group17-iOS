@@ -13,49 +13,55 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
     @IBOutlet weak var filterBarButton: UIBarButtonItem!
     
     //Data for each section
-    var scheduledTodayPosts: [Post] = {
-        do {
-            return try Post.loadTodayScheduledPosts(from: "Posts_data")
-        } catch {
-            print("FATAL ERROR: Could not load scheduled posts. Details: \(error)")
-            return []
-        }
-    }()
-    
-    var scheduledTomorrowPosts: [Post] = {
-        do {
-            return try Post.loadTomorrowScheduledPosts(from: "Posts_data")
-        } catch {
-            print("FATAL ERROR: Could not load scheduled posts. Details: \(error)")
-            return []
-        }
-    }()
+    var scheduledTodayPosts: [Post] = []
+        var scheduledTomorrowPosts: [Post] = []
+        var scheduledLaterPosts: [Post] = []
 
-    var scheduledLaterPosts: [Post] = {
-        do {
-            return try Post.loadScheduledPostsAfterDate(from: "Posts_data")
-        } catch {
-            print("FATAL ERROR: Could not load scheduled posts. Details: \(error)")
-            return []
-        }
-    }()
+        // Cache for filtering
+        var allFetchedPosts: [Post] = []
+        var currentPlatformFilter: String = "All"
 
     //Duplicate data for filtering purpose.
     var allTodayPosts: [Post] = []
     var allTomorrowPosts: [Post] = []
     var allLaterPosts: [Post] = []
-    var currentPlatformFilter: String = "All"
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        tableView.backgroundColor = .white
+        tableView.backgroundColor = .clear
 
         allTodayPosts = scheduledTodayPosts
         allTomorrowPosts = scheduledTomorrowPosts
         allLaterPosts = scheduledLaterPosts
+        refreshData()
     }
-    
+    func refreshData() {
+        Task {
+            // Fetch from Supabase table 'social_media_posts'
+            let fetchedPosts = await SupabaseManager.shared.fetchPosts()
+            self.allFetchedPosts = fetchedPosts
+            
+            // Filter locally into sections
+            let today = Date()
+            self.scheduledTodayPosts = fetchedPosts.filter {
+                guard let date = $0.scheduledAt else { return false }
+                return Calendar.current.isDate(date, inSameDayAs: today)
+            }
+            
+            self.scheduledTomorrowPosts = Post.loadTomorrowScheduledPosts(from: fetchedPosts)
+            self.scheduledLaterPosts = Post.loadScheduledPostsAfterDate(from: fetchedPosts)
+            
+            // Apply existing platform filters if active
+            if currentPlatformFilter != "All" {
+                filterScheduledPosts(by: currentPlatformFilter)
+            }
+
+            await MainActor.run {
+                self.tableView.reloadData()
+            }
+        }
+    }
     //Table view
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 3
@@ -118,8 +124,8 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
         
         // Schedule Action
         let scheduleAction = UIContextualAction(style: .normal, title: "Schedule") { [weak self] (action, view, completionHandler) in
-            guard let self = self else { 
-                return completionHandler(false) 
+            guard let self = self else {
+                return completionHandler(false)
             }
             self.performSegue(withIdentifier: "openSchedulerModal", sender: indexPath)
             completionHandler(true)
@@ -129,19 +135,28 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
         
         // Delete Action
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] (action, view, completionHandler) in
-            guard let self = self else {
-                completionHandler(false)
-                return
+            guard let self = self else { return }
+            
+            let post: Post
+            if indexPath.section == 0 { post = self.scheduledTodayPosts[indexPath.row] }
+            else if indexPath.section == 1 { post = self.scheduledTomorrowPosts[indexPath.row] }
+            else { post = self.scheduledLaterPosts[indexPath.row] }
+            
+            guard let postId = post.id else { return completionHandler(false) }
+
+            Task {
+                await SupabaseManager.shared.deletePost(id: postId)
+                
+                await MainActor.run {
+                    // Remove from local arrays
+                    if indexPath.section == 0 { self.scheduledTodayPosts.remove(at: indexPath.row) }
+                    else if indexPath.section == 1 { self.scheduledTomorrowPosts.remove(at: indexPath.row) }
+                    else { self.scheduledLaterPosts.remove(at: indexPath.row) }
+                    
+                    tableView.deleteRows(at: [indexPath], with: .automatic)
+                    completionHandler(true)
+                }
             }
-            if indexPath.section == 0 {
-                self.scheduledTodayPosts.remove(at: indexPath.row)
-            } else if indexPath.section == 1 {
-                self.scheduledTomorrowPosts.remove(at: indexPath.row)
-            } else {
-                self.scheduledLaterPosts.remove(at: indexPath.row)
-            }
-            tableView.deleteRows(at: [indexPath], with: .automatic)
-            completionHandler(true)
         }
         deleteAction.image = UIImage(systemName: "trash.fill")
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction, editAction, scheduleAction])
@@ -186,7 +201,7 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
                         else { selectedPost = scheduledLaterPosts[indexPath.row] }
                         
                         schedulerVC.postImage = UIImage(named: selectedPost.imageName) // Convert String to UIImage
-                        schedulerVC.captionText = selectedPost.text
+                        schedulerVC.captionText = selectedPost.fullCaption ?? ""
                         schedulerVC.platformText = selectedPost.platformName
                     }
             }
@@ -196,7 +211,7 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
     //Filter by platform.
     func didSelectPlatform(_ platform: String) {
         print("Selected Platform: \(platform)")
-        self.currentPlatformFilter = platform 
+        self.currentPlatformFilter = platform
         filterScheduledPosts(by: platform)
     }
     
@@ -231,7 +246,7 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
         alertController.addAction(cancelAction)
         if let popover = alertController.popoverPresentationController {
             popover.barButtonItem = self.filterBarButton
-            popover.delegate = self 
+            popover.delegate = self
             popover.permittedArrowDirections = .up
         }
         present(alertController, animated: true, completion: nil)

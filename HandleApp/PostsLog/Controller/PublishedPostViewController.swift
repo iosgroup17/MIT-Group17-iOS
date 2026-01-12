@@ -15,16 +15,10 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
     @IBOutlet weak var filterStackView: UIStackView!
 
     
-    var publishedPosts: [Post] = {
-        do {
-            return try Post.loadPublishedPosts(from: "Posts_data")
-        } catch {
-            print("FATAL ERROR: Could not load published posts. Details: \(error)")
-            return []
-        }
-    }()
-    var currentTimeFilter: String = "All"
+    var publishedPosts: [Post] = []
     var displayedPosts: [Post] = []
+    var currentTimeFilter: String = "All"
+    var expandedPostId: String? = nil
     var expandedPost: String? = nil
     
     override func viewDidLoad() {
@@ -32,14 +26,24 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
         self.publishedTableView.delegate = self
         self.publishedTableView.dataSource = self
         displayedPosts = publishedPosts
+        fetchData()
     }
-    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         currentPlatformFilter = "All"
         publishedTableView.reloadData()
     }
-
+    func fetchData() {
+            Task {
+                let allPosts = await SupabaseManager.shared.fetchPosts()
+                // Filter by status 'published' as defined in your schema
+                self.publishedPosts = allPosts.filter { $0.status == "PUBLISHED" || $0.publishedAt != nil }
+                
+                await MainActor.run {
+                    self.applyFilters()
+                }
+            }
+        }
     //Platform wise filter
     @IBAction func buttonTapped(_ sender: UIButton) {
         let tag = sender.tag
@@ -70,20 +74,32 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
     var currentPlatformFilter: String = "All" {
         didSet {
             updateCapsuleAppearance()
-            filterPublishedPosts(by: currentPlatformFilter)
+            applyFilters()
         }
     }
     
-    func filterPublishedPosts(by platform: String) {
-        guard isViewLoaded else { return }
-        if platform == "All" {
-            displayedPosts = publishedPosts
-        } else {
-            displayedPosts = publishedPosts.filter { post in
-                return post.platformName == platform
+    func applyFilters() {
+        var filtered = publishedPosts
+
+        // 1. Filter by Platform
+        if currentPlatformFilter != "All" {
+            filtered = filtered.filter { $0.platformName == currentPlatformFilter }
+        }
+
+        // 2. Filter by Time
+        if currentTimeFilter != "All" {
+            let daysAgo = currentTimeFilter == "Last 7 Days" ? 7 : 30
+            let cutoffDate = Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date())!
+            
+            filtered = filtered.filter { post in
+                // Use 'publishedAt' from schema
+                guard let publishDate = post.publishedAt else { return false }
+                return publishDate >= cutoffDate
             }
         }
-        publishedTableView.reloadData()
+
+        self.displayedPosts = filtered
+        self.publishedTableView.reloadData()
     }
     
     func updateCapsuleAppearance() {
@@ -99,55 +115,44 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
     }
     
     //Time wise filter
-    @IBAction func filerButtonTapped(_ sender: Any) {
+    @IBAction func filerButtonTapped(_ sender: UIBarButtonItem) { // Changed 'Any' to 'UIBarButtonItem' for safety
         let alertController = UIAlertController(title: "View Activity From", message: nil, preferredStyle: .actionSheet)
+        
         let timePeriods = ["All", "Last 7 Days", "Last 30 Days"]
+        
         for period in timePeriods {
             let isSelected = (period == self.currentTimeFilter)
             let displayTitle = isSelected ? "✓ \(period)" : period
+            
             let action = UIAlertAction(title: displayTitle, style: .default) { [weak self] _ in
-                self?.filterPostsByTime(timePeriod: period)
+                guard let self = self else { return }
+                
+                // 1. Update the state
+                self.currentTimeFilter = period
+                
+                // 2. Trigger the consolidated Supabase filter logic
+                self.applyFilters()
             }
             alertController.addAction(action)
         }
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
         alertController.addAction(cancelAction)
+        
+        // 3. iPad Popover Support
         if let popover = alertController.popoverPresentationController {
-            popover.barButtonItem = sender as? UIBarButtonItem // Use the sender (the new filter button)
-            popover.delegate = self 
+            popover.barButtonItem = sender
             popover.permittedArrowDirections = .up
         }
-        present(alertController, animated: true, completion: nil)
+        
+        present(alertController, animated: true)
     }
 
     func getDate(daysAgo: Int) -> Date {
         return Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date())!
     }
 
-    func filterPostsByTime(timePeriod: String) {
-            self.currentTimeFilter = timePeriod
-            var postsToFilter = publishedPosts
-            if currentPlatformFilter != "All" {
-                postsToFilter = publishedPosts.filter { $0.platformName == currentPlatformFilter }
-            }
-            switch timePeriod {
-            case "All":
-                displayedPosts = postsToFilter
-            case "Last 7 Days":
-                let date7DaysAgo = getDate(daysAgo: 7)
-                displayedPosts = postsToFilter.filter { post in
-                    return post.date! >= date7DaysAgo
-                }
-            case "Last 30 Days":
-                let date30DaysAgo = getDate(daysAgo: 30)
-                displayedPosts = postsToFilter.filter { post in
-                    return post.date! >= date30DaysAgo
-                }
-            default:
-                displayedPosts = postsToFilter
-            }
-            publishedTableView.reloadData()
-    }
+    
 
     //Table View
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -165,7 +170,7 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
         }
 
         let post = displayedPosts[indexPath.row]
-        let isExpanded = (expandedPost == post.text)
+        let isExpanded = (expandedPostId == post.id)
 
         // Assuming PublishedPostTableViewCell has a configure method
         cell.configure(with: post, isExpanded: isExpanded)
@@ -180,7 +185,7 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
         let analyticsHeight: CGFloat = 100
         let padding: CGFloat = 20
 
-        if expandedPost == post.text {
+        if expandedPostId == post.id {
             return baseHeight + analyticsHeight + padding
         } else {
             return baseHeight
@@ -192,29 +197,28 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
         tableView.deselectRow(at: indexPath, animated: true)
         
         let selectedPost = displayedPosts[indexPath.row]
-        let postText = selectedPost.text
+        guard let postId = selectedPost.id else { return }
 
-        let previousExpanded = expandedPost
+        let previousExpandedId = expandedPostId
 
-        if expandedPost == postText {
-            expandedPost = nil
-        } else {
-            expandedPost = postText
-        }
+        if expandedPostId == postId {
+                expandedPostId = nil
+            } else {
+                expandedPostId = postId
+            }
         
         var indexPathsToReload = [indexPath]
         
-        if let previous = previousExpanded, previous != postText,
-           let previousIndex = displayedPosts.firstIndex(where: { $0.text == previous }) {
-            
-            indexPathsToReload.append(IndexPath(row: previousIndex, section: 0))
-        }
+        if let previousId = previousExpandedId, previousId != postId,
+               let previousIndex = displayedPosts.firstIndex(where: { $0.id == previousId }) {
+                indexPathsToReload.append(IndexPath(row: previousIndex, section: 0))
+            }
 
         tableView.beginUpdates()
         tableView.reloadRows(at: indexPathsToReload, with: .automatic)
         tableView.endUpdates()
         
-        if expandedPost == postText {
+        if expandedPostId == postId {
             tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
         }
     }

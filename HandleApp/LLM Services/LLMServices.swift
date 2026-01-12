@@ -89,6 +89,8 @@ class OpenRouterService {
                     // Parse actual Draft Data
                     let draft = try JSONDecoder().decode(EditorDraftData.self, from: contentData)
                     completion(.success(draft))
+                    
+                    print(draft)
                 }
             } catch {
                 print("Parsing Error: \(error)")
