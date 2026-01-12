@@ -9,6 +9,7 @@ import UIKit
 
 class ChatCellTableViewCell: UITableViewCell {
 
+    @IBOutlet weak var textView: UIView!
     @IBOutlet weak var messageLabel: UILabel!
     @IBOutlet weak var editorButton: UIButton!
     
@@ -16,6 +17,8 @@ class ChatCellTableViewCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        textView.layer.cornerRadius = 10
+        
         // Initialization code
     }
 
@@ -26,7 +29,7 @@ class ChatCellTableViewCell: UITableViewCell {
         override func prepareForReuse() {
             super.prepareForReuse()
             // Reset state so recycled cells don't show buttons wrongly
-            editorButton.isHidden = true
+            editorButton?.isHidden = true
             onEditorButtonTapped = nil
         }
 
