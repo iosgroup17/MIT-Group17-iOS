@@ -8,6 +8,13 @@
 import Supabase
 import Foundation
 
+struct SocialConnection: Codable {
+    let user_id: UUID
+    let platform: String
+    let access_token: String
+}
+
+
 struct OnboardingResponse: Codable {
     let user_id: UUID
     let step_index: Int
@@ -86,6 +93,27 @@ class SupabaseManager {
             return [:]
         }
     }
+    
+    // Save Social Token (Twitter/Instagram)
+        func saveSocialToken(platform: String, token: String) async {
+            let data = SocialConnection(
+                user_id: currentUserID, // Uses your existing helper
+                platform: platform,
+                access_token: token
+            )
+            
+            do {
+                try await client
+                    .from("social_connections")
+                    .upsert(data)
+                    .execute()
+                
+                print("✅ Saved \(platform) token to Supabase!")
+            } catch {
+                print("❌ Failed to save token: \(error)")
+            }
+        }
+    
 }
 
 extension SupabaseManager {

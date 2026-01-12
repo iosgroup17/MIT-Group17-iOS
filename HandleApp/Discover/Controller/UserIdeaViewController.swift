@@ -177,6 +177,15 @@ extension UserIdeaViewController {
 
 extension UserIdeaViewController: UITextFieldDelegate {
     
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+            // Check if the return key was pressed on the message text field
+            if textField == messageTextField {
+                sendButtonTapped(textField) // Trigger the existing send logic
+                return false // Return false so it doesn't try to insert a new line
+            }
+            return true
+        }
+    
     func setupKeyboardObservers() {
         messageTextField.delegate = self
         

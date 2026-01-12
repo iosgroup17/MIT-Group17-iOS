@@ -102,8 +102,55 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
     }
     
     @IBAction func didTapTwitter(_ sender: UIButton) {
-        print("Twitter Tapped - Need Client ID")
-        //Twitter URL logic here later
+        print("🔵 Starting Twitter Auth...")
+                
+                guard let authURL = SocialAuthManager.shared.getTwitterAuthURL(),
+                      let url = URL(string: authURL) else { return }
+                
+                // Initialize Browser Session
+                self.webAuthSession = ASWebAuthenticationSession(
+                    url: url,
+                    callbackURLScheme: "handleapp") { [weak self] callbackURL, error in
+                        
+                        guard let self = self else { return }
+                        
+                        if let error = error {
+                            print("❌ Auth Canceled/Failed: \(error.localizedDescription)")
+                            return
+                        }
+                        
+                        // Success: Get the Code
+                        if let callbackURL = callbackURL,
+                           let code = self.getQueryStringParameter(url: callbackURL.absoluteString, param: "code") {
+                            
+                            print("✅ Got Twitter Code: \(code)")
+                            
+                            // Exchange Code for Token
+                            SocialAuthManager.shared.exchangeTwitterCodeForToken(code: code) { result in
+                                DispatchQueue.main.async {
+                                    switch result {
+                                    case .success(let token):
+                                        print("🎉 TWITTER TOKEN SECURED: \(token)")
+                                        
+                                        // 1. SAVE TO SUPABASE
+                                        Task {
+                                            await SupabaseManager.shared.saveSocialToken(platform: "twitter", token: token)
+                                            
+                                            // 2. NOW go to the next screen
+                                            self.handleSuccessfulLogin()
+                                        }
+                                        
+                                    case .failure(let error):
+                                        print("❌ Twitter Token Exchange Failed: \(error.localizedDescription)")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                
+                self.webAuthSession?.presentationContextProvider = self
+                self.webAuthSession?.prefersEphemeralWebBrowserSession = true
+                self.webAuthSession?.start()
     }
     
     @IBAction func didTapInstagram(_ sender: UIButton) {
