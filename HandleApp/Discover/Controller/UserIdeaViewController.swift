@@ -9,7 +9,7 @@ import UIKit
 
 struct Message {
     let text: String
-    let isUser: Bool // true = User, false = AI
+    let isUser: Bool
 }
 
 class UserIdeaViewController: UIViewController {
@@ -27,7 +27,7 @@ class UserIdeaViewController: UIViewController {
         setupTableView()
         setupKeyboardObservers()
         
-        messages.append(Message(text: "Hello! I'm here to help turn your thoughts into viral posts. What's on your mind?", isUser: false))
+        messages.append(Message(text: "Hello! I'm here to help turn your thoughts into viral posts. What's on your mind and on which platform do you plan to post on?", isUser: false))
 
         // Do any additional setup after loading the view.
     }
@@ -62,12 +62,16 @@ extension UserIdeaViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let message = messages[indexPath.row]
         
+        // 1. Determine which cell type to load
         let cellIdentifier = message.isUser ? "UserCell" : "BotCell"
-        let cell = tableView.dequeueReusableCell(withIdentifier: "UserCell", for: indexPath)
         
-        if let label = cell.viewWithTag(1) as? UILabel {
-            label.text = message.text
+        // 2. Dequeue as your new 'ChatCell' class
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath) as? ChatCellTableViewCell else {
+            fatalError("Could not dequeue cell. Check that you set the Class to 'ChatCell' in Storyboard.")
         }
+        
+        // 3. Set the text directly! (No tags needed)
+        cell.messageLabel.text = message.text
         
         return cell
     }
@@ -93,13 +97,13 @@ extension UserIdeaViewController {
             // 2. Fetch User Profile from Supabase (Waits here)
             // Note: If fetchUserProfile returns nil, we use a fallback default profile so the app doesn't crash.
             let profile = await SupabaseManager.shared.fetchUserProfile() ?? UserProfile(
-                profession: ["General User"],
-                targetAudience: ["Everyone"],
-                contentGoals: ["Growth"],
-                toneOfVoice: ["Friendly"],
-                contentTopics: ["Lifestyle"],
-                preferredPlatforms: ["Instagram"]
-            )
+                    role: ["General User"],
+                    industry: ["General"],
+                    primaryGoals: ["Growth"],
+                    contentFormats: ["Text"],
+                    toneOfVoice: ["Friendly"],
+                    targetAudience: ["Everyone"]
+                )
             
             // 3. Call AI Service (OpenRouter)
             OpenRouterService.shared.generateDraft(idea: query, profile: profile) { [weak self] result in

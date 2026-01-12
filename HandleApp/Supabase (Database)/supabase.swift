@@ -37,25 +37,19 @@ class SupabaseManager {
     }
     
     func savePreference(stepIndex: Int, selections: [String]) async {
-        // 2. Use the currentUserID helper
-        let data = OnboardingResponse(
-            user_id: currentUserID,
-            step_index: stepIndex,
-            selection_tags: selections
-        )
-
+        let data = OnboardingResponse(user_id: currentUserID, step_index: stepIndex, selection_tags: selections)
         do {
+            // Change: Use .database before .from
             try await client
                 .from("onboarding_responses")
                 .upsert(data)
                 .execute()
-            
-            print("✅ Data successfully saved to Supabase for User: \(currentUserID)")
+            print("✅ Data successfully saved")
         } catch {
             print("❌ Supabase Error: \(error)")
         }
     }
-        
+    
     func fetchAllPreferences() async -> [Int: [String]] {
         guard let userId = client.auth.currentUser?.id else { return [:] }
         
@@ -83,15 +77,12 @@ class SupabaseManager {
 
 extension SupabaseManager {
     
-    /// Fetches all 6 onboarding rows and converts them into a single UserProfile object
     func fetchUserProfile() async -> UserProfile? {
-        guard let userId = client.auth.currentUser?.id else {
-            print("❌ No logged-in user found.")
-            return nil
-        }
+        // 1. Use currentUserID (works for Test User or Auth User)
+        let userId = currentUserID
         
         do {
-            // 1. Fetch all rows for this user from 'onboarding_responses'
+            // 2. Fetch data
             let responses: [OnboardingResponse] = try await client
                 .from("onboarding_responses")
                 .select()
@@ -99,23 +90,20 @@ extension SupabaseManager {
                 .execute()
                 .value
             
-            // 2. Create a dictionary to easily find answers by step_index
-            // Key = step_index (0-5), Value = selection_tags ([String])
+            // 3. Organize by Step Index
             var answers: [Int: [String]] = [:]
-            
-            for response in responses {
-                answers[response.step_index] = response.selection_tags
+            for resp in responses {
+                answers[resp.step_index] = resp.selection_tags
             }
             
-            // 3. Map the dictionary to your UserProfile struct
-            // Defaults to empty array [] if a step is missing
+            // 4. Map to Struct using CORRECT indices from OnboardingDataStore
             return UserProfile(
-                profession: answers[0] ?? [],        // Step 0
-                targetAudience: answers[1] ?? [],    // Step 1
-                contentGoals: answers[2] ?? [],      // Step 2
-                toneOfVoice: answers[3] ?? [],       // Step 3
-                contentTopics: answers[4] ?? [],     // Step 4
-                preferredPlatforms: answers[5] ?? [] // Step 5
+                role: answers[0] ?? [],           // Step 0: Role (Founder/Employee)
+                industry: answers[1] ?? [],       // Step 1: Industry (Tech/Finance...)
+                primaryGoals: answers[2] ?? [],   // Step 2: Goals (Awareness/Leads...)
+                contentFormats: answers[3] ?? [], // Step 3: Formats (Case Studies/Q&A...)
+                toneOfVoice: answers[4] ?? [],    // Step 4: Tone (Witty/Direct...)
+                targetAudience: answers[5] ?? []  // Step 5: Audience (Prospects/Peers...)
             )
             
         } catch {

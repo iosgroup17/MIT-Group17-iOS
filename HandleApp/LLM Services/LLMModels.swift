@@ -8,24 +8,24 @@
 import Foundation
 
 struct UserProfile {
-    // These fields correspond to your 6 onboarding questions
-    let profession: [String]       // Step 0
-    let targetAudience: [String]   // Step 1
-    let contentGoals: [String]     // Step 2
-    let toneOfVoice: [String]      // Step 3
-    let contentTopics: [String]    // Step 4
-    let preferredPlatforms: [String] // Step 5
+    // These fields match the 6 steps in OnboardingDataStore
+    let role: [String]          // Step 0
+    let industry: [String]      // Step 1
+    let primaryGoals: [String]  // Step 2
+    let contentFormats: [String]// Step 3
+    let toneOfVoice: [String]   // Step 4
+    let targetAudience: [String]// Step 5
     
-    // Helper: Converts this struct into a single text block for the AI prompt
+    // Dynamic System Prompt
     var promptContext: String {
         return """
-        USER CONTEXT:
-        - Profession/Identity: \(profession.joined(separator: ", "))
-        - Target Audience: \(targetAudience.joined(separator: ", "))
-        - Main Goals: \(contentGoals.joined(separator: ", "))
+        USER PROFILE CONTEXT:
+        - Role/Identity: \(role.first ?? "Professional")
+        - Industry: \(industry.first ?? "General")
+        - Primary Goals: \(primaryGoals.joined(separator: ", "))
+        - Preferred Content Formats: \(contentFormats.joined(separator: ", "))
         - Tone of Voice: \(toneOfVoice.joined(separator: ", "))
-        - key Topics: \(contentTopics.joined(separator: ", "))
-        - Focus Platforms: \(preferredPlatforms.joined(separator: ", "))
+        - Target Audience: \(targetAudience.joined(separator: ", "))
         """
     }
 }
