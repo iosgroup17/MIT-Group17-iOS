@@ -24,20 +24,6 @@ class OnboardingDataStore {
 
         OnboardingStep(
             index: 1,
-            title: "What’s your primary goal right now?",
-            description: nil,
-            layoutType: .singleSelectCards,
-            options: [
-                OnboardingOption(title: "Build brand awareness", subtitle: "Grow your professional Presence and Reach"),
-                OnboardingOption(title: "Generate leads", subtitle: "Attract potential Customers and Inquiries"),
-                OnboardingOption(title: "Recruit candidates", subtitle: "Find and engage talented Professionals"),
-                OnboardingOption(title: "Launch/promote", subtitle: "Announce products features or initiatives"),
-                OnboardingOption(title: "Attract investors", subtitle: "Build credibility with funding sources"),
-            ]
-        ),
-
-        OnboardingStep(
-            index: 2,
             title: "Which industry do you work in?",
             description: nil,
             layoutType: .grid,
@@ -52,6 +38,20 @@ class OnboardingDataStore {
                 OnboardingOption(title: "Media", iconName: "grid_media"),
                 OnboardingOption(title: "Legal", iconName: "grid_legal"),
                 OnboardingOption(title: "Other", iconName: "grid_search")
+            ]
+        ),
+        
+        OnboardingStep(
+            index: 2,
+            title: "What’s your primary goal right now?",
+            description: nil,
+            layoutType: .singleSelectCards,
+            options: [
+                OnboardingOption(title: "Build brand awareness", subtitle: "Grow your professional Presence and Reach"),
+                OnboardingOption(title: "Generate leads", subtitle: "Attract potential Customers and Inquiries"),
+                OnboardingOption(title: "Recruit candidates", subtitle: "Find and engage talented Professionals"),
+                OnboardingOption(title: "Launch/promote", subtitle: "Announce products features or initiatives"),
+                OnboardingOption(title: "Attract investors", subtitle: "Build credibility with funding sources"),
             ]
         ),
         

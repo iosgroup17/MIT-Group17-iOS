@@ -86,7 +86,7 @@
                                 <rect key="frame" x="0.0" y="230" width="402" height="483"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="UserCell" id="pX0-Vh-ljx">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="UserCell" id="pX0-Vh-ljx" customClass="ChatCellTableViewCell" customModule="HandleApp" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="50" width="402" height="40.333332061767578"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="pX0-Vh-ljx" id="GG1-bj-cbz">
@@ -119,8 +119,11 @@
                                                 <constraint firstAttribute="trailing" secondItem="kvs-dJ-lOU" secondAttribute="trailing" constant="20" id="tdV-sJ-jjo"/>
                                             </constraints>
                                         </tableViewCellContentView>
+                                        <connections>
+                                            <outlet property="messageLabel" destination="TA4-Za-44a" id="HJ0-ih-5lV"/>
+                                        </connections>
                                     </tableViewCell>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="AICell" id="BqZ-na-yE7">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="BotCell" id="BqZ-na-yE7" customClass="ChatCellTableViewCell" customModule="HandleApp" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="90.333332061767578" width="402" height="40.333332061767578"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="BqZ-na-yE7" id="xGM-Qx-N6R">
@@ -153,19 +156,28 @@
                                                 <constraint firstAttribute="bottom" secondItem="cG7-fG-usV" secondAttribute="bottom" constant="5" id="yTF-jn-jLh"/>
                                             </constraints>
                                         </tableViewCellContentView>
+                                        <connections>
+                                            <outlet property="messageLabel" destination="u3y-rF-PPk" id="yRl-sA-xDF"/>
+                                        </connections>
                                     </tableViewCell>
                                 </prototypes>
                             </tableView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Byw-lO-U2B">
                                 <rect key="frame" x="0.0" y="713" width="402" height="44"/>
                                 <subviews>
-                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Type your idea" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="mcQ-j8-JsZ">
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Type your idea" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="mcQ-j8-JsZ">
                                         <rect key="frame" x="20" y="5" width="301.33333333333331" height="34"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="301.32999999999998" id="9IX-9d-4z1"/>
+                                        </constraints>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits"/>
                                     </textField>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zVb-cQ-eRp">
                                         <rect key="frame" x="331.33333333333331" y="5" width="50.666666666666686" height="34"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="50.670000000000002" id="2qx-fR-7Xd"/>
+                                        </constraints>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="filled" image="paperplane.fill" catalog="system"/>
                                         <connections>
@@ -176,7 +188,6 @@
                                 <color key="backgroundColor" systemColor="systemGray4Color"/>
                                 <constraints>
                                     <constraint firstAttribute="bottom" secondItem="mcQ-j8-JsZ" secondAttribute="bottom" constant="5" id="DAV-sn-HyS"/>
-                                    <constraint firstAttribute="height" constant="44" id="GMl-Ni-JRS"/>
                                     <constraint firstItem="zVb-cQ-eRp" firstAttribute="leading" secondItem="mcQ-j8-JsZ" secondAttribute="trailing" constant="10" id="JCD-xb-EGg"/>
                                     <constraint firstAttribute="trailing" secondItem="zVb-cQ-eRp" secondAttribute="trailing" constant="20" id="MrA-sh-Mja"/>
                                     <constraint firstItem="mcQ-j8-JsZ" firstAttribute="top" secondItem="Byw-lO-U2B" secondAttribute="top" constant="5" id="T1z-S9-PYo"/>
@@ -195,7 +206,6 @@
                             <constraint firstItem="TWj-Sr-LmK" firstAttribute="leading" secondItem="vQZ-PJ-3jW" secondAttribute="leading" id="CET-jL-tTS"/>
                             <constraint firstItem="TWj-Sr-LmK" firstAttribute="top" secondItem="vQZ-PJ-3jW" secondAttribute="top" id="Qq1-xq-TOZ"/>
                             <constraint firstItem="Byw-lO-U2B" firstAttribute="top" secondItem="TWj-Sr-LmK" secondAttribute="bottom" id="Qsc-cP-TmS"/>
-                            <constraint firstItem="Byw-lO-U2B" firstAttribute="top" secondItem="vQZ-PJ-3jW" secondAttribute="top" constant="483" id="VOo-af-wNc"/>
                             <constraint firstItem="vQZ-PJ-3jW" firstAttribute="trailing" secondItem="Byw-lO-U2B" secondAttribute="trailing" id="cqA-MS-KEJ"/>
                         </constraints>
                     </view>

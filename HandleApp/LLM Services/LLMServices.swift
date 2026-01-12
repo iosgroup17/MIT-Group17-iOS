@@ -33,7 +33,7 @@ class OpenRouterService {
         
         TASK:
         The user has a rough idea: "\(idea)".
-        Generate a high-quality post for the SINGLE best platform listed in their 'Focus Platforms'.
+        Generate a high-quality post for the specified platform.
         
         OUTPUT FORMAT:
         Return ONLY valid JSON matching this structure:
@@ -56,6 +56,8 @@ class OpenRouterService {
             ],
             "response_format": ["type": "json_object"] // Forces valid JSON
         ]
+        
+        print(parameters)
         
         // 3. Request Setup
         var request = URLRequest(url: apiURL)
