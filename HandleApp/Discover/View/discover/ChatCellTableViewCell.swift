@@ -10,16 +10,24 @@ import UIKit
 class ChatCellTableViewCell: UITableViewCell {
 
     @IBOutlet weak var messageLabel: UILabel!
+    @IBOutlet weak var editorButton: UIButton!
+    
+    var onEditorButtonTapped: (() -> Void)?
     
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
     }
 
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
-    }
+    @IBAction func editorButtonTapped(_ sender: Any) {
+            onEditorButtonTapped?()
+        }
+        
+        override func prepareForReuse() {
+            super.prepareForReuse()
+            // Reset state so recycled cells don't show buttons wrongly
+            editorButton.isHidden = true
+            onEditorButtonTapped = nil
+        }
 
 }

@@ -10,6 +10,7 @@ import UIKit
 struct Message {
     let text: String
     let isUser: Bool
+    var draft: EditorDraftData? = nil
 }
 
 class UserIdeaViewController: UIViewController {
@@ -52,6 +53,20 @@ class UserIdeaViewController: UIViewController {
         // 3. Trigger AI
         fetchAIResponse(for: text)
     }
+    
+    func navigateToEditor(with draft: EditorDraftData) {
+        print("🚀 Moving to Editor with caption: \(draft.caption ?? "")")
+        
+        // Option A: If using Storyboard ID
+        if let editorVC = storyboard?.instantiateViewController(withIdentifier: "EditorViewController") as? EditorSuiteViewController {
+            
+            // Pass the data!
+            // editorVC.draftData = draft
+            
+            navigationController?.pushViewController(editorVC, animated: true)
+            // Or if using modal: present(editorVC, animated: true)
+        }
+    }
 }
 
 extension UserIdeaViewController: UITableViewDelegate, UITableViewDataSource {
@@ -61,17 +76,29 @@ extension UserIdeaViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let message = messages[indexPath.row]
-        
-        // 1. Determine which cell type to load
         let cellIdentifier = message.isUser ? "UserCell" : "BotCell"
         
-        // 2. Dequeue as your new 'ChatCell' class
         guard let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath) as? ChatCellTableViewCell else {
-            fatalError("Could not dequeue cell. Check that you set the Class to 'ChatCell' in Storyboard.")
+            fatalError("Check Storyboard Class")
         }
         
-        // 3. Set the text directly! (No tags needed)
         cell.messageLabel.text = message.text
+        
+        // --- NEW LOGIC START ---
+        
+        // 1. Check if this message has draft data attached
+        if let draftData = message.draft {
+            // If yes, show button
+            cell.editorButton.isHidden = false
+            
+            // 2. Define what happens when clicked
+            cell.onEditorButtonTapped = { [weak self] in
+                self?.navigateToEditor(with: draftData)
+            }
+        } else {
+            cell.editorButton.isHidden = true
+        }
+        
         
         return cell
     }
@@ -125,23 +152,24 @@ extension UserIdeaViewController {
         }
     }
     func handleSuccess(draft: EditorDraftData) {
-            let platform = draft.platformName
-            let tags = draft.hashtags?.joined(separator: " ") ?? ""
-            
-            // Create a structured text response
-            let displayText = """
-            ✨ Here is a draft for \(platform):
-            
-            \(draft.caption ?? "No caption generated.")
-            
-            Hashtags:
-            \(tags)
-            """
-            
-            let aiMessage = Message(text: displayText, isUser: false)
-            self.messages.append(aiMessage)
-            self.insertNewMessage()
-        }
+        let platform = draft.platformName
+        let tags = draft.hashtags?.joined(separator: " ") ?? ""
+        
+        let displayText = """
+        ✨ Here is a draft for \(platform):
+        
+        \(draft.caption ?? "No caption generated.")
+        
+        Hashtags:
+        \(tags)
+        """
+        
+        // ✅ Store the draft object here!
+        let aiMessage = Message(text: displayText, isUser: false, draft: draft)
+        
+        self.messages.append(aiMessage)
+        self.insertNewMessage()
+    }
         
         func handleError(error: Error) {
             print("AI Error: \(error.localizedDescription)")

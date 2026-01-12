@@ -51,4 +51,4 @@ fastlane/test_output
 # Other Common
 *.log
 *.tmp
-Secrets.xcconfig
+HandleApp/Secrets.xcconfig

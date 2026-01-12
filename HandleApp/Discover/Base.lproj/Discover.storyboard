@@ -131,14 +131,22 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cG7-fG-usV">
-                                                    <rect key="frame" x="20.000000000000004" y="4.9999999999999982" width="51.333333333333343" height="30.333333333333329"/>
+                                                    <rect key="frame" x="20" y="4.9999999999999982" width="175.33333333333334" height="30.333333333333329"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="u3y-rF-PPk">
-                                                            <rect key="frame" x="5" y="5" width="41.333333333333336" height="20.333333333333332"/>
+                                                            <rect key="frame" x="5" y="5" width="165.33333333333334" height="20.333333333333332"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <nil key="textColor"/>
                                                             <nil key="highlightedColor"/>
                                                         </label>
+                                                        <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dAB-RV-HgP">
+                                                            <rect key="frame" x="0.0" y="-3.3333320617675781" width="175.33333333333334" height="35"/>
+                                                            <state key="normal" title="Button"/>
+                                                            <buttonConfiguration key="configuration" style="plain" title="Open in Editor Suite"/>
+                                                            <connections>
+                                                                <action selector="editorButtonTapped:" destination="BqZ-na-yE7" eventType="touchUpInside" id="of6-eN-qNX"/>
+                                                            </connections>
+                                                        </button>
                                                     </subviews>
                                                     <color key="backgroundColor" red="0.82891840959999996" green="0.9559988438" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                     <constraints>
@@ -146,6 +154,8 @@
                                                         <constraint firstItem="u3y-rF-PPk" firstAttribute="leading" secondItem="cG7-fG-usV" secondAttribute="leading" constant="5" id="Fsa-2r-7LS"/>
                                                         <constraint firstItem="u3y-rF-PPk" firstAttribute="top" secondItem="cG7-fG-usV" secondAttribute="top" constant="5" id="TIh-ec-HTs"/>
                                                         <constraint firstAttribute="width" relation="lessThanOrEqual" constant="250" id="UuK-Kc-hCi"/>
+                                                        <constraint firstItem="dAB-RV-HgP" firstAttribute="leading" secondItem="cG7-fG-usV" secondAttribute="leading" id="VOt-qJ-eyr"/>
+                                                        <constraint firstAttribute="trailing" secondItem="dAB-RV-HgP" secondAttribute="trailing" id="XvG-gP-iUW"/>
                                                         <constraint firstAttribute="bottom" secondItem="u3y-rF-PPk" secondAttribute="bottom" constant="5" id="fhf-nR-m2e"/>
                                                     </constraints>
                                                 </view>
@@ -157,6 +167,7 @@
                                             </constraints>
                                         </tableViewCellContentView>
                                         <connections>
+                                            <outlet property="editorButton" destination="dAB-RV-HgP" id="dIA-ws-7po"/>
                                             <outlet property="messageLabel" destination="u3y-rF-PPk" id="yRl-sA-xDF"/>
                                         </connections>
                                     </tableViewCell>
