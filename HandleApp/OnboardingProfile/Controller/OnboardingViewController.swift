@@ -144,7 +144,7 @@ class OnboardingViewController: UIViewController {
             vc.stepIndex = index
             contentVC = vc
         }
-
+        
         displayContentController(contentVC)
     }
     
@@ -200,33 +200,6 @@ class OnboardingViewController: UIViewController {
             sceneDelegate.showMainApp(window: window)
             
             UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: nil, completion: nil)
-        }
-    }
-    
-    func savePreferenceToCloud(stepIndex: Int, selections: [String]) {
-        guard let userId = client.auth.currentUser?.id else { return }
-        
-        let response = OnboardingResponse(
-            user_id: userId,
-            step_index: stepIndex,
-            selection_tags: selections
-        )
-        
-        Task {
-            do {
-                // .upsert handles both initial saving AND updates/changes
-                try await client
-                    .from("onboarding_responses")
-                    .upsert(response)
-                    .execute()
-                
-                print("Successfully synced step \(stepIndex) to Supabase")
-                self.goToNextStep()
-                
-            } catch {
-                print("Database error: \(error)")
-                // Handle error (e.g., show an alert)
-            }
         }
     }
 }

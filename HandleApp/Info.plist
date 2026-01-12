@@ -17,6 +17,16 @@
 	</array>
 	<key>OpenRouterAPIKey</key>
 	<string>$(OPEN_ROUTER_API_KEY)</string>
+	<key>TwitterClientId</key>
+	<string>$(TWITTER_CLIENT_ID)</string>
+	<key>InstagramAppID</key>
+	<string>$(INSTAGRAM_APP_ID)</string>
+	<key>InstagramAppSecret</key>
+	<string>$(INSTAGRAM_APP_SECRET)</string>
+	<key>LinkedInClientID</key>
+	<string>$(LINKEDIN_CLIENT_ID)</string>
+	<key>LinkedInClientSecret</key>
+	<string>$(LINKEDIN_CLIENT_SECRET)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

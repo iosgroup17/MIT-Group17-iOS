@@ -60,7 +60,7 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
         // Settings to make it look professional
         self.webAuthSession?.presentationContextProvider = self
         // this setting presentationContextProvider is used to specify the context in which the authentication session should be presented. by setting it to self, we are indicating that the current view controller will provide the necessary context for displaying the authentication session. this is important for managing the user experience during the authentication process, ensuring that the session appears in the appropriate window or view.
-        self.webAuthSession?.prefersEphemeralWebBrowserSession = false 
+        self.webAuthSession?.prefersEphemeralWebBrowserSession = true
         // this is false to remember cookies, so users don't have to log in every time
         
         // Launch the browser!
