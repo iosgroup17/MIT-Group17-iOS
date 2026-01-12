@@ -51,4 +51,4 @@ fastlane/test_output
 # Other Common
 *.log
 *.tmp
-HandleApp/Secrets.xcconfig
+MIT-Group17-iOS/HandleApp/Secrets.xcconfig
