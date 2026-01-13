@@ -29,8 +29,7 @@ class SocialAuthManager {
     private var linkedInClientID: String { AppConfig.linkedInClientID }
     private var linkedInClientSecret: String { AppConfig.linkedInClientSecret }
     private let linkedInRedirectURI = "https://handleapp.com/auth/"
-   
-    // Internal variable to hold the secret security code for Twitter PKCE
+
     var currentTwitterVerifier: String?
    
     private init() {}
@@ -109,38 +108,37 @@ class SocialAuthManager {
     // ======================================================
    
     func getLinkedInAuthURL() -> String {
-        let scope = "openid profile email"
-        let state = "random_linked_in_string"
-       
-        return "https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=\(linkedInClientID)&redirect_uri=\(linkedInRedirectURI)&state=\(state)&scope=\(scope)"
+            let scope = "openid profile email"
+            let state = "random_linked_in_string"
+           
+            return "https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=\(linkedInClientID)&redirect_uri=\(linkedInRedirectURI)&state=\(state)&scope=\(scope)"
     }
    
     func exchangeLinkedInCodeForToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
-        let urlString = "https://www.linkedin.com/oauth/v2/accessToken"
-        guard let url = URL(string: urlString) else { return }
-       
-        // LinkedIn requires Client Secret here
-        let bodyString = "grant_type=authorization_code&code=\(code)&redirect_uri=\(linkedInRedirectURI)&client_id=\(linkedInClientID)&client_secret=\(linkedInClientSecret)"
-       
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        request.httpBody = bodyString.data(using: .utf8)
-       
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error { completion(.failure(error)); return }
-            guard let data = data else { return }
+            let urlString = "https://www.linkedin.com/oauth/v2/accessToken"
+            guard let url = URL(string: urlString) else { return }
            
-            do {
-                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let accessToken = json["access_token"] as? String {
-                    completion(.success(accessToken))
-                } else {
-                    completion(.failure(NSError(domain: "LinkedInAuth", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to parse token"])))
+            let bodyString = "grant_type=authorization_code&code=\(code)&redirect_uri=\(linkedInRedirectURI)&client_id=\(linkedInClientID)&client_secret=\(linkedInClientSecret)"
+           
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+            request.httpBody = bodyString.data(using: .utf8)
+           
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error { completion(.failure(error)); return }
+                guard let data = data else { return }
+               
+                do {
+                    if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                       let accessToken = json["access_token"] as? String {
+                        completion(.success(accessToken))
+                    } else {
+                        completion(.failure(NSError(domain: "LinkedInAuth", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to parse token"])))
+                    }
+                } catch {
+                    completion(.failure(error))
                 }
-            } catch {
-                completion(.failure(error))
-            }
-        }.resume()
-    }
+            }.resume()
+        }
 }

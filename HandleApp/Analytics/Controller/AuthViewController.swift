@@ -92,6 +92,54 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
         self.webAuthSession?.start()
     }
 
+    
+    @IBAction func didTapLinkedIn(_ sender: UIButton) {
+        print("🔵 Starting LinkedIn Auth...")
+        
+        let authURL = SocialAuthManager.shared.getLinkedInAuthURL()
+        guard let url = URL(string: authURL) else { return }
+        
+        // 1. Set the callback scheme to "https" because that's what LinkedIn is sending
+        self.webAuthSession = ASWebAuthenticationSession(
+            url: url,
+            callbackURLScheme: "https") { [weak self] callbackURL, error in
+                
+                guard let self = self else { return }
+                if let error = error { return }
+                
+                // 2. Intercept the redirect by checking the string
+                if let callbackURL = callbackURL,
+                   callbackURL.absoluteString.starts(with: "https://handleapp.com/auth/") {
+                    
+                    print("✅ Intercepted LinkedIn HTTPS Callback!")
+                    
+                    // 3. Extract the code from the intercepted URL
+                    if let code = self.getQueryStringParameter(url: callbackURL.absoluteString, param: "code") {
+                        
+                        SocialAuthManager.shared.exchangeLinkedInCodeForToken(code: code) { result in
+                            DispatchQueue.main.async {
+                                switch result {
+                                case .success(let token):
+                                    Task {
+                                        // 4. Save to Supabase
+                                        await SupabaseManager.shared.saveSocialToken(platform: "linkedin", token: token)
+                                        // 5. GO TO ANALYTICS
+                                        self.handleSuccessfulLogin()
+                                    }
+                                case .failure(let error):
+                                    print("❌ LinkedIn Token Exchange Failed: \(error.localizedDescription)")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        
+        self.webAuthSession?.presentationContextProvider = self
+        self.webAuthSession?.prefersEphemeralWebBrowserSession = true
+        self.webAuthSession?.start()
+    }
+    
     // MARK: - Helper Logic
     func getQueryStringParameter(url: String, param: String) -> String? {
         guard let urlComponents = URLComponents(string: url) else { return nil }
