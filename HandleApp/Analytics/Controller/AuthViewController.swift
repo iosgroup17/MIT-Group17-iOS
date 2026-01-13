@@ -1,178 +1,118 @@
 import UIKit
-import AuthenticationServices // Import the Auth Framework
+import AuthenticationServices
 
-// Add the ContextProviding protocol to the class definition 
-// this protocol allows us to specify where the authentication session should be presented as in which window or view it should be attached to. This is important for managing the user experience during the authentication process.
 class AuthViewController: UIViewController, ASWebAuthenticationPresentationContextProviding {
 
-
-    // Create a variable to hold the browser session
     var webAuthSession: ASWebAuthenticationSession?
     var onCompletion: ((Bool) -> Void)?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Hides the top navigation bar as it is not needed on this screen
         navigationController?.setNavigationBarHidden(true, animated: false)
     }
     
-    @IBAction func skipButtonTapped(_ sender: Any) {
-        onCompletion?(false)
-        dismiss(animated: true)
-    }
-    
-    // When success in linkedIn instagram button function
-    // onCompletion?(true)
-    // dismiss(animated: true)
-
-    // This function can handle ANY platform (LinkedIn, X, Insta)
-    func startAuth(authURL: String, callbackScheme: String) {
+    // MARK: - Twitter Action
+    @IBAction func didTapTwitter(_ sender: UIButton) {
+        print("🔵 Starting Twitter Auth...")
         
-        guard let url = URL(string: authURL) else { return }
-
-        // Initialize the secure browser session
+        guard let authURL = SocialAuthManager.shared.getTwitterAuthURL(),
+              let url = URL(string: authURL) else { return }
+        
         self.webAuthSession = ASWebAuthenticationSession(
             url: url,
-            callbackURLScheme: callbackScheme) { callbackURL, error in
+            callbackURLScheme: "handleapp") { [weak self] callbackURL, error in
                 
-                // Handle Errors (User clicked Cancel)
-                if let error = error {
-                    print("Auth Canceled or Failed: \(error.localizedDescription)")
-                    return
-                }
+                guard let self = self else { return }
+                if let error = error { print("❌ Auth Failed: \(error.localizedDescription)"); return }
                 
-                // Handle Success (We got a URL back!)
-                if let callbackURL = callbackURL {
-                    // The URL looks like: handleapp://callback?code=12345ABCDE&state=...
-                    print("Successful Verification! Redirected URL: \(callbackURL)")
+                if let callbackURL = callbackURL,
+                   let code = self.getQueryStringParameter(url: callbackURL.absoluteString, param: "code") {
                     
-                    // Extract the 'code' parameter
-                    if let code = self.getQueryStringParameter(url: callbackURL.absoluteString, param: "code") {
-                        print("AUTH CODE: \(code)")
-                        
-                        // TODO: Save this code or swap it for a Token
-                        // For now, let's behave as if we logged in:
-                        self.handleSuccessfulLogin()
+                    print("✅ Got Twitter Code: \(code)")
+                    
+                    SocialAuthManager.shared.exchangeTwitterCodeForToken(code: code) { result in
+                        DispatchQueue.main.async {
+                            switch result {
+                            case .success(let token):
+                                print("🎉 TWITTER TOKEN SECURED: \(token)")
+                                
+                                Task {
+                                    await SupabaseManager.shared.saveSocialToken(platform: "twitter", token: token)
+                                    self.handleSuccessfulLogin()
+                                }
+                                
+                            case .failure(let error):
+                                print("❌ Token Exchange Failed: \(error.localizedDescription)")
+                            }
+                        }
                     }
                 }
             }
-
-        // Settings to make it look professional
-        self.webAuthSession?.presentationContextProvider = self
-        // this setting presentationContextProvider is used to specify the context in which the authentication session should be presented. by setting it to self, we are indicating that the current view controller will provide the necessary context for displaying the authentication session. this is important for managing the user experience during the authentication process, ensuring that the session appears in the appropriate window or view.
-        self.webAuthSession?.prefersEphemeralWebBrowserSession = true
-        // this is false to remember cookies, so users don't have to log in every time
         
-        // Launch the browser!
+        self.webAuthSession?.presentationContextProvider = self
+        // Set to TRUE if you want to force the login screen to appear every time (good for testing)
+        // Set to FALSE if you want it to remember you (good for real users)
+        self.webAuthSession?.prefersEphemeralWebBrowserSession = true
         self.webAuthSession?.start()
     }
 
-    // Helper to find the "code=" part of the URL string it allows the app to securely obtain an access token from the authentication server, which is then used to access protected resources on behalf of the user.
+    // MARK: - Instagram Action
+    @IBAction func didTapInstagram(_ sender: UIButton) {
+        print("🟣 Starting Instagram Auth...")
+        let authURL = SocialAuthManager.shared.getInstagramAuthURL()
+        guard let url = URL(string: authURL) else { return }
+
+        // Note: For Instagram, we look for 'https' callback because we used a dummy web URL
+        self.webAuthSession = ASWebAuthenticationSession(
+            url: url,
+            callbackURLScheme: "https") { [weak self] callbackURL, error in
+                
+                guard let self = self else { return }
+                if let error = error { print("❌ Auth Failed: \(error.localizedDescription)"); return }
+                
+                // Intercept the redirect to handleapp.com
+                if let callbackURL = callbackURL,
+                   callbackURL.absoluteString.starts(with: "https://handleapp.com/auth/") {
+                    
+                    // Note: If using Implicit Flow (Token in URL), parse token directly.
+                    // If using Code Flow, parse code.
+                    // Assuming token flow for Business Login simplicity:
+                    if let token = self.getQueryStringParameter(url: callbackURL.absoluteString.replacingOccurrences(of: "#", with: "?"), param: "access_token") {
+                         
+                         print("🎉 INSTAGRAM TOKEN SECURED: \(token)")
+                         Task {
+                             await SupabaseManager.shared.saveSocialToken(platform: "instagram", token: token)
+                             self.handleSuccessfulLogin()
+                         }
+                    }
+                }
+            }
+        self.webAuthSession?.presentationContextProvider = self
+        self.webAuthSession?.prefersEphemeralWebBrowserSession = true
+        self.webAuthSession?.start()
+    }
+
+    // MARK: - Helper Logic
     func getQueryStringParameter(url: String, param: String) -> String? {
-        guard let url = URLComponents(string: url) else { return nil }
-        return url.queryItems?.first(where: { $0.name == param })?.value
+        guard let urlComponents = URLComponents(string: url) else { return nil }
+        return urlComponents.queryItems?.first(where: { $0.name == param })?.value
     }
     
-    // Logic to handle what happens after login
     func handleSuccessfulLogin() {
-        // Navigation: Go to Analytics
-        // dismissal of browser is automatic
-        
-        // Delay slightly to let the browser dismiss animation finish
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.performSegue(withIdentifier: "goToAnalytics", sender: self)
         }
     }
-
     
-    @IBAction func didTapLinkedIn(_ sender: UIButton) {
-        print("LinkedIn Button Tapped")
-        
-        // Will replace this with real CLIENT ID Linkedin Dev Portal
-        let clientID = "YOUR_CLIENT_ID_HERE"
-        let redirectURI = "handleapp://callback" // Must match what was put in Info.plist
-        // Info.plist is a file that contains config settings for the app
-        let state = "random_string"
-        let scope = "openid profile email" // The permissions we are asking for
-        
-        // The Official LinkedIn OAuth URL
-        let authURL = "https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=\(clientID)&redirect_uri=\(redirectURI)&state=\(state)&scope=\(scope)"
-        
-        startAuth(authURL: authURL, callbackScheme: "handleapp")
+    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        return self.view.window!
     }
-    
-    @IBAction func didTapTwitter(_ sender: UIButton) {
-        print("🔵 Starting Twitter Auth...")
-                
-                guard let authURL = SocialAuthManager.shared.getTwitterAuthURL(),
-                      let url = URL(string: authURL) else { return }
-                
-                // Initialize Browser Session
-                self.webAuthSession = ASWebAuthenticationSession(
-                    url: url,
-                    callbackURLScheme: "handleapp") { [weak self] callbackURL, error in
-                        
-                        guard let self = self else { return }
-                        
-                        if let error = error {
-                            print("❌ Auth Canceled/Failed: \(error.localizedDescription)")
-                            return
-                        }
-                        
-                        // Success: Get the Code
-                        if let callbackURL = callbackURL,
-                           let code = self.getQueryStringParameter(url: callbackURL.absoluteString, param: "code") {
-                            
-                            print("✅ Got Twitter Code: \(code)")
-                            
-                            // Exchange Code for Token
-                            SocialAuthManager.shared.exchangeTwitterCodeForToken(code: code) { result in
-                                DispatchQueue.main.async {
-                                    switch result {
-                                    case .success(let token):
-                                        print("🎉 TWITTER TOKEN SECURED: \(token)")
-                                        
-                                        // 1. SAVE TO SUPABASE
-                                        Task {
-                                            await SupabaseManager.shared.saveSocialToken(platform: "twitter", token: token)
-                                            
-                                            // 2. NOW go to the next screen
-                                            self.handleSuccessfulLogin()
-                                        }
-                                        
-                                    case .failure(let error):
-                                        print("❌ Twitter Token Exchange Failed: \(error.localizedDescription)")
-                                    }
-                                }
-                            }
-                        }
-                    }
-                
-                self.webAuthSession?.presentationContextProvider = self
-                self.webAuthSession?.prefersEphemeralWebBrowserSession = true
-                self.webAuthSession?.start()
-    }
-    
-    @IBAction func didTapInstagram(_ sender: UIButton) {
-        print("Instagram Tapped - Need Client ID")
-        //Instagram URL logic here later
-    }
-    
     
     @IBAction func didTapSkip(_ sender: UIButton) {
-        // this if block checks if current vc was presented as modal or not if yes then it dismisses else it performs segue
-        print("Skip Tapped")
         if self.presentingViewController != nil {
-            
             self.dismiss(animated: true, completion: nil)
         } else {
             performSegue(withIdentifier: "goToAnalytics", sender: self)
         }
-    }
-    
-    // MARK: - ASWebAuthentication Protocol
-    // This tells the browser to use the current window for presentation of the authentication session
-    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        return self.view.window!
     }
 }
