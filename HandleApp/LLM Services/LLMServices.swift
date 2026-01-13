@@ -7,26 +7,45 @@
 
 import Foundation
 
-class OpenRouterService {
+//
+//  LLMServices.swift
+//  HandleApp
+//
+//  Updated for Gemini 1.5 Flash
+//
+
+import Foundation
+
+class GeminiService {
     
-    static let shared = OpenRouterService()
+    static let shared = GeminiService()
     
-    // ⚠️ Replace with your actual OpenRouter API Key
+    // ⚠️ Ensure you have added "GeminiAPIKey" to your Info.plist
     private var apiKey: String {
-        guard let key = Bundle.main.object(forInfoDictionaryKey: "OpenRouterAPIKey") as? String else {
-            print("⚠️ API Key not found in Info.plist")
+        guard let key = Bundle.main.object(forInfoDictionaryKey: "GeminiAPIKey") as? String else {
+            print("⚠️ Gemini API Key not found in Info.plist")
             return ""
         }
         return key
     }
-    private let apiURL = URL(string: "https://openrouter.ai/api/v1/chat/completions")!
     
     private init() {}
     
     func generateDraft(idea: String, profile: UserProfile, completion: @escaping (Result<EditorDraftData, Error>) -> Void) {
         
-        // 1. Build the System Prompt using your profile helper
-        let systemInstruction = """
+        // 1. URL for Gemini 1.5 Flash
+        // We inject the API Key directly into the URL query parameter for Google's API
+        let endpointString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=\(apiKey)"
+                
+        guard let url = URL(string: endpointString) else {
+            print("Invalid URL")
+            return
+        }
+
+        
+        // 2. Build the Prompt
+        // Gemini supports a specific "system_instruction" field, which is great for your persona setup.
+        let systemInstructionText = """
         You are an expert Social Media Manager.
         
         \(profile.promptContext)
@@ -47,26 +66,31 @@ class OpenRouterService {
         }
         """
         
-        // 2. Prepare JSON Body
+        // 3. Construct the Request Body
+        // Gemini expects 'contents' for user messages and 'system_instruction' for system prompts.
+        // We also force JSON response mime type.
         let parameters: [String: Any] = [
-            "model": "openai/gpt-3.5-turbo", // or "anthropic/claude-3-haiku"
-            "messages": [
-                ["role": "system", "content": systemInstruction],
-                ["role": "user", "content": "Generate the post now."]
+            "system_instruction": [
+                "parts": [
+                    ["text": systemInstructionText]
+                ]
             ],
-            "response_format": ["type": "json_object"] // Forces valid JSON
+            "contents": [
+                [
+                    "role": "user",
+                    "parts": [
+                        ["text": "Draft a post for this idea: \(idea)"]
+                    ]
+                ]
+            ],
+            "generationConfig": [
+                "response_mime_type": "application/json" // Forces Gemini to reply in JSON
+            ]
         ]
         
-        print(parameters)
-        
-        // 3. Request Setup
-        var request = URLRequest(url: apiURL)
+        var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        // Optional OpenRouter headers
-        request.addValue("YourAppName", forHTTPHeaderField: "X-Title")
-        
         request.httpBody = try? JSONSerialization.data(withJSONObject: parameters)
         
         // 4. Execute
@@ -78,19 +102,33 @@ class OpenRouterService {
             
             guard let data = data else { return }
             
+            // Debug: Print raw JSON to see if errors occur
+            // if let rawString = String(data: data, encoding: .utf8) { print("Raw Response: \(rawString)") }
+
             do {
-                // Parse OpenRouter/OpenAI wrapper
+                // 5. Parse Gemini Response Structure
+                // Gemini returns: { "candidates": [ { "content": { "parts": [ { "text": "..." } ] } } ] }
                 if let jsonResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   let choices = jsonResponse["choices"] as? [[String: Any]],
-                   let message = choices.first?["message"] as? [String: Any],
-                   let content = message["content"] as? String,
-                   let contentData = content.data(using: .utf8) {
+                   let candidates = jsonResponse["candidates"] as? [[String: Any]],
+                   let firstCandidate = candidates.first,
+                   let contentContainer = firstCandidate["content"] as? [String: Any],
+                   let parts = contentContainer["parts"] as? [[String: Any]],
+                   let text = parts.first?["text"] as? String,
+                   let contentData = text.data(using: .utf8) {
                     
-                    // Parse actual Draft Data
+                    // Parse the actual Draft Data (JSON inside the text)
                     let draft = try JSONDecoder().decode(EditorDraftData.self, from: contentData)
                     completion(.success(draft))
                     
-                    print(draft)
+                } else {
+                    // Handle API Errors (e.g., if key is wrong, Google returns an "error" object)
+                    if let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let errorObj = jsonResponse["error"] as? [String: Any],
+                       let message = errorObj["message"] as? String {
+                        print("Gemini API Error: \(message)")
+                    }
+                    let error = NSError(domain: "GeminiService", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to parse Gemini response"])
+                    completion(.failure(error))
                 }
             } catch {
                 print("Parsing Error: \(error)")

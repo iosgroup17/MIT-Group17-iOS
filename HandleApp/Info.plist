@@ -15,7 +15,7 @@
 			</array>
 		</dict>
 	</array>
-	<key>OpenRouterAPIKey</key>
+	<key>GeminiAPIKey</key>
 	<string>$(OPEN_ROUTER_API_KEY)</string>
 	<key>TwitterClientID</key>
 	<string>$(TWITTER_CLIENT_ID)</string>

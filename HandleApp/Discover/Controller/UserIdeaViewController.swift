@@ -129,7 +129,7 @@ extension UserIdeaViewController {
                 )
             
             // 3. Call AI Service (OpenRouter)
-            OpenRouterService.shared.generateDraft(idea: query, profile: profile) { [weak self] result in
+            GeminiService.shared.generateDraft(idea: query, profile: profile) { [weak self] result in
                 guard let self = self else { return }
                 
                 DispatchQueue.main.async {
