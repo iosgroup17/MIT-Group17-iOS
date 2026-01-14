@@ -77,6 +77,8 @@ extension UserIdeaViewController: UITableViewDelegate, UITableViewDataSource {
                 return UITableViewCell()
             }
         
+        cell.configureBubble(isUser: message.isUser)
+        
         cell.messageLabel.text = message.text
         
         if let btn = cell.editorButton {

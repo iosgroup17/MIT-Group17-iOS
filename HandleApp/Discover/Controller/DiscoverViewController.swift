@@ -353,7 +353,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
             ) as! HeaderCollectionReusableView
 
             if indexPath.section == 0 {
-                header.titleLabel.text = "Top Post Ideas For You"
+                header.titleLabel.text = "Top Post Ideas"
             } else if indexPath.section == 1 {
                 header.titleLabel.text = "Trending Topics"
             } else if indexPath.section == 2 {

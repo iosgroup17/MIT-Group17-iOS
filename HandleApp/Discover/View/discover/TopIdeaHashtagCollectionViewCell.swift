@@ -28,6 +28,6 @@ class TopIdeaHashtagCollectionViewCell: UICollectionViewCell {
             hashtagText.textColor = color
             
             // 3. Set Background Color (Light Platform Color)
-            hashtagContainer.backgroundColor = color.withAlphaComponent(0.1)
+            hashtagContainer.backgroundColor = color.withAlphaComponent(0.075)
         }
 }

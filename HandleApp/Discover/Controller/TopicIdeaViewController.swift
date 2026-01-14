@@ -36,12 +36,12 @@ class TopicIdeaViewController: UIViewController {
             return UICollectionViewCompositionalLayout { (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
 
                 let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.5),
-                                                      heightDimension: .absolute(240))
+                                                      heightDimension: .absolute(220))
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 item.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
  
                 let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                       heightDimension: .absolute(240))
+                                                       heightDimension: .absolute(220))
                 let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
     
                 let section = NSCollectionLayoutSection(group: group)
