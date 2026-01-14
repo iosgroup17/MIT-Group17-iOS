@@ -41,7 +41,6 @@ class TrendingCollectionViewCell: UICollectionViewCell {
         
         iconImage.image = UIImage(systemName: topic.icon)
         iconImage.tintColor = topic.color
-        iconImage.backgroundColor = topic.color.withAlphaComponent(0.12)
         iconImage.layer.cornerRadius = 6
         iconImage.clipsToBounds = true
 

@@ -17,13 +17,27 @@ class ChatCellTableViewCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        textView.layer.cornerRadius = 10
-        
+        textView.layer.cornerRadius = 16
+        textView.layer.masksToBounds = true
         // Initialization code
     }
 
     @IBAction func editorButtonTapped(_ sender: Any) {
             onEditorButtonTapped?()
+        }
+    
+    func configureBubble(isUser: Bool) {
+            if isUser {
+                // USER: Purple bubble, tail on bottom-right
+                // Round Top-Left, Top-Right, Bottom-Left. Keep Bottom-Right sharp.
+                textView.backgroundColor = UIColor.secondarySystemBackground
+                textView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner]
+            } else {
+                // BOT: Gray bubble, tail on bottom-left
+                // Round Top-Left, Top-Right, Bottom-Right. Keep Bottom-Left sharp.
+                textView.backgroundColor = UIColor.systemTeal.withAlphaComponent(0.1) // or your custom color
+                textView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMaxXMaxYCorner]
+            }
         }
         
         override func prepareForReuse() {
