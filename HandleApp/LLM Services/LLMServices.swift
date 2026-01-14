@@ -1,31 +1,16 @@
-//
-//  LLMServices.swift
-//  HandleApp
-//
-//  Created by SDC-USER on 09/01/26.
-//
-
-import Foundation
-
-//
-//  LLMServices.swift
-//  HandleApp
-//
-//  Updated for Gemini 1.5 Flash
-//
-
 import Foundation
 
 class GeminiService {
     
     static let shared = GeminiService()
     
-    // ⚠️ Ensure you have added "GeminiAPIKey" to your Info.plist
     private var apiKey: String {
         guard let key = Bundle.main.object(forInfoDictionaryKey: "GeminiAPIKey") as? String else {
             print("⚠️ Gemini API Key not found in Info.plist")
             return ""
         }
+        // DEBUG: Uncomment the line below to verify if your key is resolving correctly
+         print("DEBUG: API Key being used: [\(key)]")
         return key
     }
     
@@ -33,81 +18,58 @@ class GeminiService {
     
     func generateDraft(idea: String, profile: UserProfile, completion: @escaping (Result<EditorDraftData, Error>) -> Void) {
         
-        // 1. URL for Gemini 1.5 Flash
-        // We inject the API Key directly into the URL query parameter for Google's API
-        let endpointString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=\(apiKey)"
+        // 1. URL for Gemini 2.0 Flash (Standard Endpoint)
+        let endpointString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
                 
         guard let url = URL(string: endpointString) else {
             print("Invalid URL")
             return
         }
 
-        
-        // 2. Build the Prompt
-        // Gemini supports a specific "system_instruction" field, which is great for your persona setup.
         let systemInstructionText = """
         You are an expert Social Media Manager.
-        
         \(profile.promptContext)
-        
-        TASK:
-        The user has a rough idea: "\(idea)".
-        Generate a high-quality post for the specified platform.
-        
-        OUTPUT FORMAT:
-        Return ONLY valid JSON matching this structure:
-        {
-            "platformName": "String",
-            "platformIconName": "String (e.g. linkedin, instagram, twitter)",
-            "caption": "String (The full post content)",
-            "images": ["String (Visual description of image)"],
-            "hashtags": ["String"],
-            "postingTimes": ["String"]
-        }
+        TASK: The user has a rough idea: "\(idea)". Generate a high-quality post.
+        OUTPUT FORMAT: Return ONLY valid JSON matching the EditorDraftData structure.
         """
         
-        // 3. Construct the Request Body
-        // Gemini expects 'contents' for user messages and 'system_instruction' for system prompts.
-        // We also force JSON response mime type.
         let parameters: [String: Any] = [
-            "system_instruction": [
-                "parts": [
-                    ["text": systemInstructionText]
-                ]
-            ],
-            "contents": [
-                [
-                    "role": "user",
-                    "parts": [
-                        ["text": "Draft a post for this idea: \(idea)"]
-                    ]
-                ]
-            ],
-            "generationConfig": [
-                "response_mime_type": "application/json" // Forces Gemini to reply in JSON
-            ]
+            "system_instruction": ["parts": [["text": systemInstructionText]]],
+            "contents": [["role": "user", "parts": [["text": "Draft a post for: \(idea)"]]]],
+            "generationConfig": ["response_mime_type": "application/json"]
         ]
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // 2. The Critical Fix: Pass the API Key in the Header instead of the URL
+        request.addValue(apiKey, forHTTPHeaderField: "x-goog-api-key")
+        
         request.httpBody = try? JSONSerialization.data(withJSONObject: parameters)
         
-        // 4. Execute
         URLSession.shared.dataTask(with: request) { data, response, error in
+            // 3. Check for Transport Errors
             if let error = error {
                 completion(.failure(error))
                 return
             }
             
-            guard let data = data else { return }
+            // 4. Check HTTP Status & Handle Detailed Errors
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+                print("⚠️ Gemini API Server Error (\(httpResponse.statusCode))")
+                if let data = data, let errorMsg = String(data: data, encoding: .utf8) {
+                    print("Detailed Error Details: \(errorMsg)")
+                }
+                let statusError = NSError(domain: "GeminiService", code: httpResponse.statusCode,
+                                          userInfo: [NSLocalizedDescriptionKey: "Server returned status \(httpResponse.statusCode)"])
+                completion(.failure(statusError))
+                return
+            }
             
-            // Debug: Print raw JSON to see if errors occur
-            // if let rawString = String(data: data, encoding: .utf8) { print("Raw Response: \(rawString)") }
+            guard let data = data else { return }
 
             do {
-                // 5. Parse Gemini Response Structure
-                // Gemini returns: { "candidates": [ { "content": { "parts": [ { "text": "..." } ] } } ] }
                 if let jsonResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any],
                    let candidates = jsonResponse["candidates"] as? [[String: Any]],
                    let firstCandidate = candidates.first,
@@ -116,19 +78,10 @@ class GeminiService {
                    let text = parts.first?["text"] as? String,
                    let contentData = text.data(using: .utf8) {
                     
-                    // Parse the actual Draft Data (JSON inside the text)
                     let draft = try JSONDecoder().decode(EditorDraftData.self, from: contentData)
                     completion(.success(draft))
-                    
                 } else {
-                    // Handle API Errors (e.g., if key is wrong, Google returns an "error" object)
-                    if let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                       let errorObj = jsonResponse["error"] as? [String: Any],
-                       let message = errorObj["message"] as? String {
-                        print("Gemini API Error: \(message)")
-                    }
-                    let error = NSError(domain: "GeminiService", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to parse Gemini response"])
-                    completion(.failure(error))
+                    throw NSError(domain: "GeminiService", code: 0, userInfo: [NSLocalizedDescriptionKey: "Unexpected JSON structure"])
                 }
             } catch {
                 print("Parsing Error: \(error)")

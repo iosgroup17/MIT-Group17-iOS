@@ -16,7 +16,7 @@
 		</dict>
 	</array>
 	<key>GeminiAPIKey</key>
-	<string>$(OPEN_ROUTER_API_KEY)</string>
+	<string>$(GEMINI_API_KEY)</string>
 	<key>TwitterClientID</key>
 	<string>$(TWITTER_CLIENT_ID)</string>
 	<key>InstagramAppID</key>
