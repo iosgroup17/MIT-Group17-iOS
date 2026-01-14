@@ -36,36 +36,30 @@ class UserIdeaViewController: UIViewController {
     func setupTableView() {
             tableView.delegate = self
             tableView.dataSource = self
-            tableView.separatorStyle = .none
     }
     
     @IBAction func sendButtonTapped(_ sender: Any) {
         guard let text = messageTextField.text, !text.isEmpty else { return }
-        
-        // 1. Add User Message
+
         let userMessage = Message(text: text, isUser: true)
         messages.append(userMessage)
-        
-        // 2. Refresh UI
+
         insertNewMessage()
         messageTextField.text = ""
-        
-        // 3. Trigger AI
+
         fetchAIResponse(for: text)
     }
     
     func navigateToEditor(with draft: EditorDraftData) {
-        print("🚀 Moving to Editor with caption: \(draft.caption ?? "")")
+        print("Moving to Editor with caption: \(draft.caption ?? "")")
         
-        
-        // Option A: If using Storyboard ID
+
         if let editorVC = storyboard?.instantiateViewController(withIdentifier: "EditorSuiteViewController") as? EditorSuiteViewController {
             
-            // Pass the data!
-            // editorVC.draftData = draft
+            editorVC.draft = draft
             
             navigationController?.pushViewController(editorVC, animated: true)
-            // Or if using modal: present(editorVC, animated: true)
+
         }
     }
 }
@@ -110,15 +104,12 @@ extension UserIdeaViewController: UITableViewDelegate, UITableViewDataSource {
 extension UserIdeaViewController {
     
     func fetchAIResponse(for query: String) {
-        
-        // 1. Show "Thinking" state immediately
+
         let loadingMessage = Message(text: "🔍 Analyzing your profile and generating ideas...", isUser: false)
         messages.append(loadingMessage)
         insertNewMessage()
         
         Task {
-            // 2. Fetch User Profile from Supabase (Waits here)
-            // Note: If fetchUserProfile returns nil, we use a fallback default profile so the app doesn't crash.
             let profile = await SupabaseManager.shared.fetchUserProfile() ?? UserProfile(
                     role: ["General User"],
                     industry: ["General"],
@@ -128,14 +119,10 @@ extension UserIdeaViewController {
                     targetAudience: ["Everyone"]
                 )
             
-            // 3. Call AI Service (OpenRouter)
             GeminiService.shared.generateDraft(idea: query, profile: profile) { [weak self] result in
                 guard let self = self else { return }
                 
                 DispatchQueue.main.async {
-                    // Remove the "Thinking..." message (optional, or just add new one below)
-                    // For simplicity, we just add the result at the bottom.
-                    
                     switch result {
                     case .success(let draft):
                         self.handleSuccess(draft: draft)
@@ -147,6 +134,7 @@ extension UserIdeaViewController {
             }
         }
     }
+    
     func handleSuccess(draft: EditorDraftData) {
         let platform = draft.platformName
         let tags = draft.hashtags?.joined(separator: " ") ?? ""
@@ -159,8 +147,7 @@ extension UserIdeaViewController {
         Hashtags:
         \(tags)
         """
-        
-        // ✅ Store the draft object here!
+
         let aiMessage = Message(text: displayText, isUser: false, draft: draft)
         
         self.messages.append(aiMessage)

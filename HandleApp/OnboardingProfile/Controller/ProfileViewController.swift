@@ -2,11 +2,11 @@ import UIKit
 
 class ProfileViewController: UIViewController {
     
-    //The Image at the top
+    //image at the top
     @IBOutlet weak var profileImageView: UIImageView!
     @IBOutlet weak var completionProgress: UIProgressView!
     
-    //The Card Backgrounds (To apply shadow/corners)
+    //card backgrounds
     @IBOutlet weak var accountCardView: UIView!
     @IBOutlet weak var detailsCardView: UIView!
     @IBOutlet weak var socialCardView: UIView!
@@ -107,15 +107,15 @@ class ProfileViewController: UIViewController {
         }
         
         // industry
-        let industry = (store.userAnswers[2] as? [String])?.first ?? ""
-        addRow(to: detailsStack, title: "Industry", value: industry) {
-            self.openEditor(forStep: 2)
+        let goals = (store.userAnswers[1] as? [String])?.joined(separator: ", ") ?? ""
+        addRow(to: detailsStack, title: "Industry", value: goals) {
+            self.openEditor(forStep: 1)
         }
         
         // goals
-        let goals = (store.userAnswers[1] as? [String])?.joined(separator: ", ") ?? ""
-        addRow(to: detailsStack, title: "Goals", value: goals) {
-            self.openEditor(forStep: 1)
+        let industry = (store.userAnswers[2] as? [String])?.first ?? ""
+        addRow(to: detailsStack, title: "Goals", value: industry) {
+            self.openEditor(forStep: 2)
         }
         
         // content formats
@@ -195,7 +195,6 @@ class ProfileViewController: UIViewController {
     }
     
     func hideLastSeparator(in stack: UIStackView) {
-        // find the last row in the stack and hide its line
         if let lastRow = stack.arrangedSubviews.last as? ProfileRow {
             lastRow.separatorLine.isHidden = true
         }

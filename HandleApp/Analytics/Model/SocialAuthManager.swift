@@ -10,9 +10,7 @@ import Foundation
 class SocialAuthManager {
     static let shared = SocialAuthManager()
    
-    // ======================================================
     // MARK: - CONFIGURATION (SECURE)
-    // ======================================================
    
     // TWITTER (X)
     // We use the computed property to fetch fresh from AppConfig
@@ -22,7 +20,6 @@ class SocialAuthManager {
     // INSTAGRAM
     private var instagramAppID: String { AppConfig.instagramAppID }
     private var instagramAppSecret: String { AppConfig.instagramAppSecret }
-    // Note: Use Facebook URL for Business/Graph API Login
     private let instagramRedirectURI = "https://handleapp.com/auth/"
    
     // LINKEDIN
@@ -34,16 +31,14 @@ class SocialAuthManager {
    
     private init() {}
 
-    // ======================================================
     // MARK: - TWITTER (X) AUTH FLOW
-    // ======================================================
    
     func getTwitterAuthURL() -> String? {
         let verifier = PKCEHelper.generateCodeVerifier()
         self.currentTwitterVerifier = verifier
        
         guard let challenge = PKCEHelper.generateCodeChallenge(from: verifier) else {
-            print("❌ Failed to generate PKCE Challenge")
+            print("Failed to generate PKCE Challenge")
             return nil
         }
        
@@ -86,9 +81,7 @@ class SocialAuthManager {
         }.resume()
     }
    
-    // ======================================================
     // MARK: - INSTAGRAM (GRAPH API) AUTH FLOW
-    // ======================================================
    
     func getInstagramAuthURL() -> String {
         // Permissions for Business Analytics
@@ -99,13 +92,9 @@ class SocialAuthManager {
         return "https://www.facebook.com/v17.0/dialog/oauth?client_id=\(instagramAppID)&redirect_uri=\(instagramRedirectURI)&state=\(state)&scope=\(scope)&response_type=token" // 'token' flow is simpler for client-side if supported, otherwise 'code'
     }
    
-    // Note: If using 'response_type=token' above, we don't need to exchange code.
-    // If you use 'response_type=code', keep the exchange function.
-    // For iOS "Business Login", implicit token flow often works easiest unless you have a backend.
+    // If using 'response_type=token' above, we don't need to exchange code.
    
-    // ======================================================
     // MARK: - LINKEDIN AUTH FLOW
-    // ======================================================
    
     func getLinkedInAuthURL() -> String {
             let scope = "openid profile email"

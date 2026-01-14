@@ -5,12 +5,6 @@
 //  Created by SDC_USER on 25/11/25.
 //
 
-//
-//  PostsViewController.swift
-//  OnboardingScreens
-//
-//  Created by SDC_USER on 25/11/25.
-//
 
 import UIKit
 
@@ -62,7 +56,7 @@ class PostsViewController: UIViewController {
             super.viewWillAppear(animated)
             refreshData() // Refresh every time the view appears
     }
-    
+    //Fetch posts from supabase.
     func refreshData() {
             Task {
                 let fetchedPosts = await SupabaseManager.shared.fetchPosts()

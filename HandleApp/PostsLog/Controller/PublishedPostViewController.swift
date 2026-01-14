@@ -90,9 +90,7 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
         if currentTimeFilter != "All" {
             let daysAgo = currentTimeFilter == "Last 7 Days" ? 7 : 30
             let cutoffDate = Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date())!
-            
             filtered = filtered.filter { post in
-                // Use 'publishedAt' from schema
                 guard let publishDate = post.publishedAt else { return false }
                 return publishDate >= cutoffDate
             }
@@ -203,16 +201,16 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
 
         if expandedPostId == postId {
                 expandedPostId = nil
-            } else {
+        } else {
                 expandedPostId = postId
-            }
+        }
         
         var indexPathsToReload = [indexPath]
         
         if let previousId = previousExpandedId, previousId != postId,
                let previousIndex = displayedPosts.firstIndex(where: { $0.id == previousId }) {
                 indexPathsToReload.append(IndexPath(row: previousIndex, section: 0))
-            }
+        }
 
         tableView.beginUpdates()
         tableView.reloadRows(at: indexPathsToReload, with: .automatic)

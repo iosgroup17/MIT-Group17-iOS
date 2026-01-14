@@ -11,17 +11,11 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
     
     @IBOutlet weak var postTableView: UITableView!
     @IBOutlet weak var filterBarButton: UIBarButtonItem!
-    
-    //Data for each section
     var scheduledTodayPosts: [Post] = []
-        var scheduledTomorrowPosts: [Post] = []
-        var scheduledLaterPosts: [Post] = []
-
-        // Cache for filtering
-        var allFetchedPosts: [Post] = []
-        var currentPlatformFilter: String = "All"
-
-    //Duplicate data for filtering purpose.
+    var scheduledTomorrowPosts: [Post] = []
+    var scheduledLaterPosts: [Post] = []
+    var allFetchedPosts: [Post] = []
+    var currentPlatformFilter: String = "All"
     var allTodayPosts: [Post] = []
     var allTomorrowPosts: [Post] = []
     var allLaterPosts: [Post] = []
@@ -36,23 +30,18 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
         allLaterPosts = scheduledLaterPosts
         refreshData()
     }
+    //Data refresh from supabase.
     func refreshData() {
         Task {
-            // Fetch from Supabase table 'social_media_posts'
             let fetchedPosts = await SupabaseManager.shared.fetchPosts()
             self.allFetchedPosts = fetchedPosts
-            
-            // Filter locally into sections
             let today = Date()
             self.scheduledTodayPosts = fetchedPosts.filter {
                 guard let date = $0.scheduledAt else { return false }
                 return Calendar.current.isDate(date, inSameDayAs: today)
             }
-            
             self.scheduledTomorrowPosts = Post.loadTomorrowScheduledPosts(from: fetchedPosts)
             self.scheduledLaterPosts = Post.loadScheduledPostsAfterDate(from: fetchedPosts)
-            
-            // Apply existing platform filters if active
             if currentPlatformFilter != "All" {
                 filterScheduledPosts(by: currentPlatformFilter)
             }

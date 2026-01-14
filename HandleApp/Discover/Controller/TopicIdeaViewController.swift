@@ -82,7 +82,7 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
             
 
             guard let detail = allPostDetails.first(where: { $0.id == selectedIdea.id }) else {
-                print("❌ Details not found for ID: \(selectedIdea.id). Check your JSON IDs.")
+                print("Details not found for ID: \(selectedIdea.id). Check your JSON IDs.")
                 return
             }
             

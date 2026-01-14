@@ -7,16 +7,15 @@
 
 import Foundation
 
-struct UserProfile {
-    // These fields match the 6 steps in OnboardingDataStore
-    let role: [String]          // Step 0
-    let industry: [String]      // Step 1
-    let primaryGoals: [String]  // Step 2
-    let contentFormats: [String]// Step 3
-    let toneOfVoice: [String]   // Step 4
-    let targetAudience: [String]// Step 5
-    
-    // Dynamic System Prompt
+struct UserProfile: Sendable {
+    //fields match the 6 steps in OnboardingDataStore
+    let role: [String]
+    let industry: [String]
+    let primaryGoals: [String]
+    let contentFormats: [String]
+    let toneOfVoice: [String]
+    let targetAudience: [String]
+
     var promptContext: String {
         return """
         USER PROFILE CONTEXT:

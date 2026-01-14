@@ -27,7 +27,7 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
             // 1. Filter ONLY for saved status
             self.savedPosts = posts.filter { $0.status?.lowercased() == "saved" }
             
-            print("✅ Corrected 'Saved' count: \(self.savedPosts.count)")
+            print("Corrected 'Saved' count: \(self.savedPosts.count)")
 
             await MainActor.run {
                 // 2. Apply the current platform filter (All, Instagram, etc.)
@@ -161,8 +161,8 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
                         tableView.deleteRows(at: [indexPath], with: .automatic)
                         completionHandler(true)
                     }
-                }
             }
+        }
         deleteAction.image = UIImage(systemName: "trash.fill")
 
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction, editAction, scheduleAction])

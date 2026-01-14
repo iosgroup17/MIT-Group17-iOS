@@ -126,7 +126,7 @@ class EditorSuiteViewController: UIViewController {
         }
         @objc func cancelButtonTapped() {
         
-            dismiss(animated: true, completion: nil) // close modal
+            dismiss(animated: true, completion: nil)
         }
 
         @objc func doneButtonTapped() {
@@ -141,10 +141,8 @@ class EditorSuiteViewController: UIViewController {
                 
         Task {
             do {
-                // 2. Ask the service
                 let newCaption = try await captionService.regenerate(currentText, tone: "professional")
-                
-                // 3. Update UI
+
                 await MainActor.run {
                     self.captionTextView.text = newCaption
                     sender.isEnabled = true
@@ -275,7 +273,6 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
                 
 
                 if let firstImageName = draft?.images?.first {
-                    // Convert the String name to a UIImage
                     destinationVC.postImage = UIImage(named: firstImageName)
                 }
                 

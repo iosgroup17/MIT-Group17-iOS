@@ -39,10 +39,9 @@ class SupabaseManager {
                             db: .init(
                                 decoder: {
                                     let decoder = JSONDecoder()
-                                                        // 1. USE DEFAULT KEYS (because you have CodingKeys now)
                                                         decoder.keyDecodingStrategy = .useDefaultKeys
                                                         
-                                                        // 2. HANDLE SUPABASE DATES
+                                                        // supabase dates
                                                         decoder.dateDecodingStrategy = .iso8601
                                                         return decoder
                                 }()
@@ -52,21 +51,20 @@ class SupabaseManager {
     }
     
     var currentUserID: UUID {
-        // Use the actual logged-in user if available, otherwise use our Test ID
+        //logged in user if available otherwise testUserID
         return client.auth.currentUser?.id ?? testUserID
     }
     
     func savePreference(stepIndex: Int, selections: [String]) async {
         let data = OnboardingResponse(user_id: currentUserID, step_index: stepIndex, selection_tags: selections)
         do {
-            // Change: Use .database before .from
             try await client
                 .from("onboarding_responses")
                 .upsert(data)
                 .execute()
-            print("✅ Data successfully saved")
+            print("Data successfully saved")
         } catch {
-            print("❌ Supabase Error: \(error)")
+            print("Supabase Error: \(error)")
         }
     }
     
@@ -74,13 +72,13 @@ class SupabaseManager {
         guard let userId = client.auth.currentUser?.id else { return [:] }
         
         do {
-            // Explicitly type the result so Supabase knows how to decode it
+            // tyoe results to supabase so that it decodes
             let responses: [OnboardingResponse] = try await client
                 .from("onboarding_responses")
                 .select()
                 .eq("user_id", value: userId)
                 .execute()
-                .value // This property handles the actual decoding
+                .value
             
             var preferencesDict: [Int: [String]] = [:]
             for response in responses {
@@ -89,7 +87,7 @@ class SupabaseManager {
             return preferencesDict
             
         } catch {
-            print("❌ Error fetching preferences: \(error)")
+            print("Error fetching preferences: \(error)")
             return [:]
         }
     }
@@ -108,9 +106,9 @@ class SupabaseManager {
                     .upsert(data)
                     .execute()
                 
-                print("✅ Saved \(platform) token to Supabase!")
+                print("Saved \(platform) token to Supabase!")
             } catch {
-                print("❌ Failed to save token: \(error)")
+                print("Failed to save token: \(error)")
             }
         }
     
@@ -119,11 +117,9 @@ class SupabaseManager {
 extension SupabaseManager {
     
     func fetchUserProfile() async -> UserProfile? {
-        // 1. Use currentUserID (works for Test User or Auth User)
         let userId = currentUserID
         
         do {
-            // 2. Fetch data
             let responses: [OnboardingResponse] = try await client
                 .from("onboarding_responses")
                 .select()
@@ -131,24 +127,24 @@ extension SupabaseManager {
                 .execute()
                 .value
             
-            // 3. Organize by Step Index
+            //organize acc to index
             var answers: [Int: [String]] = [:]
             for resp in responses {
                 answers[resp.step_index] = resp.selection_tags
             }
             
-            // 4. Map to Struct using CORRECT indices from OnboardingDataStore
+            // mapping data to correct indices
             return UserProfile(
-                role: answers[0] ?? [],           // Step 0: Role (Founder/Employee)
-                industry: answers[1] ?? [],       // Step 1: Industry (Tech/Finance...)
-                primaryGoals: answers[2] ?? [],   // Step 2: Goals (Awareness/Leads...)
-                contentFormats: answers[3] ?? [], // Step 3: Formats (Case Studies/Q&A...)
-                toneOfVoice: answers[4] ?? [],    // Step 4: Tone (Witty/Direct...)
-                targetAudience: answers[5] ?? []  // Step 5: Audience (Prospects/Peers...)
+                role: answers[0] ?? [],
+                industry: answers[1] ?? [],
+                primaryGoals: answers[2] ?? [],
+                contentFormats: answers[3] ?? [],
+                toneOfVoice: answers[4] ?? [],
+                targetAudience: answers[5] ?? []
             )
             
         } catch {
-            print("❌ Error assembling UserProfile: \(error)")
+            print("Error assembling UserProfile: \(error)")
             return nil
         }
     }

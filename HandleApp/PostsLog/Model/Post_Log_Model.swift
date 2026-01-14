@@ -7,33 +7,23 @@
 
 // ScheduledPostModel.swift
 
-//
-//  Post_Log_Model.swift
-//  OnboardingScreens
-//
-//  Created by SDC_USER on 25/11/25.
-//
-
-// ScheduledPostModel.swift
 
 import Foundation
 import UIKit
 import Supabase
 
 struct Post: Codable {
-    let id: String? // Changed to String as schema shows 'text' type
-    let status: String? // Matches 'post_status' custom type
-    let postText: String // Matches 'post_text'
-    let fullCaption: String? // Matches 'full_caption'
-    let imageName: String // Matches 'image_name'
-    let platformName: String // Matches 'platform_name'
-    let platformIconName: String // Matches 'platform_icon_name'
-    let scheduledAt: Date? // Matches 'scheduled_at' (timestamptz)
-    let publishedAt: Date? // Matches 'published_at' (timestamptz)
-    let suggestedHashtags: [String]? // Matches '_text' array
-    let optimalPostingTimes: [String]? // Matches '_text' array
-    
-    // Numeric metrics are now Int to match 'int4'
+    let id: String?
+    let status: String?
+    let postText: String
+    let fullCaption: String?
+    let imageName: String
+    let platformName: String
+    let platformIconName: String
+    let scheduledAt: Date?
+    let publishedAt: Date?
+    let suggestedHashtags: [String]?
+    let optimalPostingTimes: [String]?
     let likes: Int?
     let comments: Int?
     let reposts: Int?
@@ -60,21 +50,17 @@ extension SupabaseManager {
     
     // Fetch all posts for the current user
     func fetchPosts() async -> [Post] {
-        // No guard for userId needed anymore!
-        
         do {
             let posts: [Post] = try await client
                 .from("social_media_posts")
                 .select()
-                // ❌ Removed: .eq("id", value: userId)
-                // Added: Show newest first
                 .execute()
                 .value
                 
-            print("✅ Successfully fetched \(posts.count) global posts")
+            print("Successfully fetched \(posts.count) global posts")
             return posts
         } catch {
-            print("❌ Error fetching global posts: \(error)")
+            print("Error fetching global posts: \(error)")
             return []
         }
     }
@@ -87,30 +73,26 @@ extension SupabaseManager {
                 .delete()
                 .eq("id", value: id)
                 .execute()
-            print("✅ Post deleted")
+            print("Post deleted")
         } catch {
-            print("❌ Delete error: \(error)")
+            print("Delete error: \(error)")
         }
     }
 }
 extension Post {
+    //Date and Time Decoder
     private static var standardDecoder: JSONDecoder {
         let decoder = JSONDecoder()
         let formatter = DateFormatter()
-        // Matches format: "2025-11-26T09:30:00+0000"
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
         formatter.locale = Locale(identifier: "en_US_POSIX")
         decoder.dateDecodingStrategy = .formatted(formatter)
         return decoder
     }
-
     
-    //Load posts scheduled for tomorrow
-    // Load posts specifically for Tomorrow
     static func loadTomorrowScheduledPosts(from allPosts: [Post]) -> [Post] {
         let today = Date()
         guard let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today) else { return [] }
-        
         return allPosts.filter { post in
             // 1. CHECK STATUS FIRST
             let status = post.status?.uppercased() ?? ""
@@ -122,7 +104,6 @@ extension Post {
         }
     }
 
-    // Load posts scheduled for later
     static func loadScheduledPostsAfterDate(from allPosts: [Post]) -> [Post] {
         let today = Date()
         guard let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today),
@@ -131,17 +112,14 @@ extension Post {
         }
         
         return allPosts.filter { post in
-            // 1. CHECK STATUS FIRST
             let status = post.status?.uppercased() ?? ""
             guard status == "SCHEDULED" else { return false }
-            
-            // 2. CHECK DATE
             guard let scheduleDate = post.scheduledAt else { return false }
             return scheduleDate > endOfTomorrow
         }
         .sorted { ($0.scheduledAt ?? Date()) < ($1.scheduledAt ?? Date()) }
     }
-    //Load Published Posts
+    
     static func loadPublishedPosts(from allPosts: [Post]) -> [Post] {
             return allPosts.filter { post in
                 // Check the 'status' column or if 'publishedAt' has a value
@@ -149,7 +127,6 @@ extension Post {
             }
         }
     
-    //Load all posts
     static func loadAllPosts(from fileName: String) throws -> [Post] {
         guard let url = Bundle.main.url(forResource: fileName, withExtension: "json") else {
             return []
@@ -158,9 +135,7 @@ extension Post {
         return try standardDecoder.decode([Post].self, from: data)
     }
 
-    //Load saved posts
     static func loadSavedPosts(from allPosts: [Post]) -> [Post] {
             return allPosts.filter { $0.status?.uppercased() == "SAVED" }
-        }
     }
-
+}
