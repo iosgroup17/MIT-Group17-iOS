@@ -22,12 +22,14 @@ class TopIdeaHashtagCollectionViewCell: UICollectionViewCell {
     }
     
     func configure(text: String, color: UIColor) {
-        hashtagText.text = text
-            
-            // 2. Set Text Color (Solid Platform Color)
+        if color == .systemTeal {
+            hashtagText.text = text
+            hashtagText.textColor = .black
+            hashtagContainer.backgroundColor = color.withAlphaComponent(0.1)
+        } else {
+            hashtagText.text = text
             hashtagText.textColor = color
-            
-            // 3. Set Background Color (Light Platform Color)
             hashtagContainer.backgroundColor = color.withAlphaComponent(0.075)
         }
+    }
 }
