@@ -66,7 +66,7 @@ class TopIdeaCollectionViewCell: UICollectionViewCell {
                     platformIcon.image = UIImage(named: "icon-linkedin")
                     
                 } else if platformKey.contains("x") || platformKey.contains("twitter") {
-                    currentThemeColor = .black
+                    currentThemeColor = .systemTeal
                     platformIcon.image = UIImage(named: "icon-twitter")
                     
                 } else {

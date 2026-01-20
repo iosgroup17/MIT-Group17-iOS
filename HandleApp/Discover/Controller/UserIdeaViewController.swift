@@ -21,6 +21,7 @@ class UserIdeaViewController: UIViewController {
     @IBOutlet weak var inputBarBottomConstraint: NSLayoutConstraint!
     
     var messages: [Message] = []
+    var showAnalysisMessage = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,9 +52,6 @@ class UserIdeaViewController: UIViewController {
     }
     
     func navigateToEditor(with draft: EditorDraftData) {
-        print("Moving to Editor with caption: \(draft.caption ?? "")")
-        
-
         if let editorVC = storyboard?.instantiateViewController(withIdentifier: "EditorSuiteViewController") as? EditorSuiteViewController {
             
             editorVC.draft = draft
@@ -107,9 +105,13 @@ extension UserIdeaViewController {
     
     func fetchAIResponse(for query: String) {
 
-        let loadingMessage = Message(text: "🔍 Analyzing your profile and generating ideas...", isUser: false)
-        messages.append(loadingMessage)
-        insertNewMessage()
+        if !showAnalysisMessage {
+            let loadingMessage = Message(text: "🔍 Analyzing your profile and generating ideas...", isUser: false)
+            messages.append(loadingMessage)
+            insertNewMessage()
+            
+            showAnalysisMessage = true
+        }
         
         Task {
             let profile = await SupabaseManager.shared.fetchUserProfile() ?? UserProfile(
@@ -138,11 +140,10 @@ extension UserIdeaViewController {
     }
     
     func handleSuccess(draft: EditorDraftData) {
-        let platform = draft.platformName
         let tags = draft.hashtags?.joined(separator: " ") ?? ""
         
         let displayText = """
-        ✨ Here is a draft for \(platform):
+        ✨ Here is the draft:
         
         \(draft.caption ?? "No caption generated.")
         
@@ -158,7 +159,7 @@ extension UserIdeaViewController {
         
         func handleError(error: Error) {
             print("AI Error: \(error.localizedDescription)")
-            let errorMessage = Message(text: "⚠️ I couldn't generate a draft right now. Please check your connection.", isUser: false)
+            let errorMessage = Message(text: "⚠️Couldn't generate a draft right now. Please check your connection.", isUser: false)
             self.messages.append(errorMessage)
             self.insertNewMessage()
         }
