@@ -28,23 +28,16 @@ class ChatCellTableViewCell: UITableViewCell {
     
     func configureBubble(isUser: Bool) {
             if isUser {
-                // USER: Purple bubble, tail on bottom-right
-                // Round Top-Left, Top-Right, Bottom-Left. Keep Bottom-Right sharp.
-                textView.backgroundColor = UIColor.secondarySystemBackground
+                textView.backgroundColor = UIColor.systemGray5.withAlphaComponent(0.2)
+                messageLabel.textColor = .label
                 textView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner]
             } else {
-                // BOT: Gray bubble, tail on bottom-left
-                // Round Top-Left, Top-Right, Bottom-Right. Keep Bottom-Left sharp.
-                textView.backgroundColor = UIColor.systemTeal.withAlphaComponent(0.1) // or your custom color
+                textView.backgroundColor = UIColor.systemTeal.withAlphaComponent(0.15)
+                messageLabel.textColor = .label
                 textView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMaxXMaxYCorner]
             }
-        }
-        
-        override func prepareForReuse() {
-            super.prepareForReuse()
-            // Reset state so recycled cells don't show buttons wrongly
-            editorButton?.isHidden = true
-            onEditorButtonTapped = nil
-        }
 
+            textView.layer.borderWidth = 0.5
+            textView.layer.borderColor = UIColor.separator.cgColor
+        }
 }

@@ -15,48 +15,43 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-        // 1. Create the Window manually
+        // Create the Window manually
         let window = UIWindow(windowScene: windowScene)
         self.window = window
         
-        // 2. Decide which screen to show
-        // Change this boolean to 'false' later when you are done testing!
+        // Decide which screen to show
         let alwaysShowOnboarding = false
         
         let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
         
         if alwaysShowOnboarding || !hasCompletedOnboarding {
-            // A. Show Onboarding (No Tab Bar)
+            // Show Onboarding
             showOnboarding(window: window)
         } else {
-            // B. Show Main App (Tabs)
+            // Show Main App
             showMainApp(window: window)
         }
         
-        // 3. Make the window visible
+        // Make the window visible
         window.makeKeyAndVisible()
     }
     
     func showOnboarding(window: UIWindow) {
-        // 1. Get the Onboarding Storyboard
+        // Get the Onboarding Storyboard
         let storyboard = UIStoryboard(name: "Profile", bundle: nil) // Check your file name!
         
-        // 2. Instantiate the Quiz Parent VC
-        // Ensure your OnboardingViewController has ID "OnboardingParentVC"
+        // Instantiate the Quiz Parent VC
         let onboardingVC = storyboard.instantiateViewController(withIdentifier: "OnboardingParentVC")
         
-        // 3. Set as Root
+        // Set as Root
         window.rootViewController = onboardingVC
     }
 
     func showMainApp(window: UIWindow) {
-        // 1. Get the Main Storyboard (Where the Tab Bar is)
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         
-        // 2. Instantiate the Tab Bar Controller
         let tabBarVC = storyboard.instantiateViewController(withIdentifier: "MainTabBarVC")
-        
-        // 3. Set as Root
+     
         window.rootViewController = tabBarVC
     }
 
