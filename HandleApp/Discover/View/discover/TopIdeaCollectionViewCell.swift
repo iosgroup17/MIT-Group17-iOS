@@ -97,27 +97,17 @@ extension TopIdeaCollectionViewCell: UICollectionViewDataSource {
 }
 
 extension TopIdeaCollectionViewCell: UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
-    
-    // Inside the extension: UICollectionViewDelegateFlowLayout
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        
-        // 1. Get the text exactly as it appears in the cell
-        // (Note: We add the # manually here to measure the full string width)
+   
         let rawText = hashtags[indexPath.row]
         let textToMeasure = rawText
-        
-        // 2. IMPORTANT: This font MUST match the font set in your XIB file.
-        // If your XIB uses "System Semibold 12.0", this must be .semibold.
+    
         let font = UIFont.systemFont(ofSize: 13, weight: .medium)
-        
-        // 3. Calculate the exact width required for the text
+
         let textAttributes = [NSAttributedString.Key.font: font]
         let textWidth = textToMeasure.size(withAttributes: textAttributes).width
-        
-        // 4. Add Padding
-        // 16 points for leading/trailing constraints (e.g. 8 left + 8 right)
-        // + 10 extra buffer to be safe.
+ 
         let totalWidth = ceil(textWidth)
         
         return CGSize(width: totalWidth, height: 26)
