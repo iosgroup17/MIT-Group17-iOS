@@ -33,15 +33,15 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
     //Data refresh from supabase.
     func refreshData() {
         Task {
-            let fetchedPosts = await SupabaseManager.shared.fetchPosts()
-            self.allFetchedPosts = fetchedPosts
+            let allPosts = await SupabaseManager.shared.fetchLogPosts()
+            self.allFetchedPosts = allPosts
             let today = Date()
-            self.scheduledTodayPosts = fetchedPosts.filter {
+            self.scheduledTodayPosts = allPosts.filter {
                 guard let date = $0.scheduledAt else { return false }
                 return Calendar.current.isDate(date, inSameDayAs: today)
             }
-            self.scheduledTomorrowPosts = Post.loadTomorrowScheduledPosts(from: fetchedPosts)
-            self.scheduledLaterPosts = Post.loadScheduledPostsAfterDate(from: fetchedPosts)
+            self.scheduledTomorrowPosts = Post.loadTomorrowScheduledPosts(from: allPosts)
+            self.scheduledLaterPosts = Post.loadScheduledPostsLater(from: allPosts)
             if currentPlatformFilter != "All" {
                 filterScheduledPosts(by: currentPlatformFilter)
             }
@@ -51,6 +51,55 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
             }
         }
     }
+    
+    //Filter by platform.
+    func didSelectPlatform(_ platform: String) {
+        print("Selected Platform: \(platform)")
+        self.currentPlatformFilter = platform
+        filterScheduledPosts(by: platform)
+    }
+    
+    func filterScheduledPosts(by platform: String) {
+        print("Filter requested for: [\(platform)]")
+        if platform == "All" {
+            scheduledTodayPosts = allTodayPosts
+            scheduledTomorrowPosts = allTomorrowPosts
+            scheduledLaterPosts = allLaterPosts
+        } else {
+            scheduledTodayPosts = allTodayPosts.filter { $0.platformName == platform }
+            scheduledTomorrowPosts = allTomorrowPosts.filter { $0.platformName == platform }
+            scheduledLaterPosts = allLaterPosts.filter { $0.platformName == platform }
+        }
+        print("Reloading table with \(scheduledTodayPosts.count + scheduledTomorrowPosts.count + scheduledLaterPosts.count) posts.")
+        postTableView.reloadData()
+    }
+    
+    //action on bar button item for platform wise filter. (Menu using UIAlert)
+    @IBAction func filterButtonTapped(_ sender: Any) {
+        let alertController = UIAlertController(title: "Filter by Platform", message: nil, preferredStyle: .actionSheet)
+        let platforms = ["All", "LinkedIn", "Instagram", "X"]
+        for platform in platforms {
+            let isSelected = (platform == self.currentPlatformFilter)
+            let displayTitle = isSelected ? "✓ \(platform)" : platform
+            let action = UIAlertAction(title: displayTitle, style: .default) { [weak self] _ in
+                self?.didSelectPlatform(platform)
+            }
+            alertController.addAction(action)
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        alertController.addAction(cancelAction)
+        if let popover = alertController.popoverPresentationController {
+            popover.barButtonItem = self.filterBarButton
+            popover.delegate = self
+            popover.permittedArrowDirections = .up
+        }
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        return .none
+    }
+    
     //Table view
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 3
@@ -134,7 +183,7 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
             guard let postId = post.id else { return completionHandler(false) }
 
             Task {
-                await SupabaseManager.shared.deletePost(id: postId)
+                await SupabaseManager.shared.deleteLogPost(id: postId)
                 
                 await MainActor.run {
                     // Remove from local arrays
@@ -197,53 +246,7 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
         }
     }
     
-    //Filter by platform.
-    func didSelectPlatform(_ platform: String) {
-        print("Selected Platform: \(platform)")
-        self.currentPlatformFilter = platform
-        filterScheduledPosts(by: platform)
-    }
     
-    func filterScheduledPosts(by platform: String) {
-        print("Filter requested for: [\(platform)]")
-        if platform == "All" {
-            scheduledTodayPosts = allTodayPosts
-            scheduledTomorrowPosts = allTomorrowPosts
-            scheduledLaterPosts = allLaterPosts
-        } else {
-            scheduledTodayPosts = allTodayPosts.filter { $0.platformName == platform }
-            scheduledTomorrowPosts = allTomorrowPosts.filter { $0.platformName == platform }
-            scheduledLaterPosts = allLaterPosts.filter { $0.platformName == platform }
-        }
-        print("Reloading table with \(scheduledTodayPosts.count + scheduledTomorrowPosts.count + scheduledLaterPosts.count) posts.")
-        postTableView.reloadData()
-    }
-    
-    //action on bar button item for platform wise filter. (Menu using UIAlert)
-    @IBAction func filterButtonTapped(_ sender: Any) {
-        let alertController = UIAlertController(title: "Filter by Platform", message: nil, preferredStyle: .actionSheet)
-        let platforms = ["All", "LinkedIn", "Instagram", "X"]
-        for platform in platforms {
-            let isSelected = (platform == self.currentPlatformFilter)
-            let displayTitle = isSelected ? "✓ \(platform)" : platform
-            let action = UIAlertAction(title: displayTitle, style: .default) { [weak self] _ in
-                self?.didSelectPlatform(platform)
-            }
-            alertController.addAction(action)
-        }
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-        alertController.addAction(cancelAction)
-        if let popover = alertController.popoverPresentationController {
-            popover.barButtonItem = self.filterBarButton
-            popover.delegate = self
-            popover.permittedArrowDirections = .up
-        }
-        present(alertController, animated: true, completion: nil)
-    }
-    
-    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
-        return .none
-    }
 
     
 }

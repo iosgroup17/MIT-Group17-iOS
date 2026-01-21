@@ -13,10 +13,10 @@ class PostTableViewCell: UITableViewCell {
     @IBOutlet weak var platformIconImageView: UIImageView!
     @IBOutlet weak var thumbnailImageView: UIImageView!
     
-    // Static formatter to avoid re-creating it for every cell (better performance)
+    //Date and Time Formatter
     private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "h:mm a" // e.g., 10:30 AM
+        formatter.dateFormat = "h:mm a" 
         return formatter
     }()
 
@@ -28,15 +28,12 @@ class PostTableViewCell: UITableViewCell {
     }
 
     func configure(with post: Post) {
-        // 1. Use postText to match your Supabase schema property
         postTextLabel.text = post.postText
         
-        // 2. Format the Date object from 'scheduledAt' into a string
+        //Using date formatter
         if let scheduleDate = post.scheduledAt {
             timeLabel.text = PostTableViewCell.timeFormatter.string(from: scheduleDate)
         }
-            
-        // 3. Image mapping remains the same
         platformIconImageView.image = UIImage(named: post.platformIconName)
         thumbnailImageView.image = UIImage(named: post.imageName)
     }

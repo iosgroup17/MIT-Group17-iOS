@@ -7,8 +7,6 @@
 
 import UIKit
 
-
-
 class PublishedPostViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPopoverPresentationControllerDelegate {
 
     @IBOutlet weak var publishedTableView: UITableView!
@@ -35,9 +33,9 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
     }
     func fetchData() {
             Task {
-                let allPosts = await SupabaseManager.shared.fetchPosts()
+                let allPosts = await SupabaseManager.shared.fetchLogPosts()
                 // Filter by status 'published' as defined in your schema
-                self.publishedPosts = allPosts.filter { $0.status == "PUBLISHED" || $0.publishedAt != nil }
+                self.publishedPosts = Post.loadPublishedPosts(from: allPosts)
                 
                 await MainActor.run {
                     self.applyFilters()
@@ -113,7 +111,7 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
     }
     
     //Time wise filter
-    @IBAction func filerButtonTapped(_ sender: UIBarButtonItem) { // Changed 'Any' to 'UIBarButtonItem' for safety
+    @IBAction func filerButtonTapped(_ sender: UIBarButtonItem) {
         let alertController = UIAlertController(title: "View Activity From", message: nil, preferredStyle: .actionSheet)
         
         let timePeriods = ["All", "Last 7 Days", "Last 30 Days"]

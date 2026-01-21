@@ -19,26 +19,23 @@ class ScheduledPostsTableViewCell: UITableViewCell {
         thumbnailImageView.clipsToBounds = true
         self.selectionStyle = .none
     }
+    //Date and time formatter
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateStyle = .medium   // "Oct 12, 2023"
-        formatter.timeStyle = .short    // "10:30 AM"
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
         return formatter
     }()
     func configure(with post: Post) {
-        // 1. Update text property name to match your schema
         postsLabel.text = post.postText
         
         platformIconImageView.image = UIImage(named: post.platformIconName)
         thumbnailImageView.image = UIImage(named: post.imageName)
         
-        // 2. Simplified Date Handling
         // Using the 'scheduled_at' timestamp directly from the database
         if let scheduledDate = post.scheduledAt {
-            // Use a formatter that shows both Date and Time (e.g., "Oct 12, 10:30 AM")
+            // Using Date and time Formatter
             dateTimeLabel.text = ScheduledPostsTableViewCell.dateFormatter.string(from: scheduledDate)
-        } else {
-            dateTimeLabel.text = "Unscheduled"
         }
     }
 }

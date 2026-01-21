@@ -15,35 +15,28 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-        // Create the Window manually
         let window = UIWindow(windowScene: windowScene)
         self.window = window
         
-        // Decide which screen to show
         let alwaysShowOnboarding = false
         
         let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
         
         if alwaysShowOnboarding || !hasCompletedOnboarding {
-            // Show Onboarding
             showOnboarding(window: window)
         } else {
-            // Show Main App
             showMainApp(window: window)
         }
         
-        // Make the window visible
         window.makeKeyAndVisible()
     }
     
     func showOnboarding(window: UIWindow) {
-        // Get the Onboarding Storyboard
         let storyboard = UIStoryboard(name: "Profile", bundle: nil) // Check your file name!
         
         // Instantiate the Quiz Parent VC
         let onboardingVC = storyboard.instantiateViewController(withIdentifier: "OnboardingParentVC")
-        
-        // Set as Root
+ 
         window.rootViewController = onboardingVC
     }
 

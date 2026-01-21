@@ -29,24 +29,23 @@ class PublishedPostTableViewCell: UITableViewCell {
         thumbnailImageView.clipsToBounds = true
         self.selectionStyle = .none
     }
+    //Date and Time Formatter
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateStyle = .medium   // "Oct 12, 2023"
-        formatter.timeStyle = .short    // "10:30 AM"
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
         return formatter
     }()
     func configure(with post: Post, isExpanded: Bool) {
-        // 1. Basic Content
         postLabel.text = post.postText
         platformIconImageView.image = UIImage(named: post.platformIconName)
         thumbnailImageView.image = UIImage(named: post.imageName)
         
-        // 2. Simplified Date Handling
-        // Using the 'published_at' timestamptz from Supabase
+        //Using the 'published_at' timestamptz from Supabase
         if let publishDate = post.publishedAt {
             dateTimeLabel.text = PublishedPostTableViewCell.dateFormatter.string(from: publishDate)
         }
-        // 3. Metrics (Now Ints from schema)
+        //Metrics
         likesLabel.text = "\(post.likes ?? 0)"
         commentsLabel.text = "\(post.comments ?? 0)"
         sharesLabel.text = "\(post.shares ?? 0)"
@@ -54,11 +53,11 @@ class PublishedPostTableViewCell: UITableViewCell {
         viewsLabel.text = "\(post.views ?? 0)"
         engagementLabel.text = "\(post.engagementScore ?? 0)"
         
-        // 5. Expansion Logic
+        //Expansion Logic
         analyticsHeightConstraint.constant = isExpanded ? expandedHeight : 0
         analyticsContainerView.alpha = isExpanded ? 1.0 : 0.0
         
-        // Update layout without animation here (animation is handled by the TableView)
+        //Update layout
         contentView.layoutIfNeeded()
     }
 

@@ -78,7 +78,7 @@ class DiscoverViewController: UIViewController {
             
             do {
 
-                let fetchedData = try await PostIdeasLoader.shared.loadFromSupabase()
+                let fetchedData = try await SupabaseManager.shared.loadPostsIdeas()
  
                 await MainActor.run {
                     print("Data Received. Updating UI...")

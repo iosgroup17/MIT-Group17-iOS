@@ -12,55 +12,6 @@ struct PostIdeasResponse {
     var selectedPostDetails: [PostDetail] = []
 }
 
-// MARK: - Supabase Loader
-// This class handles fetching data from the 5 different database tables
-class PostIdeasLoader {
-    static let shared = PostIdeasLoader()
-    
-    func loadFromSupabase() async throws -> PostIdeasResponse {
-        let client = SupabaseManager.shared.client
-        
-        print("Fetching data from Supabase...")
-        
-        // Fetch all tables in parallel
-        async let topIdeasQuery: [TopIdea] = client.from("top_ideas").select().execute().value
-        async let topicsQuery: [TrendingTopic] = client.from("trending_topics").select().execute().value
-        async let recommendationsQuery: [Recommendation] = client.from("recommendations").select().execute().value
-        async let postDetailsQuery: [PostDetail] = client.from("post_details").select().execute().value
-        
-        // Fetch flat list of topic ideas (group them later)
-        async let flatTopicIdeasQuery: [TopicIdea] = client.from("topic_ideas").select().execute().value
-
-        let (topIdeas, trendingTopics, recommendations, postDetails, flatTopicIdeas) = try await (
-            topIdeasQuery,
-            topicsQuery,
-            recommendationsQuery,
-            postDetailsQuery,
-            flatTopicIdeasQuery
-        )
-        
-        // Process the data (Group topic ideas into sections)
-        // Group by topic_id
-        let groupedIdeas = Dictionary(grouping: flatTopicIdeas, by: { $0.topicId })
-        
-        // Map to TopicIdeaGroup struct
-        let topicIdeaGroups = groupedIdeas.map { (key, value) in
-            TopicIdeaGroup(topicId: key, ideas: value)
-        }
-        
-        print("Data fetched successfully!")
-        
-        //Return the combined object
-        return PostIdeasResponse(
-            topIdeas: topIdeas,
-            trendingTopics: trendingTopics,
-            topicIdeas: topicIdeaGroups,
-            recommendations: recommendations,
-            selectedPostDetails: postDetails
-        )
-    }
-}
-
 struct TopIdea: Codable, Identifiable {
     let id: String
     let caption: String

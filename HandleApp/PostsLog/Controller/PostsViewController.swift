@@ -59,10 +59,10 @@ class PostsViewController: UIViewController {
     //Fetch posts from supabase.
     func refreshData() {
             Task {
-                let fetchedPosts = await SupabaseManager.shared.fetchPosts()
+                let fetchedPosts = await SupabaseManager.shared.fetchLogPosts()
                 self.allPosts = fetchedPosts
                 
-                // Filter for today locally to keep the UI snappy
+                // Filter for posts scheduled for today.
                 self.todayScheduledPosts = fetchedPosts.filter { post in
                     guard let scheduleDate = post.scheduledAt else { return false }
                     return Calendar.current.isDate(scheduleDate, inSameDayAs: Date())
@@ -76,6 +76,7 @@ class PostsViewController: UIViewController {
                 }
         }
     }
+    
     //Setting up the weekly calendar
     func setupCustomCalendar(for startDate: Date) {
             let dateFormatter = DateFormatter()
@@ -310,7 +311,7 @@ extension PostsViewController: UITableViewDataSource, UITableViewDelegate {
                     
                     if let postId = postToDelete.id {
                         Task {
-                            await SupabaseManager.shared.deletePost(id: postId)
+                            await SupabaseManager.shared.deleteLogPost(id: postId)
                             await MainActor.run {
                                 self.todayScheduledPosts.remove(at: indexPath.row)
                                 tableView.deleteRows(at: [indexPath], with: .automatic)

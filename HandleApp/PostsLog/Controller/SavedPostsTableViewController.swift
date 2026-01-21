@@ -22,15 +22,12 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
     }
     func fetchSavedPosts() {
         Task {
-            let posts = await SupabaseManager.shared.fetchPosts()
-            
-            // 1. Filter ONLY for saved status
-            self.savedPosts = posts.filter { $0.status?.lowercased() == "saved" }
+            let allPosts = await SupabaseManager.shared.fetchLogPosts()
+            self.savedPosts = Post.loadSavedPosts(from: allPosts)
             
             print("Corrected 'Saved' count: \(self.savedPosts.count)")
 
             await MainActor.run {
-                // 2. Apply the current platform filter (All, Instagram, etc.)
                 self.filterSavedPosts(by: self.currentPlatformFilter)
             }
         }
@@ -147,17 +144,13 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
                 }
 
                 Task {
-                    // 1. Delete from Supabase
-                    await SupabaseManager.shared.deletePost(id: postId)
+                    await SupabaseManager.shared.deleteLogPost(id: postId)
                     
                     await MainActor.run {
-                        // 2. Update local arrays
                         if let indexInAll = self.savedPosts.firstIndex(where: { $0.id == postId }) {
                             self.savedPosts.remove(at: indexInAll)
                         }
                         self.displayedPosts.remove(at: indexPath.row)
-                        
-                        // 3. Update UI
                         tableView.deleteRows(at: [indexPath], with: .automatic)
                         completionHandler(true)
                     }

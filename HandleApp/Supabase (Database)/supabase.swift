@@ -55,6 +55,8 @@ class SupabaseManager {
         return client.auth.currentUser?.id ?? testUserID
     }
     
+    
+    //save what the user has selected in the onboarding and insert that into table
     func savePreference(stepIndex: Int, selections: [String]) async {
         let data = OnboardingResponse(user_id: currentUserID, step_index: stepIndex, selection_tags: selections)
         do {
@@ -68,6 +70,8 @@ class SupabaseManager {
         }
     }
     
+    
+    //fetching the preferences from supabase to be used for generation by AI
     func fetchAllPreferences() async -> [Int: [String]] {
         guard let userId = client.auth.currentUser?.id else { return [:] }
         
@@ -147,5 +151,79 @@ extension SupabaseManager {
             print("Error assembling UserProfile: \(error)")
             return nil
         }
+    }
+    
+    func fetchLogPosts() async -> [Post] {
+        do {
+            let posts: [Post] = try await client
+                .from("social_media_posts")
+                .select()
+                .execute()
+                .value
+                
+            print("Successfully fetched \(posts.count) global posts")
+            return posts
+        } catch {
+            print("Error fetching global posts: \(error)")
+            return []
+        }
+    }
+
+    // Delete a post from Supabase
+    func deleteLogPost(id: String) async {
+        do {
+            try await client
+                .from("posts")
+                .delete()
+                .eq("id", value: id)
+                .execute()
+            print("Post deleted")
+        } catch {
+            print("Delete error: \(error)")
+        }
+    }
+    
+    
+    //load the multiple type of post idea and formats
+    func loadPostsIdeas() async throws -> PostIdeasResponse {
+        
+        print("Fetching data from Supabase...")
+        
+        //fetch all tables in parallel
+        async let topIdeasQuery: [TopIdea] = client.from("top_ideas").select().execute().value
+        async let topicsQuery: [TrendingTopic] = client.from("trending_topics").select().execute().value
+        async let recommendationsQuery: [Recommendation] = client.from("recommendations").select().execute().value
+        async let postDetailsQuery: [PostDetail] = client.from("post_details").select().execute().value
+        
+        //fetch flat list of topic ideas (group them later)
+        async let flatTopicIdeasQuery: [TopicIdea] = client.from("topic_ideas").select().execute().value
+
+        let (topIdeas, trendingTopics, recommendations, postDetails, flatTopicIdeas) = try await (
+            topIdeasQuery,
+            topicsQuery,
+            recommendationsQuery,
+            postDetailsQuery,
+            flatTopicIdeasQuery
+        )
+        
+        // process the data (group topic ideas into sections)
+        // group by topic_id
+        let groupedIdeas = Dictionary(grouping: flatTopicIdeas, by: { $0.topicId })
+        
+        //map to TopicIdeaGroup struct
+        let topicIdeaGroups = groupedIdeas.map { (key, value) in
+            TopicIdeaGroup(topicId: key, ideas: value)
+        }
+        
+        print("Data fetched successfully!")
+        
+        //return the combined object
+        return PostIdeasResponse(
+            topIdeas: topIdeas,
+            trendingTopics: trendingTopics,
+            topicIdeas: topicIdeaGroups,
+            recommendations: recommendations,
+            selectedPostDetails: postDetails
+        )
     }
 }

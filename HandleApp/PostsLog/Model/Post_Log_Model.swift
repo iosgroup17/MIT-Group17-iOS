@@ -46,65 +46,20 @@ struct Post: Codable {
     }
 }
 
-extension SupabaseManager {
-    
-    // Fetch all posts for the current user
-    func fetchPosts() async -> [Post] {
-        do {
-            let posts: [Post] = try await client
-                .from("social_media_posts")
-                .select()
-                .execute()
-                .value
-                
-            print("Successfully fetched \(posts.count) global posts")
-            return posts
-        } catch {
-            print("Error fetching global posts: \(error)")
-            return []
-        }
-    }
-
-    // Delete a post from Supabase
-    func deletePost(id: String) async {
-        do {
-            try await client
-                .from("posts")
-                .delete()
-                .eq("id", value: id)
-                .execute()
-            print("Post deleted")
-        } catch {
-            print("Delete error: \(error)")
-        }
-    }
-}
 extension Post {
-    //Date and Time Decoder
-    private static var standardDecoder: JSONDecoder {
-        let decoder = JSONDecoder()
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        decoder.dateDecodingStrategy = .formatted(formatter)
-        return decoder
-    }
     
     static func loadTomorrowScheduledPosts(from allPosts: [Post]) -> [Post] {
         let today = Date()
         guard let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today) else { return [] }
         return allPosts.filter { post in
-            // 1. CHECK STATUS FIRST
             let status = post.status?.uppercased() ?? ""
             guard status == "SCHEDULED" else { return false }
-            
-            // 2. CHECK DATE
             guard let scheduleDate = post.scheduledAt else { return false }
             return Calendar.current.isDate(scheduleDate, inSameDayAs: tomorrow)
         }
     }
 
-    static func loadScheduledPostsAfterDate(from allPosts: [Post]) -> [Post] {
+    static func loadScheduledPostsLater(from allPosts: [Post]) -> [Post] {
         let today = Date()
         guard let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today),
               let endOfTomorrow = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: tomorrow) else {
@@ -121,18 +76,12 @@ extension Post {
     }
     
     static func loadPublishedPosts(from allPosts: [Post]) -> [Post] {
-            return allPosts.filter { post in
-                // Check the 'status' column or if 'publishedAt' has a value
-                return post.status == "PUBLISHED" || post.publishedAt != nil
-            }
+        return allPosts.filter { post in
+            // Check the 'status' column or if 'publishedAt' has a value
+            return post.status == "PUBLISHED" || post.publishedAt != nil
         }
-    
-    static func loadAllPosts(from fileName: String) throws -> [Post] {
-        guard let url = Bundle.main.url(forResource: fileName, withExtension: "json") else {
-            return []
+        .sorted { $0.publishedAt ?? Date() > $1.publishedAt ?? Date()
         }
-        let data = try Data(contentsOf: url)
-        return try standardDecoder.decode([Post].self, from: data)
     }
 
     static func loadSavedPosts(from allPosts: [Post]) -> [Post] {
