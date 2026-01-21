@@ -3,13 +3,40 @@ import AuthenticationServices
 
 class AuthViewController: UIViewController, ASWebAuthenticationPresentationContextProviding {
 
+    
+    
+    @IBOutlet weak var twitterButton: UIButton!
+    
+    @IBOutlet weak var linkedInButton: UIButton!
+    @IBOutlet weak var instagramButton: UIButton!
     @IBOutlet weak var skipForNowButton: UIButton!
+    
+    
     var webAuthSession: ASWebAuthenticationSession?
     var onCompletion: ((Bool) -> Void)?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.setNavigationBarHidden(true, animated: false)
+    }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        Task {
+            let list = await SupabaseManager.shared.fetchConnectedPlatforms()
+            if list.contains("twitter") { markButtonAsConnected(twitterButton) }
+            if list.contains("linkedin") { markButtonAsConnected(linkedInButton) }
+            if list.contains("instagram") { markButtonAsConnected(instagramButton) }
+        }
+    }
+    func markButtonAsConnected(_ button: UIButton) {
+        DispatchQueue.main.async {
+            button.isUserInteractionEnabled = false // Make it unclickable
+            button.backgroundColor = .systemGray3   // Change background to grey
+            button.setTitleColor(.white, for: .normal)
+            button.setTitle("Connected ✓", for: .normal)
+            button.alpha = 1.0
+        }
     }
     
     // MARK: - Twitter Action
@@ -35,10 +62,11 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
                         DispatchQueue.main.async {
                             switch result {
                             case .success(let token):
-                                print("TWITTER TOKEN SECURED: \(token)")
-                                
                                 Task {
                                     await SupabaseManager.shared.saveSocialToken(platform: "twitter", token: token)
+                                    // 🚀 Add this line:
+                                    self.markButtonAsConnected(self.twitterButton)
+                                    
                                     self.handleSuccessfulLogin()
                                 }
                                 
@@ -49,6 +77,7 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
                     }
                 }
             }
+
         
         self.webAuthSession?.presentationContextProvider = self
         // Set to TRUE if want to force the login screen to appear every time

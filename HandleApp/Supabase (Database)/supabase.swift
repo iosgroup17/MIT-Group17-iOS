@@ -96,6 +96,21 @@ class SupabaseManager {
         }
     }
     
+    func fetchConnectedPlatforms() async -> [String] {
+        do {
+            let connections: [SocialConnection] = try await client
+                .from("social_connections")
+                .select()
+                .eq("user_id", value: currentUserID)
+                .execute()
+                .value
+            
+            return connections.map { $0.platform.lowercased() }
+        } catch {
+            return [] // If it fails, just return an empty list
+        }
+    }
+    
     // Save Social Token (Twitter/Instagram)
         func saveSocialToken(platform: String, token: String) async {
             let data = SocialConnection(
