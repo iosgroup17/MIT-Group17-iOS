@@ -88,7 +88,7 @@ extension UserIdeaViewController: UITableViewDelegate, UITableViewDataSource {
             } else {
                 btn.isHidden = true
             }
-        } 
+        }
         
         return cell
     }
@@ -113,49 +113,68 @@ extension UserIdeaViewController {
             showAnalysisMessage = true
         }
         
+
         Task {
+
             let profile = await SupabaseManager.shared.fetchUserProfile() ?? UserProfile(
-                    role: ["General User"],
-                    industry: ["General"],
-                    primaryGoals: ["Growth"],
-                    contentFormats: ["Text"],
-                    toneOfVoice: ["Friendly"],
-                    targetAudience: ["Everyone"]
-                )
+                role: ["General User"],
+                industry: ["General"],
+                primaryGoals: ["Growth"],
+                contentFormats: ["Text"],
+                toneOfVoice: ["Friendly"],
+                targetAudience: ["Everyone"]
+            )
             
-            GeminiService.shared.generateDraft(idea: query, profile: profile) { [weak self] result in
-                guard let self = self else { return }
+
+            do {
+                let draft = try await GeminiService.shared.generateDraft(idea: query, profile: profile)
                 
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let draft):
-                        self.handleSuccess(draft: draft)
-                        
-                    case .failure(let error):
-                        self.handleError(error: error)
-                    }
+                await MainActor.run {
+                    self.handleSuccess(draft: draft)
+                }
+
+            } catch {
+                await MainActor.run {
+                    self.handleError(error: error)
                 }
             }
         }
     }
     
+    
     func handleSuccess(draft: EditorDraftData) {
-        let tags = draft.hashtags?.joined(separator: " ") ?? ""
         
-        let displayText = """
-        ✨ Here is the draft:
+        let platform = draft.platformName
         
-        \(draft.caption ?? "No caption generated.")
-        
-        Hashtags:
-        \(tags)
-        """
+        let isStrategy = platform.lowercased() == "strategy"
 
-        let aiMessage = Message(text: displayText, isUser: false, draft: draft)
         
+        let tags = draft.hashtags?.joined(separator: " ") ?? ""
+
+        let displayText: String
+        
+        if isStrategy{
+            displayText = draft.caption ?? "Here is the information you requested."
+        } else {
+            displayText = """
+                ✨ Here is a draft:
+                
+                \(draft.caption ?? "No caption generated.")
+                
+                Hashtags:
+                \(tags)
+                """
+        }
+        
+
+        let draftPayload = isStrategy ? nil : draft
+               
+        let aiMessage = Message(text: displayText, isUser: false, draft: draftPayload)
+               
         self.messages.append(aiMessage)
         self.insertNewMessage()
     }
+        
         
         func handleError(error: Error) {
             print("AI Error: \(error.localizedDescription)")

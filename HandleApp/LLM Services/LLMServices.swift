@@ -5,6 +5,8 @@
 //  Created by SDC-USER on 09/01/26.
 //
 
+
+
 import Foundation
 
 class GeminiService {
@@ -26,15 +28,13 @@ class GeminiService {
     private init() {}
     
     
-    func generateDraft(idea: String, profile: UserProfile, completion: @escaping (Result<EditorDraftData, Error>) -> Void) {
-
+    func generateDraft(idea: String, profile: UserProfile) async throws -> EditorDraftData {
         let endpointString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=\(apiKey)"
-       
+        
         guard let url = URL(string: endpointString) else {
-            print("Invalid URL")
-            return
+            throw URLError(.badURL)
         }
- 
+
         let systemInstructionText = """
         You are an expert Social Media Manager and Strategist.
         
@@ -59,14 +59,13 @@ class GeminiService {
         Structure:
         {
             "platformName": "String (e.g., LinkedIn, Instagram, or 'Strategy' if answering a question)",
-            "platformIconName": "String (use 'icon-linkedin', 'icon-instagram', 'icon-twitter', or 'doc.text' for strategy)",
+            "platformIconName": "String (use 'linkedin', 'instagram', 'twitter', or 'doc.text' for strategy)",
             "caption": "String (The post content OR the answer to the user's question)",
-            "images": ["String (Visual description of image), or image-1, img_01, img-post-1"],
+            "images": ["String (Visual description of image)"],
             "hashtags": ["String"],
             "postingTimes": ["String"]
         }
         """
-       
 
         let parameters: [String: Any] = [
             "system_instruction": [
@@ -82,46 +81,42 @@ class GeminiService {
                 "response_mime_type": "application/json"
             ]
         ]
-       
+        
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try? JSONSerialization.data(withJSONObject: parameters)
+        request.httpBody = try JSONSerialization.data(withJSONObject: parameters)
 
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                DispatchQueue.main.async { completion(.failure(error)) }
-                return
-            }
-           
-            guard let data = data else { return }
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
 
-            do {
-                if let jsonResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   let candidates = jsonResponse["candidates"] as? [[String: Any]],
-                   let firstCandidate = candidates.first,
-                   let contentContainer = firstCandidate["content"] as? [String: Any],
-                   let parts = contentContainer["parts"] as? [[String: Any]],
-                   let text = parts.first?["text"] as? String,
-                   let contentData = text.data(using: .utf8) {
-                   
-                    let draft = try JSONDecoder().decode(EditorDraftData.self, from: contentData)
-                    DispatchQueue.main.async {
-                        completion(.success(draft))
-                    }
-                   
-                } else {
-                    if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                       let errorObj = json["error"] as? [String: Any],
-                       let msg = errorObj["message"] as? String {
-                        print("Gemini API Error: \(msg)")
-                    }
-                    throw NSError(domain: "GeminiService", code: 500, userInfo: [NSLocalizedDescriptionKey: "Failed to parse Gemini response"])
-                }
-            } catch {
-                print("Parsing Error: \(error)")
-                DispatchQueue.main.async { completion(.failure(error)) }
+        
+        if let httpResponse = response as? HTTPURLResponse, !(200...299).contains(httpResponse.statusCode) {
+
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let errorObj = json["error"] as? [String: Any],
+               let msg = errorObj["message"] as? String {
+                print("Gemini API Error: \(msg)")
             }
-        }.resume()
+            throw NSError(domain: "GeminiService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Server returned error code: \(httpResponse.statusCode)"])
+        }
+
+
+        guard let jsonResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let candidates = jsonResponse["candidates"] as? [[String: Any]],
+              let firstCandidate = candidates.first,
+              let contentContainer = firstCandidate["content"] as? [String: Any],
+              let parts = contentContainer["parts"] as? [[String: Any]],
+              let text = parts.first?["text"] as? String,
+              let contentData = text.data(using: .utf8) else {
+            
+            throw NSError(domain: "GeminiService", code: 500, userInfo: [NSLocalizedDescriptionKey: "Failed to parse Gemini response structure"])
+        }
+
+
+        let draft = try JSONDecoder().decode(EditorDraftData.self, from: contentData)
+        
+        return draft
     }
 }
