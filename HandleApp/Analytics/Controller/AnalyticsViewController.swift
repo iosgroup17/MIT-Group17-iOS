@@ -1,6 +1,6 @@
 import UIKit
 
-// MARK: - Modern Animation Helper
+// Concurrency using Animation Helper
 extension UIView {
     // A helper to perform UIView animations using Swift Concurrency (async/await)
     static func animateAsync(duration: TimeInterval, delay: TimeInterval = 0, options: UIView.AnimationOptions = [], animations: @escaping () -> Void) async -> Bool {
@@ -8,6 +8,10 @@ extension UIView {
             UIView.animate(withDuration: duration, delay: delay, options: options, animations: animations) { finished in
                 continuation.resume(returning: finished)
             }
+
+            // withCheckedContinuation is bridge between delegate/callback-based APIs and async/await as in it is used to create an async function that can be awaited.
+
+            // animateAsync function is used coz otherwise we would have had to use UIView.animate with closures causing extensive nesting
         }
     }
 }
@@ -36,6 +40,7 @@ class AnalyticsViewController: UIViewController {
         self.navigationItem.rightBarButtonItem = linkButton
     }
    
+//    used to present auth screen modally
     func manageConnections() {
         let storyboard = UIStoryboard(name: "Analytics", bundle: nil)
         if let authVC = storyboard.instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController {
@@ -44,6 +49,7 @@ class AnalyticsViewController: UIViewController {
         }
     }
     
+    // i button function
     @IBAction func didTapHandleScoreInfo(_ sender: Any) {
         let alert = UIAlertController(
             title: "What is Handle Score?",
@@ -54,6 +60,7 @@ class AnalyticsViewController: UIViewController {
         self.present(alert, animated: true, completion: nil)
     }
     
+    // suggestion card animation and toasts
     @IBAction func didTapDismissSuggestion(_ sender: UIButton) {
         guard let cardView = sender.superview else { return }
 
@@ -74,7 +81,7 @@ class AnalyticsViewController: UIViewController {
         showToast(message: "Applying Suggestion...", isSuccess: true)
     }
     
-    // MARK: - Setup Functions
+    //  Setup Functions
     func setupDesign() {
         self.view.tintColor = UIColor.systemTeal
     }
@@ -83,7 +90,7 @@ class AnalyticsViewController: UIViewController {
         print("Data setup complete")
     }
     
-    // MARK: - Modern Toast Logic with Concurrency
+    // Modern Toast Logic with Concurrency
     func showToast(message: String, isSuccess: Bool) {
 
         let toastView = UIView()

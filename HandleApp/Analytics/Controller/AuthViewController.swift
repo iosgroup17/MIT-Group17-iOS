@@ -3,7 +3,7 @@ import AuthenticationServices
 
 class AuthViewController: UIViewController, ASWebAuthenticationPresentationContextProviding {
 
-    
+    // adopting ASWebAuthenticationPresentationContextProviding protocol to provide presentation anchor for ASWebAuthenticationSession
     
     @IBOutlet weak var twitterButton: UIButton!
     
@@ -12,13 +12,14 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
     @IBOutlet weak var skipForNowButton: UIButton!
     
     
-    var webAuthSession: ASWebAuthenticationSession?
-    var onCompletion: ((Bool) -> Void)?
+    var webAuthSession: ASWebAuthenticationSession? // to hold the authentication session
+    var onCompletion: ((Bool) -> Void)? //this is a closure to notify when auth is complete it is used here to inform AnalyticsVC about successful connection as in handleSuccessfulLogin function
 
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.setNavigationBarHidden(true, animated: false)
     }
+    // disable buttons if they're already connected 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -29,6 +30,8 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
             if list.contains("instagram") { markButtonAsConnected(instagramButton) }
         }
     }
+
+    // disable buttons if they're already connected 
     func markButtonAsConnected(_ button: UIButton) {
         DispatchQueue.main.async {
             button.isUserInteractionEnabled = false // Make it unclickable
@@ -43,8 +46,13 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
     @IBAction func didTapTwitter(_ sender: UIButton) {
         print("Starting Twitter Auth...")
         
+        // create a URL that includes your "Client ID" and a "Code Challenge" 
+        // guard let here unwraps safely, if nil then it returns immediately
         guard let authURL = SocialAuthManager.shared.getTwitterAuthURL(),
-              let url = URL(string: authURL) else { return }
+              let url = URL(string: authURL) else { return } 
+              // this converts the string URL to URL object
+
+
         
         self.webAuthSession = ASWebAuthenticationSession(
             url: url,
@@ -53,18 +61,20 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
                 guard let self = self else { return }
                 if let error = error { print("Auth Failed: \(error.localizedDescription)"); return }
                 
+                // extracting code from the redirect URL is done by getQueryStringParameter function
                 if let callbackURL = callbackURL,
                    let code = self.getQueryStringParameter(url: callbackURL.absoluteString, param: "code") {
                     
                     print("Got Twitter Code: \(code)")
                     
+                    // exchange the code for a permanent access token (PAT)
                     SocialAuthManager.shared.exchangeTwitterCodeForToken(code: code) { result in
                         DispatchQueue.main.async {
+                            // dispatch to main thread to update UI to update db and change color
                             switch result {
                             case .success(let token):
                                 Task {
                                     await SupabaseManager.shared.saveSocialToken(platform: "twitter", token: token)
-                                    // 🚀 Add this line:
                                     self.markButtonAsConnected(self.twitterButton)
                                     
                                     self.handleSuccessfulLogin()
@@ -80,8 +90,8 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
 
         
         self.webAuthSession?.presentationContextProvider = self
-        // Set to TRUE if want to force the login screen to appear every time
-        // Set to FALSE if want it to remember
+        // true if we want to force the login screen to appear every time
+        // false if want it to remember
         self.webAuthSession?.prefersEphemeralWebBrowserSession = true
         self.webAuthSession?.start()
     }
@@ -124,7 +134,7 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
         print("Starting LinkedIn Auth...")
         
         let authURL = SocialAuthManager.shared.getLinkedInAuthURL()
-        guard let url = URL(string: authURL) else { return }
+        guard let url = URL(string: a   uthURL) else { return }
         
         self.webAuthSession = ASWebAuthenticationSession(
             url: url,
@@ -173,6 +183,7 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
     
     func handleSuccessfulLogin() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            // wait 0.5 s and then segue back to analytics screen
             self.performSegue(withIdentifier: "goToAnalytics", sender: self)
         }
     }

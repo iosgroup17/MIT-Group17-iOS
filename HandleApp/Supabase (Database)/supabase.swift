@@ -114,7 +114,7 @@ class SupabaseManager {
     // Save Social Token (Twitter/Instagram)
         func saveSocialToken(platform: String, token: String) async {
             let data = SocialConnection(
-                user_id: currentUserID, // Uses your existing helper
+                user_id: currentUserID, 
                 platform: platform,
                 access_token: token
             )

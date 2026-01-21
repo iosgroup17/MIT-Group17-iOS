@@ -9,13 +9,13 @@ import Foundation
 
 class SocialAuthManager {
     static let shared = SocialAuthManager()
-   
-    // MARK: - CONFIGURATION (SECURE)
-   
+    // singleton design pattern to have a single instance throughout the app
+      
     // TWITTER (X)
     // We use the computed property to fetch fresh from AppConfig
     private var twitterClientID: String { AppConfig.twitterClientID }
     private let twitterRedirectURI = "handleapp://callback"
+    // Twitter allows for Native App Redirection using a Custom URL Scheme
    
     // INSTAGRAM
     private var instagramAppID: String { AppConfig.instagramAppID }
@@ -34,7 +34,12 @@ class SocialAuthManager {
     // MARK: - TWITTER (X) AUTH FLOW
    
     func getTwitterAuthURL() -> String? {
+
+
+        // generates a Verifier and a Challenge
+        // sends challenge to twitter twitter sends a code back 
         let verifier = PKCEHelper.generateCodeVerifier()
+        // Proof Key for Code Exchange (PKCE) for enhanced security
         self.currentTwitterVerifier = verifier
        
         guard let challenge = PKCEHelper.generateCodeChallenge(from: verifier) else {
@@ -43,27 +48,35 @@ class SocialAuthManager {
         }
        
         let scope = "tweet.read users.read offline.access"
+        // scopes for read access and offline access (refresh tokens)
         let state = "random_state_string"
+        // antiforgery state parameter
        
         let urlString = "https://twitter.com/i/oauth2/authorize?response_type=code&client_id=\(twitterClientID)&redirect_uri=\(twitterRedirectURI)&scope=\(scope)&state=\(state)&code_challenge=\(challenge)&code_challenge_method=S256"
        
+
+        //    converts special characters to percent-encoded format for URL
         return urlString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
     }
    
     func exchangeTwitterCodeForToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
+
+        // send code + real verifier (secret) to get access token
         guard let url = URL(string: "https://api.twitter.com/2/oauth2/token") else { return }
         guard let verifier = currentTwitterVerifier else {
             completion(.failure(NSError(domain: "AuthError", code: 400, userInfo: [NSLocalizedDescriptionKey: "Missing PKCE Verifier"])))
             return
         }
 
+    //    sending a post request to exchange code for access token
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-       
+
         let bodyString = "code=\(code)&grant_type=authorization_code&client_id=\(twitterClientID)&redirect_uri=\(twitterRedirectURI)&code_verifier=\(verifier)"
         request.httpBody = bodyString.data(using: .utf8)
        
+
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error { completion(.failure(error)); return }
             guard let data = data else { return }
@@ -79,6 +92,8 @@ class SocialAuthManager {
                 completion(.failure(error))
             }
         }.resume()
+
+        // Asynchronous HTTP POST Request that handles the response from the Twitter API json->swift dictionary
     }
    
     // MARK: - INSTAGRAM (GRAPH API) AUTH FLOW
