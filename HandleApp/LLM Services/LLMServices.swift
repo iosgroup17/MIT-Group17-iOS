@@ -59,7 +59,7 @@ class GeminiService {
         Structure:
         {
             "platformName": "String (e.g., LinkedIn, Instagram, or 'Strategy' if answering a question)",
-            "platformIconName": "String (use 'linkedin', 'instagram', 'twitter', or 'doc.text' for strategy)",
+            "platformIconName": "String (use 'icon-linkedin', 'icon-instagram', 'icon-twitter', or 'doc.text' for strategy)",
             "caption": "String (The post content OR the answer to the user's question)",
             "images": ["String (Visual description of image)"],
             "hashtags": ["String"],

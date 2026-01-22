@@ -113,8 +113,6 @@ class OnboardingViewController: UIViewController {
             backButton.isHidden = false
         }
         
-        backButton.isHidden = (index == 0)
-        
         if index < 2 {
             skipButton.isHidden = true
         } else {
