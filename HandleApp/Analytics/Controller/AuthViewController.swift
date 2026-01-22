@@ -134,7 +134,7 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
         print("Starting LinkedIn Auth...")
         
         let authURL = SocialAuthManager.shared.getLinkedInAuthURL()
-        guard let url = URL(string: a   uthURL) else { return }
+        guard let url = URL(string: authURL) else { return }
         
         self.webAuthSession = ASWebAuthenticationSession(
             url: url,
