@@ -293,13 +293,13 @@
         <!--Editor Suite-->
         <scene sceneID="Pw1-Gg-cE5">
             <objects>
-                <viewController storyboardIdentifier="EditorSuiteViewController" automaticallyAdjustsScrollViewInsets="NO" useStoryboardIdentifierAsRestorationIdentifier="YES" id="5Es-wD-mmQ" customClass="EditorSuiteViewController" customModule="HandleApp" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="EditorModalEntry" automaticallyAdjustsScrollViewInsets="NO" useStoryboardIdentifierAsRestorationIdentifier="YES" id="5Es-wD-mmQ" customClass="EditorSuiteViewController" customModule="HandleApp" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="end-aC-vrT">
                         <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hjg-p5-3eo">
-                                <rect key="frame" x="0.0" y="230" width="402" height="527"/>
+                                <rect key="frame" x="0.0" y="178" width="402" height="628"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="4dy-69-Rw6">
                                         <rect key="frame" x="0.0" y="0.0" width="402" height="935.33333333333337"/>
@@ -352,7 +352,7 @@
                                                 </cells>
                                             </collectionView>
                                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="hek-gE-fig">
-                                                <rect key="frame" x="16" y="302.33333333333337" width="370" height="100"/>
+                                                <rect key="frame" x="16" y="302.33333333333331" width="370" height="100"/>
                                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="100" id="HYP-Kp-zBm"/>
@@ -817,20 +817,20 @@
             <point key="canvasLocation" x="2782" y="806"/>
         </scene>
         <!--Navigation Controller-->
-        <scene sceneID="y9d-JK-xdg">
+        <scene sceneID="ZKM-do-qlu">
             <objects>
-                <navigationController storyboardIdentifier="EditorModalEntry" id="mGh-Kb-au4" sceneMemberID="viewController">
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="0aP-wd-Pby">
+                <navigationController id="dlF-b2-8uQ" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="kxP-sn-3Zr">
                         <rect key="frame" x="0.0" y="124" width="402" height="54"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
-                        <segue destination="5Es-wD-mmQ" kind="relationship" relationship="rootViewController" id="xCD-Xp-The"/>
+                        <segue destination="5Es-wD-mmQ" kind="relationship" relationship="rootViewController" id="IW9-7Y-YeL"/>
                     </connections>
                 </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="SE5-gh-z7P" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="5PH-Yn-yqT" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1851" y="1461"/>
+            <point key="canvasLocation" x="1924" y="1536"/>
         </scene>
         <!--Discover-->
         <scene sceneID="W1D-PK-AS8">
@@ -853,7 +853,7 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="DwR-tX-FwO"/>
+        <segue reference="IW9-7Y-YeL"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="chevron.right" catalog="system" width="97" height="128"/>

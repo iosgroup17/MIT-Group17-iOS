@@ -12,8 +12,12 @@ class PostsViewController: UIViewController {
 
     @IBOutlet weak var dateStackView: UIStackView!
     @IBOutlet weak var weekDayStackView: UIStackView!
+    @IBOutlet weak var cardTableView: UIView!
     @IBOutlet weak var monthLabel: UILabel!
     
+    @IBOutlet weak var shadowTableView: UIView!
+    @IBOutlet weak var calendarCardView: UIView!
+    @IBOutlet weak var calendarShadowView: UIView!
     @IBOutlet weak var publishedStackView: UIStackView!
     @IBOutlet weak var scheduledStackView: UIStackView!
     @IBOutlet weak var savedStackView: UIStackView!
@@ -32,6 +36,14 @@ class PostsViewController: UIViewController {
         let calendar = Calendar.current
         currentWeekStartDate = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())) ?? Date()
         setupCustomCalendar(for: currentWeekStartDate) // Pass the starting date
+        
+        calendarShadowView.layer.shadowColor = UIColor.black.cgColor
+        calendarShadowView.layer.shadowOffset = CGSize(width: 0, height: 4)
+        calendarShadowView.layer.shadowRadius = 8
+        calendarShadowView.layer.shadowOpacity = 0.1
+
+
+        calendarCardView.layer.cornerRadius = 8
 
         //tap gesture for each stack to navigate.
         let tapSavedGesture = UITapGestureRecognizer(target: self, action: #selector(savedStackTapped))
@@ -47,10 +59,22 @@ class PostsViewController: UIViewController {
         applyPillShadowStyle(to: publishedStackView)
         applyPillShadowStyle(to: scheduledStackView)
         applyPillShadowStyle(to: savedStackView)
+        
+        
 
         updateTableViewHeight()
         postsTableView.dataSource = self
         postsTableView.delegate = self
+        
+        shadowTableView.layer.shadowColor = UIColor.black.cgColor
+        shadowTableView.layer.shadowOffset = CGSize(width: 0, height: 4)
+        shadowTableView.layer.shadowRadius = 8
+        shadowTableView.layer.shadowOpacity = 0.1
+
+
+        cardTableView.layer.cornerRadius = 16
+        
+
     }
     override func viewWillAppear(_ animated: Bool) {
             super.viewWillAppear(animated)
@@ -89,18 +113,41 @@ class PostsViewController: UIViewController {
     func addWeekdayLabels() {
         let daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
         weekDayStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        let todayIndex = weekdayIndex(for: Date())
             
-        for day in daysOfWeek {
+        for (index,day) in daysOfWeek.enumerated() {
             let label = UILabel()
             label.text = day
             label.textAlignment = .center
-            label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+            label.font = UIFont.systemFont(ofSize: 11, weight: .semibold)
             label.textColor = .systemGray
+            
+            let container = UIView()
+            container.addSubview(label)
+            label.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                label.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+                label.centerYAnchor.constraint(equalTo: container.centerYAnchor, constant: -3)
+            ])
+            
+            // Handle Selection Background
+            if index == todayIndex {
+                container.backgroundColor = .systemTeal.withAlphaComponent(70/255)
+                container.layer.cornerRadius = 18
+                container.clipsToBounds = true
+                container.heightAnchor.constraint(equalToConstant: 36).isActive = true
+            } else {
+                container.heightAnchor.constraint(equalToConstant: 36).isActive = true
+            }
             
             weekDayStackView.addArrangedSubview(label)
         }
     }
-            
+    
+    func weekdayIndex(for date: Date) -> Int {
+        return Calendar.current.component(.weekday, from: date) - 1
+    }
+    
     func addDateViews(startingFrom startDate: Date) {
         let calendar = Calendar.current
         let selectedDate = Date()
@@ -133,26 +180,32 @@ class PostsViewController: UIViewController {
         let label = UILabel()
         label.text = date
         label.textAlignment = .center
-        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        label.font = UIFont.preferredFont(forTextStyle: .callout)
         label.textColor = .label
             
         let container = UIView()
-        container.addSubview(label)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            label.centerXAnchor.constraint(equalTo: container.centerXAnchor),
-            label.centerYAnchor.constraint(equalTo: container.centerYAnchor, constant: -3)
-        ])
-        
-        // Handle Selection Background
-        if isSelected {
-            container.backgroundColor = .systemTeal.withAlphaComponent(70/255)
-            container.layer.cornerRadius = 18
-            container.clipsToBounds = true
-            container.heightAnchor.constraint(equalToConstant: 36).isActive = true
-        } else {
-            container.heightAnchor.constraint(equalToConstant: 36).isActive = true
-        }
+            container.addSubview(label)
+            label.translatesAutoresizingMaskIntoConstraints = false
+            
+            // 1. Set translatesAutoresizingMaskIntoConstraints to false for the container
+            container.translatesAutoresizingMaskIntoConstraints = false
+
+            NSLayoutConstraint.activate([
+                label.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+                label.centerYAnchor.constraint(equalTo: container.centerYAnchor, constant: -3),
+                
+                // 2. Force the container to be a square
+                container.heightAnchor.constraint(equalToConstant: 32),
+                container.widthAnchor.constraint(equalToConstant: 32)
+            ])
+
+            if isSelected {
+                container.backgroundColor = .systemTeal.withAlphaComponent(40/255)
+                // 3. Corner radius should be half of the height/width
+                container.layer.cornerRadius = 16
+                container.clipsToBounds = true
+                label.textColor = .systemTeal
+            }
         
         // Handle Indicator Dotselected
         if indicatorColor != .clear && !isSelected {
@@ -213,12 +266,12 @@ class PostsViewController: UIViewController {
     //Capsules for saved, scheduled and published posts.
     func applyPillShadowStyle(to stackView: UIStackView) {
         stackView.backgroundColor = .white
-        stackView.layer.cornerRadius = 16
+        stackView.layer.cornerRadius = 12
         stackView.clipsToBounds = false
         stackView.layer.shadowColor = UIColor.black.cgColor
         stackView.layer.shadowOpacity = 0.1
-        stackView.layer.shadowOffset = CGSize(width: 0, height: 2)
-        stackView.layer.shadowRadius = 4
+        stackView.layer.shadowOffset = CGSize(width: 0, height: 1)
+        stackView.layer.shadowRadius = 2
     }
 
     //Functions to navigate to the specific posts screen.
