@@ -3,78 +3,77 @@ import UIKit
 import Supabase
 
 // MARK: - Main Data Container
-// struct just holds the data fetched ..doesn't load 
-struct PostIdeasResponse {
-    var topIdeas: [TopIdea] = []
+struct DiscoverIdeaResponse {
     var trendingTopics: [TrendingTopic] = []
-    var topicIdeas: [TopicIdeaGroup] = []
-    var recommendations: [Recommendation] = []
+    var publishReadyPosts: [PublishReadyPost] = []
+    var topicDetails: [TopicDetail] = []
     var selectedPostDetails: [PostDetail] = []
 }
 
-struct TopIdea: Codable, Identifiable {
+struct TrendingTopic: Codable {
     let id: String
-    let caption: String
-    let image: String?
-    let whyThisPost: [String]
-    let platformName: String
-
-    enum CodingKeys: String, CodingKey {
-        case id, caption, image
-        case whyThisPost = "why_this_post"
-        case platformName = "platform_name"
-    }
-}
-
-struct TrendingTopic: Codable, Identifiable {
-    let id: String
-    let name: String
-    let icon: String
-    
-    var color: UIColor {
-        switch id {
-        case "topic_1": return UIColor.systemBlue
-        case "topic_2": return UIColor.systemGreen
-        case "topic_3": return UIColor.systemOrange
-        case "topic_4": return UIColor.systemPurple
-        case "topic_5": return UIColor.systemPink
-        default:        return UIColor.systemGray
-        }
-    }
-}
-
-struct TopicIdeaGroup {
-    let topicId: String
-    let ideas: [TopicIdea]
-}
-
-struct TopicIdea: Codable, Identifiable {
-    let id: String
-    let topicId: String
-    let caption: String
-    let whyThisPost: String
-    let image: String?
+    let topicName: String
+    let shortDescription: String
     let platformIcon: String
+    let hashtags: [String]
 
     enum CodingKeys: String, CodingKey {
-        case id, caption, image
-        case topicId = "topic_id"
-        case whyThisPost = "why_this_post"
+        case id, hashtags
+        case topicName = "topic_name"
+        case shortDescription = "short_description"
         case platformIcon = "platform_icon"
     }
 }
 
-struct Recommendation: Codable, Identifiable {
+struct PublishReadyPost: Codable {
     let id: String
+    let topicDetailId: String?
+    let postHeading: String
+    let platformIcon: String
     let caption: String
-    let whyThisPost: String
-    let image: String?
-    let platform: String
+    let postImage: [String]?
+    let hashtags: [String]
+    let predictionText: String
+    
+    enum CodingKeys: String, CodingKey {
+        case id, caption, hashtags
+        case topicDetailId = "topic_detail_id"
+        case postHeading = "post_heading"
+        case platformIcon = "platform_icon"
+        case postImage = "post_image"
+        case predictionText = "prediction_text"
+    }
+}
+
+struct TopicDetail: Codable {
+    let id: String
+    let topicId: String
+    let contextDescription: String
+    var actions: [TopicAction]?
+    var relevantPosts: [PublishReadyPost]?
 
     enum CodingKeys: String, CodingKey {
-        case id, caption, image
-        case whyThisPost = "why_this_post"
-        case platform = "platform_icon"
+        case id
+        case topicId = "topic_id"
+        case contextDescription = "context_description"
+        case actions
+        case relevantPosts
+    }
+}
+
+struct TopicAction: Codable {
+    let topicDetailId: String
+    let callToAction: String
+    let actionDescription: String
+    let destinationUrl: String?
+    let actionIcon: String?
+
+    enum CodingKeys: String, CodingKey {
+        case topicDetailId = "topic_detail_id"
+        case callToAction = "call_to_action"
+        case actionIcon = "action_icon"
+        case actionDescription = "action_description"
+        case destinationUrl = "destination_url"
     }
 }
 

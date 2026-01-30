@@ -200,44 +200,79 @@ extension SupabaseManager {
     
     
     //load the multiple type of post idea and formats
-    func loadPostsIdeas() async throws -> PostIdeasResponse {
+    func loadPostsIdeas() async throws -> DiscoverIdeaResponse {
         
         print("Fetching data from Supabase...")
         
-        //fetch all tables in parallel
-        async let topIdeasQuery: [TopIdea] = client.from("top_ideas").select().execute().value
-        async let topicsQuery: [TrendingTopic] = client.from("trending_topics").select().execute().value
-        async let recommendationsQuery: [Recommendation] = client.from("recommendations").select().execute().value
-        async let postDetailsQuery: [PostDetail] = client.from("post_details").select().execute().value
-        
-        //fetch flat list of topic ideas (group them later)
-        async let flatTopicIdeasQuery: [TopicIdea] = client.from("topic_ideas").select().execute().value
+        // 1. Fetch Trending Topics
+        async let trendingQuery: [TrendingTopic] = client
+            .from("trending_topics")
+            .select()
+            .execute()
+            .value
+            
+        // 2. Fetch ALL Topic Details (Flat list)
+        async let detailsQuery: [TopicDetail] = client
+            .from("topic_details")
+            .select()
+            .execute()
+            .value
 
-        let (topIdeas, trendingTopics, recommendations, postDetails, flatTopicIdeas) = try await (
-            topIdeasQuery,
-            topicsQuery,
-            recommendationsQuery,
-            postDetailsQuery,
-            flatTopicIdeasQuery
+        // 3. Fetch ALL Actions (Flat list)
+        async let actionsQuery: [TopicAction] = client
+            .from("topic_actions")
+            .select()
+            .execute()
+            .value
+
+        // 4. Fetch ALL Publish Ready Posts (Flat list)
+        async let postsQuery: [PublishReadyPost] = client
+            .from("publish_ready_posts")
+            .select()
+            .execute()
+            .value
+        
+        // 5. Fetch Post Details (Flat list)
+        async let postDetailsQuery: [PostDetail] = client
+            .from("post_details")
+            .select()
+            .execute()
+            .value
+
+        // Await all results
+        let (trending, flatDetails, allActions, allPosts, postDetails) = try await (
+            trendingQuery,
+            detailsQuery,
+            actionsQuery,
+            postsQuery,
+            postDetailsQuery
         )
         
-        // process the data (group topic ideas into sections)
-        // group by topic_id
-        let groupedIdeas = Dictionary(grouping: flatTopicIdeas, by: { $0.topicId })
+        // MARK: - Process Data in Swift
+        // Now we manually group the items, just like your previous code.
         
-        //map to TopicIdeaGroup struct
-        let topicIdeaGroups = groupedIdeas.map { (key, value) in
-            TopicIdeaGroup(topicId: key, ideas: value)
+        // 1. Group Actions by 'topic_detail_id'
+        // (We need to add topic_detail_id to the TopicAction struct for this to work!)
+        let groupedActions = Dictionary(grouping: allActions, by: { $0.topicDetailId })
+        
+        // 2. Group Posts by 'topic_detail_id'
+        // (We need to add topic_detail_id to the PublishReadyPost struct too!)
+        let groupedPosts = Dictionary(grouping: allPosts, by: { $0.topicDetailId ?? "independent" })
+        
+        // 3. Map the Details to include their children
+        let populatedDetails = flatDetails.map { detail -> TopicDetail in
+            var newDetail = detail
+            newDetail.actions = groupedActions[detail.id] ?? []
+            newDetail.relevantPosts = groupedPosts[detail.id] ?? []
+            return newDetail
         }
         
-        print("Data fetched successfully!")
+        print("Data fetched and grouped successfully!")
         
-        //return the combined object
-        return PostIdeasResponse(
-            topIdeas: topIdeas,
-            trendingTopics: trendingTopics,
-            topicIdeas: topicIdeaGroups,
-            recommendations: recommendations,
+        return DiscoverIdeaResponse(
+            trendingTopics: trending,
+            publishReadyPosts: allPosts, // This contains all posts (Home screen needs this)
+            topicDetails: populatedDetails, // This contains nested data (Detail screen needs this)
             selectedPostDetails: postDetails
         )
     }
