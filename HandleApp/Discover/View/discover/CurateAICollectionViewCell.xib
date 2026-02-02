@@ -63,6 +63,9 @@
                                                 <buttonConfiguration key="configuration" style="filled" image="sparkles" catalog="system" title="Create Post">
                                                     <color key="baseBackgroundColor" systemColor="systemTealColor"/>
                                                 </buttonConfiguration>
+                                                <connections>
+                                                    <action selector="createButtonTapped:" destination="gTV-IL-0wX" eventType="touchUpInside" id="VGw-mI-W5c"/>
+                                                </connections>
                                             </button>
                                         </subviews>
                                     </stackView>
@@ -97,9 +100,10 @@
             </constraints>
             <connections>
                 <outlet property="cardContainer" destination="eqp-HR-RCl" id="9OZ-8b-iFj"/>
+                <outlet property="createActionButton" destination="zv2-Bs-9b9" id="ULY-eu-lGF"/>
                 <outlet property="shadowContainer" destination="sdF-xR-Mkt" id="mxH-Jg-Ka4"/>
             </connections>
-            <point key="canvasLocation" x="138.93129770992365" y="153.16901408450704"/>
+            <point key="canvasLocation" x="138.93129770992365" y="152.81690140845072"/>
         </collectionViewCell>
     </objects>
     <resources>

@@ -103,13 +103,13 @@ class TopicIdeaViewController: UIViewController {
                 
                 let itemSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .absolute(80)
+                    heightDimension: .absolute(96)
                 )
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 
                 let groupSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .absolute(80)
+                    heightDimension: .absolute(96)
                 )
                 
                 let group = NSCollectionLayoutGroup.vertical(

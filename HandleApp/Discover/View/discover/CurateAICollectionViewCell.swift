@@ -11,6 +11,10 @@ class CurateAICollectionViewCell: UICollectionViewCell {
 
     @IBOutlet weak var shadowContainer: UIView!
     @IBOutlet weak var cardContainer: UIView!
+    @IBOutlet weak var createActionButton: UIButton!
+    
+    var didTapButtonAction: (() -> Void)?
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         
@@ -24,4 +28,7 @@ class CurateAICollectionViewCell: UICollectionViewCell {
         // Initialization code
     }
 
+    @IBAction func createButtonTapped(_ sender: UIButton) {
+        didTapButtonAction?()
+    }
 }

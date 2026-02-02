@@ -247,6 +247,10 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
                     for: indexPath
                 ) as! CurateAICollectionViewCell
                 
+                cell.didTapButtonAction = { [weak self] in
+                    self?.navigateToChat()
+                }
+                
                 return cell
                 
             }
@@ -295,6 +299,17 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
             
             return UICollectionViewCell()
         }
+    
+    func navigateToChat() {
+        let storyboard = UIStoryboard(name: "Discover", bundle: nil)
+        
+        //cast it to UserIdeaViewController based on your previous code
+        if let chatVC = storyboard.instantiateViewController(withIdentifier: "ChatViewController") as? UserIdeaViewController {
+            self.navigationController?.pushViewController(chatVC, animated: true)
+        } else {
+            print("Error: Could not find ChatViewController")
+        }
+    }
         
         func collectionView(_ collectionView: UICollectionView,
                             viewForSupplementaryElementOfKind kind: String,
@@ -316,20 +331,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
         }
         
         func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-            
-            if indexPath.section == 0 {
-                
-                
-                let storyboard = UIStoryboard(name: "Discover", bundle: nil) // Or "Main"
-                if let chatVC = storyboard.instantiateViewController(withIdentifier: "ChatViewController") as? UserIdeaViewController {
-                    self.navigationController?.pushViewController(chatVC, animated: true)
-                } else {
-                    print("ChatViewController not found in Storyboard")
-                }
-                return
-            
-            }
-           
+         
             if indexPath.section == 1 {
                 
                 let selectedTopic = trendingTopics[indexPath.row]
