@@ -18,7 +18,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         self.window = window
         
-        let alwaysShowOnboarding = false
+        let alwaysShowOnboarding = true
         
         let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
         
@@ -35,7 +35,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let storyboard = UIStoryboard(name: "Profile", bundle: nil) // Check your file name!
         
         // Instantiate the Quiz Parent VC
-        let onboardingVC = storyboard.instantiateViewController(withIdentifier: "OnboardingParentVC")
+        let onboardingVC = storyboard.instantiateViewController(withIdentifier: "LoginAuthVC")
  
         window.rootViewController = onboardingVC
     }

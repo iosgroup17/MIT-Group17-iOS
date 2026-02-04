@@ -14,11 +14,19 @@
 				<string>handleapp</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
+			</array>
+		</dict>
 	</array>
+	<key>GIDClientID</key>
+	<string>$(GOOGLE_CLIENT_ID)</string>
 	<key>GeminiAPIKey</key>
 	<string>$(GEMINI_API_KEY)</string>
-	<key>TwitterClientID</key>
-	<string>$(TWITTER_CLIENT_ID)</string>
 	<key>InstagramAppID</key>
 	<string>$(INSTAGRAM_APP_ID)</string>
 	<key>InstagramAppSecret</key>
@@ -27,6 +35,8 @@
 	<string>$(LINKEDIN_CLIENT_ID)</string>
 	<key>LinkedInClientSecret</key>
 	<string>$(LINKEDIN_CLIENT_SECRET)</string>
+	<key>TwitterClientID</key>
+	<string>$(TWITTER_CLIENT_ID)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
