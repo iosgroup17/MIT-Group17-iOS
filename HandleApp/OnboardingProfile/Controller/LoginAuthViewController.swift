@@ -30,7 +30,6 @@ class LoginAuthViewController: UIViewController {
         authorizationController.performRequests()
     }
 
-        // MARK: - Google Sign In
     @IBAction func handleGoogleSignIn(_ sender: UIButton) {
         GIDSignIn.sharedInstance.signIn(withPresenting: self) { signInResult, error in
             if let error = error {
