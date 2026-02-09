@@ -205,76 +205,65 @@ extension SupabaseManager {
         
         print("Fetching data from Supabase...")
         
-        // 1. Fetch Trending Topics
+        // 1. Fetch Trending Topics (The Parent Table)
         async let trendingQuery: [TrendingTopic] = client
             .from("trending_topics")
             .select()
             .execute()
             .value
-            
-        // 2. Fetch ALL Topic Details (Flat list)
-        async let detailsQuery: [TopicDetail] = client
-            .from("topic_details")
-            .select()
-            .execute()
-            .value
 
-        // 3. Fetch ALL Actions (Flat list)
+        // 2. Fetch ALL Actions (Linked via topic_id)
         async let actionsQuery: [TopicAction] = client
             .from("topic_actions")
             .select()
             .execute()
             .value
 
-        // 4. Fetch ALL Publish Ready Posts (Flat list)
+        // 3. Fetch ALL Publish Ready Posts (Linked via topic_id)
         async let postsQuery: [PublishReadyPost] = client
             .from("publish_ready_posts")
             .select()
             .execute()
             .value
         
-        // 5. Fetch Post Details (Flat list)
+        // 4. Fetch Post Details (Linked via id -> publish_ready_posts.id)
         async let postDetailsQuery: [PostDetail] = client
             .from("post_details")
             .select()
             .execute()
             .value
 
-        // Await all results
-        let (trending, flatDetails, allActions, allPosts, postDetails) = try await (
+        // 5. Await all results concurrently
+        let (trending, allActions, allPosts, allPostDetails) = try await (
             trendingQuery,
-            detailsQuery,
             actionsQuery,
             postsQuery,
             postDetailsQuery
         )
         
-        // MARK: - Process Data in Swift
-        // Now we manually group the items, just like your previous code.
-        
-        // 1. Group Actions by 'topic_detail_id'
-        // (We need to add topic_detail_id to the TopicAction struct for this to work!)
+        // MARK: - Process & Group Data
+
         let groupedActions = Dictionary(grouping: allActions, by: { $0.topicDetailId })
         
-        // 2. Group Posts by 'topic_detail_id'
-        // (We need to add topic_detail_id to the PublishReadyPost struct too!)
-        let groupedPosts = Dictionary(grouping: allPosts, by: { $0.topicDetailId ?? "independent" })
+
+        let groupedPosts = Dictionary(grouping: allPosts, by: { $0.id ?? "independent" })
         
-        // 3. Map the Details to include their children
-        let populatedDetails = flatDetails.map { detail -> TopicDetail in
-            var newDetail = detail
-            newDetail.actions = groupedActions[detail.id] ?? []
-            newDetail.relevantPosts = groupedPosts[detail.id] ?? []
-            return newDetail
+
+        let populatedTopics = trending.map { topic -> TrendingTopic in
+            var newTopic = topic
+            // Inject the children found in the dictionaries
+            newTopic.actions = groupedActions[topic.id] ?? []
+            newTopic.relevantPosts = groupedPosts[topic.id] ?? []
+            return newTopic
         }
         
         print("Data fetched and grouped successfully!")
         
+        // D. Return the response
         return DiscoverIdeaResponse(
-            trendingTopics: trending,
-            publishReadyPosts: allPosts, // This contains all posts (Home screen needs this)
-            topicDetails: populatedDetails, // This contains nested data (Detail screen needs this)
-            selectedPostDetails: postDetails
+            trendingTopics: populatedTopics,
+            publishReadyPosts: allPosts,
+            selectedPostDetails: allPostDetails
         )
     }
 }

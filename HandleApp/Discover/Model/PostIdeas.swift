@@ -6,7 +6,6 @@ import Supabase
 struct DiscoverIdeaResponse {
     var trendingTopics: [TrendingTopic] = []
     var publishReadyPosts: [PublishReadyPost] = []
-    var topicDetails: [TopicDetail] = []
     var selectedPostDetails: [PostDetail] = []
 }
 
@@ -16,12 +15,18 @@ struct TrendingTopic: Codable {
     let shortDescription: String
     let platformIcon: String
     let hashtags: [String]
+    let trendingContext: String
+    var actions: [TopicAction]?
+    var relevantPosts: [PublishReadyPost]?
 
     enum CodingKeys: String, CodingKey {
         case id, hashtags
         case topicName = "topic_name"
         case shortDescription = "short_description"
         case platformIcon = "platform_icon"
+        case trendingContext = "trending_context"
+        case actions
+        case relevantPosts
     }
 }
 
@@ -83,21 +88,6 @@ struct PublishReadyPost: Codable, Identifiable {
     }
 }
 
-struct TopicDetail: Codable {
-    let id: String
-    let topicId: String
-    let contextDescription: String
-    var actions: [TopicAction]?
-    var relevantPosts: [PublishReadyPost]?
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case topicId = "topic_id"
-        case contextDescription = "context_description"
-        case actions
-        case relevantPosts
-    }
-}
 
 struct TopicAction: Codable {
     let topicDetailId: String

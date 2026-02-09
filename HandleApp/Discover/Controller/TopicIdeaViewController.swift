@@ -11,7 +11,7 @@ class TopicIdeaViewController: UIViewController {
     
     @IBOutlet weak var collectionView: UICollectionView!
     
-    var topicDetail: TopicDetail?
+    var topic: TrendingTopic?
     var allPostDetails: [PostDetail] = []
     
     var pageTitle: String = "Topic Ideas"
@@ -178,14 +178,14 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        guard let detail = topicDetail else { return 0 }
+        guard let data = topic else { return 0 }
         
         if section == 0 {
-            return 1 // The "What's this about" card
+            return 1 
         } else if section == 1 {
-            return detail.actions?.count ?? 0
+            return data.actions?.count ?? 0
         } else {
-            return detail.relevantPosts?.count ?? 0
+            return data.relevantPosts?.count ?? 0
         }
     }
     
@@ -198,9 +198,9 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
             ) as! TopicDetailContextCollectionViewCell
             
             
-            if let text = topicDetail?.contextDescription {
-                cell.configure(with: text)
-            }
+            if let text = topic?.trendingContext {
+                            cell.configure(with: text)
+                        }
             
             return cell
         }
@@ -212,7 +212,7 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
             ) as! TopicActionCollectionViewCell
             
             
-            if let actions = topicDetail?.actions, indexPath.row < actions.count {
+            if let actions = topic?.actions, indexPath.row < actions.count {
                 let action = actions[indexPath.row]
                 cell.configure(with: action)
             }
@@ -222,18 +222,16 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
         
         if indexPath.section == 2 {
             // 1. Safely get the post object
-            guard let posts = topicDetail?.relevantPosts, indexPath.row < posts.count else {
-                return UICollectionViewCell() // Return empty if data is missing
+            guard let posts = topic?.relevantPosts, indexPath.row < posts.count else {
+                return UICollectionViewCell()
             }
             let post = posts[indexPath.row]
             
-            // 2. Check if it has images (Array exists AND is not empty)
-            // Note: post.postImage is [String]? so !images.isEmpty checks if it has items
+  
             if let images = post.postImage, !images.isEmpty {
-                
-                // --- USE IMAGE CELL ---
+
                 let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: "PublishReadyImageCollectionViewCell", // Make sure this XIB is registered!
+                    withReuseIdentifier: "PublishReadyImageCollectionViewCell",
                     for: indexPath
                 ) as! PublishReadyImageCollectionViewCell
                 
@@ -242,9 +240,9 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
                 
             } else {
                 
-                // --- USE TEXT CELL ---
+    
                 let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: "PublishReadyTextCollectionViewCell", // Make sure this XIB is registered!
+                    withReuseIdentifier: "PublishReadyTextCollectionViewCell",
                     for: indexPath
                 ) as! PublishReadyTextCollectionViewCell
                 
@@ -279,8 +277,8 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
         if indexPath.section == 1 {
-            // Safely unwrap the array first
-            guard let actions = topicDetail?.actions, indexPath.row < actions.count else { return }
+
+            guard let actions = topic?.actions, indexPath.row < actions.count else { return }
             
             let action = actions[indexPath.row]
             
@@ -291,7 +289,7 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
         
         if indexPath.section == 2 {
             
-            guard let posts = topicDetail?.relevantPosts, indexPath.row < posts.count else { return }
+            guard let posts = topic?.relevantPosts, indexPath.row < posts.count else { return }
             
             let previewPost = posts[indexPath.row]
             print("Selected ID: \(previewPost.id)")

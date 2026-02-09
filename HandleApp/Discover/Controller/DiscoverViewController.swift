@@ -15,7 +15,6 @@ class DiscoverViewController: UIViewController {
     var ideasResponse = DiscoverIdeaResponse()
     var trendingTopics: [TrendingTopic] = []
     var publishReadyPosts: [PublishReadyPost] = []
-    var topicDetails: [TopicDetail] = []
     
     var selectedPostDetails: [PostDetail] = []
     
@@ -24,7 +23,6 @@ class DiscoverViewController: UIViewController {
         
         trendingTopics = ideasResponse.trendingTopics
         publishReadyPosts = ideasResponse.publishReadyPosts
-        topicDetails = ideasResponse.topicDetails
         
         collectionView.delegate = self
         collectionView.dataSource = self
@@ -101,47 +99,40 @@ class DiscoverViewController: UIViewController {
     // In DiscoverViewController.swift
 
         func loadSupabaseData() async {
-            print("🚀 Starting Hybrid Data Load...")
+            print("Starting Data Load...")
             
             do {
-                // 1. Fetch Supabase Data (Trends, Details, etc.)
-                // We still need this to populate Section 1 (Trending Topics)
+
                 let fetchedData = try await SupabaseManager.shared.loadPostsIdeas()
                 
-                // 2. Fetch User Profile (Needed for the AI prompt context)
+
                 guard let userProfile = await SupabaseManager.shared.fetchUserProfile() else {
-                    print("⚠️ No user profile found. Cannot generate posts.")
+                    print("No user profile found. Cannot generate posts.")
                     return
                 }
-
-                // 3. Update UI with Supabase Data (Trends) immediately
-                await MainActor.run {
+            await MainActor.run {
                     self.ideasResponse = fetchedData
                     self.trendingTopics = fetchedData.trendingTopics
-                    self.topicDetails = fetchedData.topicDetails
-                    // We do NOT set self.publishReadyPosts here yet,
-                    // because we want to overwrite/fill them with AI data.
+
                     self.collectionView.reloadData()
                 }
                 
-                // 4. Select a Trend for the AI
-                // We grab the top trending topic to feed the generator
+                
                 let topTrendName = fetchedData.trendingTopics.first?.topicName ?? "Digital Marketing Trends"
                 let topTrendDesc = fetchedData.trendingTopics.first?.shortDescription ?? "Latest industry shifts"
                 let combinedTrendText = "\(topTrendName): \(topTrendDesc)"
                 
-                print("🤖 Generative AI: Starting generation for trend: \(topTrendName)")
-                
-                // 5. Generate Posts on Device
-                // Note: This might take 2-5 seconds depending on the device
+                print("Generative AI: Starting generation for trend: \(topTrendName)")
+
+
                 let generatedPosts = try await OnDevicePostEngine.shared.generatePublishReadyPosts(
                     trendText: combinedTrendText,
                     context: userProfile
                 )
                 
-                // 6. Update UI with AI Posts (Section 2)
+
                 await MainActor.run {
-                    print("✅ AI Generation Complete. Reloading Section 2.")
+                    print("AI Generation Complete. Reloading Section 2.")
                     self.publishReadyPosts = generatedPosts
                     
                     // Only reload the "Publish Ready" section (Section 2) to avoid flickering the trends
@@ -150,11 +141,11 @@ class DiscoverViewController: UIViewController {
                 }
                 
                 // 7. (Optional) Save these generated posts back to Supabase?
-                // If you want them to persist for next time, uncomment below:
+                // to persist for next time, uncomment below:
                 // try await SupabaseManager.shared.saveGeneratedPosts(generatedPosts)
                 
             } catch {
-                print("❌ Error in Hybrid Load: \(error.localizedDescription)")
+                print("Error in Hybrid Load: \(error.localizedDescription)")
             }
         }
     
@@ -362,8 +353,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
     
     func navigateToChat() {
         let storyboard = UIStoryboard(name: "Discover", bundle: nil)
-        
-        //cast it to UserIdeaViewController based on your previous code
+  
         if let chatVC = storyboard.instantiateViewController(withIdentifier: "ChatViewController") as? UserIdeaViewController {
             self.navigationController?.pushViewController(chatVC, animated: true)
         } else {
@@ -393,39 +383,29 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
         func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
          
             if indexPath.section == 1 {
-                
-                let selectedTopic = trendingTopics[indexPath.row]
-                //let selectedID = selectedTopic.id
-                let selectedName = selectedTopic.topicName
-                
-                let matchingDetail = topicDetails.first(where: { $0.topicId == selectedTopic.id })
-                        
-                        if matchingDetail == nil {
-                            print("ERROR: No detail found for topic: \(selectedTopic.topicName). Check Supabase IDs.")
-                        }
-                
-                
-                let storyboard = UIStoryboard(name: "Discover", bundle: nil)
-                        if let destVC = storyboard.instantiateViewController(withIdentifier: "TopicIdeasVC") as? TopicIdeaViewController {
+                    
+                    let selectedTopic = trendingTopics[indexPath.row]
+                    
+                    print("Selected Topic: \(selectedTopic.topicName)")
 
-                            destVC.topicDetail = matchingDetail
-                            destVC.allPostDetails = selectedPostDetails
-                            destVC.pageTitle = selectedTopic.topicName
-                            
-                            navigationController?.pushViewController(destVC, animated: true)
-                        }
-                
-                
-                print("Selected Trending Topic: \(selectedName)")
-                return
-                
-            }
+ 
+                    let storyboard = UIStoryboard(name: "Discover", bundle: nil)
+                    if let destVC = storyboard.instantiateViewController(withIdentifier: "TopicIdeasVC") as? TopicIdeaViewController {
+
+                        destVC.topic = selectedTopic
+                        
+                        destVC.allPostDetails = selectedPostDetails
+                        destVC.pageTitle = selectedTopic.topicName
+                        
+                        navigationController?.pushViewController(destVC, animated: true)
+                    }
+                    return
+                }
             
             
             if indexPath.section == 2 {
                 let selectedPost = publishReadyPosts[indexPath.row]
-                        
-                        // 1. Show loading
+    
                         self.showLoading()
                         
                         Task {
@@ -434,8 +414,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
                                     await MainActor.run { self.hideLoading() }
                                     return
                                 }
-                                
-                                // 2. AI expands the short "Idea" into a full "Draft"
+  
                                 let finalDraft = try await OnDevicePostEngine.shared.refinePostForEditor(
                                     post: selectedPost,
                                     context: profile
@@ -443,8 +422,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
                                 
                                 await MainActor.run {
                                     self.hideLoading()
-                                    
-                                    // 3. Send the polished draft to the Editor
+
                                     self.performSegue(withIdentifier: "ShowEditorSegue", sender: finalDraft)
                                 }
                             } catch {
