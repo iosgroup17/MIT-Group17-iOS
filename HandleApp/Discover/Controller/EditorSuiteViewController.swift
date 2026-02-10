@@ -383,8 +383,6 @@ class ShareTextSource: NSObject, UIActivityItemSource {
         if activityType?.rawValue.contains("instagram") == true {
             return nil
         }
-        
-        // For X (Twitter), LinkedIn, Messages, etc., return the actual text.
         return text
     }
 }
