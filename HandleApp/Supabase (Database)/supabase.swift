@@ -169,69 +169,88 @@ extension SupabaseManager {
         }
     }
     
+    // In SupabaseManager.swift
+
     func fetchUserPosts() async -> [Post] {
-        do {
-            // Ensure you have a valid user session
-            guard let currentUser = try? await client.auth.session.user else {
-                print("Error: No user logged in")
+            do {
+                // ✅ Use the smart 'currentUserID'
+                let targetID = self.currentUserID
+                print("DEBUG: Fetching posts for User: \(targetID)")
+
+                let posts: [Post] = try await client
+                    .from("posts")
+                    .select()
+                    .eq("user_id", value: targetID)
+                    .order("created_at", ascending: false)
+                    .execute()
+                    .value
+                
+                return posts
+            } catch {
+                print("Error fetching user posts: \(error)")
                 return []
             }
-
-            let posts: [Post] = try await client
-                .from("posts")
-                .select()
-                .eq("user_id", value: currentUser.id)
-                .order("created_at", ascending: false)
-                .execute()
-                .value
+        }
+    
+    func createPost(post: Post) async throws {
+            // ✅ Use the smart 'currentUserID'
+            let targetID = self.currentUserID
             
-            return posts
-        } catch {
-            print("Error fetching user posts: \(error)")
-            return []
-        }
-    }
-    
-    // 2. Create (Save/Schedule) a new post
-    func createPost(_ post: Post) async throws {
-        // Post struct already has userId, so we just insert
-        try await client
-            .from("posts")
-            .insert(post)
-            .execute()
-    }
-    
-    // 3. Update an existing post (e.g. Saved -> Scheduled)
-    func updatePostStatus(postId: UUID, status: Post.PostStatus, date: Date? = nil) async throws {
-        var updateData: [String: AnyJSON] = ["status": .string(status.rawValue)]
-        
-        if let date = date {
-            // Convert Date to ISO8601 String for JSON
-            let formatter = ISO8601DateFormatter()
-            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-            updateData["scheduled_at"] = .string(formatter.string(from: date))
-        }
+            let postPayload = Post(
+                id: post.id ?? UUID(),
+                userId: targetID, // Attach to whichever user is active (Real or Test)
+                topicId: post.topicId,
+                status: post.status,
+                postText: post.postText,
+                fullCaption: post.fullCaption,
+                imageNames: post.imageNames,
+                platformName: post.platformName,
+                platformIconName: post.platformIconName,
+                scheduledAt: post.scheduledAt,
+                publishedAt: post.publishedAt,
+                suggestedHashtags: post.suggestedHashtags
+            )
 
-        try await client
-            .from("posts")
-            .update(updateData)
-            .eq("id", value: postId.uuidString)
-            .execute()
-    }
+            print("DEBUG: Insert Post for User: \(targetID)")
 
-    // Delete a post from Supabase
-    func deleteLogPost(id: UUID) async {
-        do {
             try await client
                 .from("posts")
-                .delete()
-                .eq("id", value: id)
+                .insert(postPayload)
                 .execute()
-            print("Post deleted")
-        } catch {
-            print("Delete error: \(error)")
+            
+            print("DEBUG: Post inserted successfully!")
         }
-    }
+
+    // 3. Update an existing post
+        func updatePostStatus(postId: UUID, status: Post.PostStatus, date: Date? = nil) async throws {
+            var updateData: [String: AnyJSON] = ["status": .string(status.rawValue)]
+            
+            if let date = date {
+                let formatter = ISO8601DateFormatter()
+                formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                updateData["scheduled_at"] = .string(formatter.string(from: date))
+            }
+
+            try await client
+                .from("posts")
+                .update(updateData)
+                .eq("id", value: postId.uuidString)
+                .execute()
+        }
+
+        // Delete a post
+        func deleteLogPost(id: UUID) async {
+            do {
+                try await client
+                    .from("posts")
+                    .delete()
+                    .eq("id", value: id)
+                    .execute()
+                print("Post deleted")
+            } catch {
+                print("Delete error: \(error)")
+            }
+        }
     
     
     //load the multiple type of post idea and formats

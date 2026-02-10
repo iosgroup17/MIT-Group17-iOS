@@ -105,6 +105,9 @@ class EditorSuiteViewController: UIViewController {
             hashtagCollectionView.reloadData()
             timeCollectionView.reloadData()
         }
+    
+    
+    
 
     func setupNavigationButtons() {
         let shareAction = UIAction(image: UIImage(systemName: "square.and.arrow.up")) { [weak self] _ in
@@ -113,6 +116,7 @@ class EditorSuiteViewController: UIViewController {
         let shareButton = UIBarButtonItem(primaryAction: shareAction)
         self.navigationItem.rightBarButtonItem = shareButton
     }
+    
     
     @IBAction func regenerateTapped(_ sender: UIButton) {
         guard let currentText = captionTextView.text else { return }

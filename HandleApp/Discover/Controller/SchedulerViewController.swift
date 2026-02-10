@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Supabase
 
 class SchedulerViewController: UIViewController {
     
@@ -25,6 +26,8 @@ class SchedulerViewController: UIViewController {
     var postImage: UIImage?
     var captionText: String?
     var platformText: String?
+    var hashtags: [String]?
+    var imageNames: [String]?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -119,19 +122,80 @@ class SchedulerViewController: UIViewController {
         }
     
     @IBAction func scheduleButtonTapped(_ sender: UIBarButtonItem) {
-            
-            let selectedDate = dateSwitch.isOn ? datePicker.date : nil
-            let selectedTime = timeSwitch.isOn ? timePicker.date : nil
-            
-            print("Scheduling Post...")
-            if let date = selectedDate {
-                 print("Date selected: \(date)")
-            }
-            if let time = selectedTime {
-                 print("Time selected: \(time)")
-            }
+        // 1. Logic to combine Date and Time pickers into one Date object
+                let calendar = Calendar.current
+                let dateComponents = calendar.dateComponents([.year, .month, .day], from: datePicker.date)
+                let timeComponents = calendar.dateComponents([.hour, .minute], from: timePicker.date)
+                
+                var mergedComps = DateComponents()
+                mergedComps.year = dateComponents.year
+                mergedComps.month = dateComponents.month
+                mergedComps.day = dateComponents.day
+                mergedComps.hour = timeComponents.hour
+                mergedComps.minute = timeComponents.minute
+                
+                let finalDate = calendar.date(from: mergedComps) ?? Date()
 
-        dismiss(animated: true, completion: nil)
+                // 2. Show Loading
+                let alert = UIAlertController(title: nil, message: "Scheduling...", preferredStyle: .alert)
+                let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 5, width: 50, height: 50))
+                loadingIndicator.hidesWhenStopped = true
+                loadingIndicator.style = .medium
+                loadingIndicator.startAnimating()
+                alert.view.addSubview(loadingIndicator)
+                present(alert, animated: true, completion: nil)
+
+                // 3. Create the Post Object
+                // We use a dummy UUID for userId; SupabaseManager will overwrite it with the real one.
+                let newPost = Post(
+                    id: UUID(),
+                    userId: UUID(),
+                    topicId: nil,
+                    status: .scheduled, // Status is SCHEDULED
+                    postText: captionText ?? "",
+                    fullCaption: captionText ?? "",
+                    imageNames: self.imageNames, // The array of filenames passed from Editor
+                    platformName: platformText ?? "General",
+                    platformIconName: nil,
+                    scheduledAt: finalDate, // The calculated date
+                    publishedAt: nil,
+                    likes: 0,
+                    engagementScore: 0,
+                    suggestedHashtags: self.hashtags
+                )
+
+                // 4. Save to Supabase
+                Task {
+                    do {
+                        try await SupabaseManager.shared.createPost(post: newPost)
+                        
+                        await MainActor.run {
+                            self.dismiss(animated: true) { // Dismiss Loading Alert
+                                self.navigateToScheduledTab()
+                            }
+                        }
+                    } catch {
+                        await MainActor.run {
+                            self.dismiss(animated: true) // Dismiss Loading Alert
+                            // Show Error Alert
+                            let errAlert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+                            errAlert.addAction(UIAlertAction(title: "OK", style: .default))
+                            self.present(errAlert, animated: true)
+                        }
+                    }
+                }
+            }
+    
+    func navigateToScheduledTab() {
+            // If your app uses a TabBarController
+            if let tabBar = self.tabBarController {
+                // Change '1' to the index of your Posts/Schedule tab (0, 1, 2, etc.)
+                tabBar.selectedIndex = 1
+                self.navigationController?.popToRootViewController(animated: false)
+            } else {
+                // Fallback if no TabBar
+                self.dismiss(animated: true)
+            }
         }
 
 }
