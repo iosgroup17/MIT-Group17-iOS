@@ -107,32 +107,12 @@ class EditorSuiteViewController: UIViewController {
         }
 
     func setupNavigationButtons() {
-            if self.navigationController?.viewControllers.first == self {
-
-
-                let cancelImage = UIImage(systemName: "xmark")
-                let cancelButton = UIBarButtonItem(image: cancelImage, style: .plain, target: self, action: #selector(cancelButtonTapped))
-
-
-                let doneImage = UIImage(systemName: "checkmark")
-                let doneButton = UIBarButtonItem(image: doneImage, style: .plain, target: self, action: #selector(doneButtonTapped))
-
-
-                doneButton.tintColor = .systemTeal
-
-                self.navigationItem.leftBarButtonItem = cancelButton
-                self.navigationItem.rightBarButtonItem = doneButton
-            }
+        let shareAction = UIAction(image: UIImage(systemName: "square.and.arrow.up")) { [weak self] _ in
+            self?.handleShareFlow()
         }
-        @objc func cancelButtonTapped() {
-        
-            dismiss(animated: true, completion: nil)
-        }
-
-        @objc func doneButtonTapped() {
-            
-            dismiss(animated: true, completion: nil)
-        }
+        let shareButton = UIBarButtonItem(primaryAction: shareAction)
+        self.navigationItem.rightBarButtonItem = shareButton
+    }
     
     @IBAction func regenerateTapped(_ sender: UIButton) {
         guard let currentText = captionTextView.text else { return }
@@ -155,21 +135,49 @@ class EditorSuiteViewController: UIViewController {
         
     }
     
-    @IBAction func publishButtonTapped(_ sender: UIButton) {
-        
-        var itemsToShare: [Any] = []
-        
+    func getFileURLs(from images: [UIImage]) -> [URL] {
+        var urls: [URL] = []
+        for (index, image) in images.enumerated() {
+            if let data = image.jpegData(compressionQuality: 0.9) {
+                let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("share_image_\(index).jpg")
+                try? data.write(to: tempURL)
+                urls.append(tempURL)
+            }
+        }
+        return urls
+    }
+    
+    func handleShareFlow() {
+        // 1. Handle Caption (Clipboard is the ONLY way for Instagram)
         if let text = captionTextView.text, !text.isEmpty {
-            itemsToShare.append(text)
+            UIPasteboard.general.string = text
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         }
         
-        itemsToShare.append(contentsOf: displayedImages)
+        // 2. Convert Images to File URLs
+        let imageURLs = getFileURLs(from: displayedImages)
         
-        let activityViewController = UIActivityViewController(activityItems: itemsToShare, applicationActivities: nil)
+        // 3. Prepare Items (We only send URLs for Instagram compatibility)
+        // Note: We are NOT adding 'text' here because it causes Instagram to fail.
+        // Other apps will still work because they can read the image URLs.
+        let itemsToShare: [Any] = imageURLs
         
-        self.present(activityViewController, animated: true, completion: nil)
-    }
+        guard !itemsToShare.isEmpty else { return }
 
+        let activityVC = UIActivityViewController(activityItems: itemsToShare, applicationActivities: nil)
+        
+        // 4. iPad Support
+        if let popover = activityVC.popoverPresentationController {
+            popover.barButtonItem = self.navigationItem.rightBarButtonItem
+        }
+        
+        // 5. Success Handler (Optional: clean up temp files)
+        activityVC.completionWithItemsHandler = { _, _, _, _ in
+            imageURLs.forEach { try? FileManager.default.removeItem(at: $0) }
+        }
+        
+        self.present(activityVC, animated: true)
+    }
 }
 
 
