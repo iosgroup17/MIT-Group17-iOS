@@ -97,56 +97,86 @@ class DiscoverViewController: UIViewController {
     
     // In DiscoverViewController.swift
 
-        func loadSupabaseData() async {
-            print("Starting Data Load...")
-            
-            do {
-
+    func loadSupabaseData() async {
+        print("Starting Industry-Specific Data Load...")
+        
+        do {
+            // 1. Identify User & Fetch Profile Context (Required for Section 2)
+            guard let user = try? await SupabaseManager.shared.client.auth.session.user,
+                  let userProfile = await SupabaseManager.shared.fetchUserProfile() else {
+                print("No user profile found. Falling back to generic load.")
+                // Fallback: Maintain your original global fetch if profile isn't ready
                 let fetchedData = try await SupabaseManager.shared.loadPostsIdeas()
-                
+                updateUI(with: fetchedData)
+                return
+            }
 
-                guard let userProfile = await SupabaseManager.shared.fetchUserProfile() else {
-                    print("No user profile found. Cannot generate posts.")
-                    return
-                }
+            // 2. Fetch User's Industry from Onboarding Responses (Step 2)
+            let onboardingResponse: [String: [String]] = try await SupabaseManager.shared.client
+                .from("onboarding_responses")
+                .select("selection_tags")
+                .eq("user_id", value: user.id)
+                .eq("step_index", value: 2)
+                .single()
+                .execute()
+                .value
+
+            let userNiche = onboardingResponse["selection_tags"]?.first ?? "Technology & Software"
+            print("Industry Found: \(userNiche). Filtering trends...")
+
+            // 3. Fetch ONLY matching Trending Topics (Personalized Section 1)
+            let fetchedTrends: [TrendingTopic] = try await SupabaseManager.shared.client
+                .from("trending_topics")
+                .select("*")
+                .eq("category", value: userNiche)
+                .order("created_at", ascending: false)
+                .limit(10)
+                .execute()
+                .value
+
+            // 4. Update UI for Trending Section (Section 1)
             await MainActor.run {
-                    self.ideasResponse = fetchedData
-                    self.trendingTopics = fetchedData.trendingTopics
+                self.trendingTopics = fetchedTrends
+                // We use reloadData here initially to sync the new trend list
+                self.collectionView.reloadData()
+            }
 
-                    self.collectionView.reloadData()
-                }
-                
-                
-                let topTrendName = fetchedData.trendingTopics.first?.topicName ?? "Digital Marketing Trends"
-                let topTrendDesc = fetchedData.trendingTopics.first?.shortDescription ?? "Latest industry shifts"
-                let combinedTrendText = "\(topTrendName): \(topTrendDesc)"
-                
-                print("Generative AI: Starting generation for trend: \(topTrendName)")
+            // 5. Section 2: Trigger AI Post Generation based on the Newest Trend
+            let topTrend = fetchedTrends.first
+            let topTrendName = topTrend?.topicName ?? "Digital Marketing Trends"
+            let topTrendDesc = topTrend?.shortDescription ?? "Latest industry shifts"
+            let combinedTrendText = "\(topTrendName): \(topTrendDesc)"
+            
+            print("Generative AI: Starting generation for trend: \(topTrendName)")
 
+            let generatedPosts = try await OnDevicePostEngine.shared.generatePublishReadyPosts(
+                trendText: combinedTrendText,
+                context: userProfile
+            )
 
-                let generatedPosts = try await OnDevicePostEngine.shared.generatePublishReadyPosts(
-                    trendText: combinedTrendText,
-                    context: userProfile
-                )
-                
-
-                await MainActor.run {
-                    print("AI Generation Complete. Reloading Section 2.")
-                    self.publishReadyPosts = generatedPosts
-                    
-                    // Only reload the "Publish Ready" section (Section 2) to avoid flickering the trends
-                    let sectionIndex = 2
-                    self.collectionView.reloadSections(IndexSet(integer: sectionIndex))
-                }
-                
-                // 7. (Optional) Save these generated posts back to Supabase?
-                // to persist for next time, uncomment below:
-                // try await SupabaseManager.shared.saveGeneratedPosts(generatedPosts)
-                
-            } catch {
-                print("Error in Hybrid Load: \(error.localizedDescription)")
+            // 6. Update Section 2 (Publish Ready)
+            await MainActor.run {
+                print("AI Generation Complete. Reloading Section 2.")
+                self.publishReadyPosts = generatedPosts
+                self.collectionView.reloadSections(IndexSet(integer: 2))
+            }
+            
+        } catch {
+            print("Personalized Fetch failed, falling back to original logic: \(error.localizedDescription)")
+            // Fallback: Run your original global fetch if anything in the personalization fails
+            if let fetchedData = try? await SupabaseManager.shared.loadPostsIdeas() {
+                updateUI(with: fetchedData)
             }
         }
+    }
+
+    // Helper to prevent code duplication in fallbacks
+    @MainActor
+    private func updateUI(with data: DiscoverIdeaResponse) {
+        self.ideasResponse = data
+        self.trendingTopics = data.trendingTopics
+        self.collectionView.reloadData()
+    }
     
     func generateLayout() -> UICollectionViewLayout {
         

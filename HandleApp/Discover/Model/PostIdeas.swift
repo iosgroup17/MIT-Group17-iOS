@@ -17,9 +17,10 @@ struct TrendingTopic: Codable {
     let trendingContext: String
     var actions: [TopicAction]?
     var relevantPosts: [PublishReadyPost]?
+    let category: String
 
     enum CodingKeys: String, CodingKey {
-        case id, hashtags
+        case id, hashtags, category
         case topicName = "topic_name"
         case shortDescription = "short_description"
         case platformIcon = "platform_icon"
