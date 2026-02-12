@@ -8,11 +8,17 @@
 import UIKit
 import Supabase
 
-class SchedulerViewController: UIViewController {
+struct ScheduledPostData {
+    let platformName: String
+    let iconName: String?
+    let caption: String
+    let images: [UIImage]?
+    let hashtags: [String]
+}
+
+class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     
-    @IBOutlet weak var previewImageView: UIImageView!
-    @IBOutlet weak var previewCaptionLabel: UILabel!
-    @IBOutlet weak var previewPlatformLabel: UILabel!
+    @IBOutlet weak var postPreviewCollectionView: UICollectionView!
     
     @IBOutlet weak var dateSwitch: UISwitch!
     @IBOutlet weak var dateDetailLabel: UILabel!
@@ -22,35 +28,71 @@ class SchedulerViewController: UIViewController {
     @IBOutlet weak var timeDetailLabel: UILabel!
     @IBOutlet weak var timePicker: UIDatePicker!
     
-    
-    var postImage: UIImage?
-    var captionText: String?
-    var platformText: String?
-    var hashtags: [String]?
-    var imageNames: [String]?
+    var postData: ScheduledPostData?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-      
+        setupCollectionView()
         setupInitialUI()
         // Do any additional setup after loading the view.
     }
     
+    private func setupCollectionView() {
+        postPreviewCollectionView.delegate = self
+        postPreviewCollectionView.dataSource = self
+        
+        // Register BOTH XIBs
+        postPreviewCollectionView.register(
+            UINib(nibName: "PostPreviewImageCollectionViewCell", bundle: nil),
+            forCellWithReuseIdentifier: "PostPreviewImageCollectionViewCell"
+        )
+        
+        postPreviewCollectionView.register(
+            UINib(nibName: "PostPreviewTextCollectionViewCell", bundle: nil),
+            forCellWithReuseIdentifier: "PostPreviewTextCollectionViewCell"
+        )
+        
+        postPreviewCollectionView.isScrollEnabled = false
+        let layout = UICollectionViewCompositionalLayout { (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
+            
+            // ITEM: Takes up 100% of the Group
+            let itemSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .fractionalHeight(1.0)
+            )
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            
+            // GROUP: Fixed Height (300), Width fills the Section
+            let groupSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .estimated(145)
+            )
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+            
+            // SECTION: Apply the padding here
+            let section = NSCollectionLayoutSection(group: group)
+            
+            // This creates the "Screen Width - 48" effect
+            // (24 padding on Left + 24 padding on Right)
+            section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 12)
+            
+            return section
+        }
+                
+        postPreviewCollectionView.collectionViewLayout = layout
+    }
+    
     private func setupInitialUI() {
-
-            previewImageView.image = postImage
-            previewImageView.layer.cornerRadius = 8
-
-            
-            previewCaptionLabel.text = captionText
-            previewPlatformLabel.text = platformText
-            
-            // Configure Pickers initial state
-            datePicker.datePickerMode = .date
-            timePicker.datePickerMode = .time
-            
-            dateSwitch.isOn = !datePicker.isHidden
-            timeSwitch.isOn = !timePicker.isHidden
+        // Configure Pickers initial state
+        datePicker.datePickerMode = .date
+        timePicker.datePickerMode = .time
+        
+        dateSwitch.isOn = !datePicker.isHidden
+        timeSwitch.isOn = !timePicker.isHidden
+        
+        // Update labels immediately
+        updateDateLabel()
+        updateTimeLabel()
         
         }
 
@@ -122,7 +164,7 @@ class SchedulerViewController: UIViewController {
         }
     
     @IBAction func scheduleButtonTapped(_ sender: UIBarButtonItem) {
-        // 1. Logic to combine Date and Time pickers into one Date object
+        // 1. Combine Date/Time
                 let calendar = Calendar.current
                 let dateComponents = calendar.dateComponents([.year, .month, .day], from: datePicker.date)
                 let timeComponents = calendar.dateComponents([.hour, .minute], from: timePicker.date)
@@ -138,30 +180,29 @@ class SchedulerViewController: UIViewController {
 
                 // 2. Show Loading
                 let alert = UIAlertController(title: nil, message: "Scheduling...", preferredStyle: .alert)
-                let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 5, width: 50, height: 50))
+                let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 20, width: 50, height: 50))
                 loadingIndicator.hidesWhenStopped = true
                 loadingIndicator.style = .medium
                 loadingIndicator.startAnimating()
                 alert.view.addSubview(loadingIndicator)
                 present(alert, animated: true, completion: nil)
 
-                // 3. Create the Post Object
-                // We use a dummy UUID for userId; SupabaseManager will overwrite it with the real one.
+                // 3. Create Post Object (Using postData!)
                 let newPost = Post(
                     id: UUID(),
-                    userId: UUID(),
+                    userId: UUID(), // SupabaseManager will handle this
                     topicId: nil,
-                    status: .scheduled, // Status is SCHEDULED
-                    postText: captionText ?? "",
-                    fullCaption: captionText ?? "",
-                    imageNames: self.imageNames, // The array of filenames passed from Editor
-                    platformName: platformText ?? "General",
-                    platformIconName: nil,
-                    scheduledAt: finalDate, // The calculated date
+                    status: .scheduled,
+                    postText: postData?.caption ?? "",
+                    fullCaption: postData?.caption ?? "",
+                    imageNames: [], // TODO: You need to upload `postData?.images` and put URLs/Names here
+                    platformName: postData?.platformName ?? "General",
+                    platformIconName: postData?.iconName,
+                    scheduledAt: finalDate,
                     publishedAt: nil,
                     likes: 0,
                     engagementScore: 0,
-                    suggestedHashtags: self.hashtags
+                    suggestedHashtags: postData?.hashtags
                 )
 
                 // 4. Save to Supabase
@@ -170,14 +211,13 @@ class SchedulerViewController: UIViewController {
                         try await SupabaseManager.shared.createPost(post: newPost)
                         
                         await MainActor.run {
-                            self.dismiss(animated: true) { // Dismiss Loading Alert
+                            self.dismiss(animated: true) {
                                 self.navigateToScheduledTab()
                             }
                         }
                     } catch {
                         await MainActor.run {
-                            self.dismiss(animated: true) // Dismiss Loading Alert
-                            // Show Error Alert
+                            self.dismiss(animated: true)
                             let errAlert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
                             errAlert.addAction(UIAlertAction(title: "OK", style: .default))
                             self.present(errAlert, animated: true)
@@ -195,6 +235,33 @@ class SchedulerViewController: UIViewController {
             } else {
                 // Fallback if no TabBar
                 self.dismiss(animated: true)
+            }
+        }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+            return postData == nil ? 0 : 1
+        }
+        
+        func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+            guard let data = postData else { return UICollectionViewCell() }
+            
+            if let images = data.images, let firstImage = images.first {
+                let cell = postPreviewCollectionView.dequeueReusableCell(withReuseIdentifier: "PostPreviewImageCollectionViewCell", for: indexPath) as! PostPreviewImageCollectionViewCell
+                cell.configure(
+                    platformName: data.platformName,
+                    iconName: data.iconName,
+                    caption: data.caption,
+                    image: firstImage
+                )
+                return cell
+            } else {
+                let cell = postPreviewCollectionView.dequeueReusableCell(withReuseIdentifier: "PostPreviewTextCollectionViewCell", for: indexPath) as! PostPreviewTextCollectionViewCell
+                cell.configure(
+                    platformName: data.platformName,
+                    iconName: data.iconName,
+                    caption: data.caption
+                )
+                return cell
             }
         }
 

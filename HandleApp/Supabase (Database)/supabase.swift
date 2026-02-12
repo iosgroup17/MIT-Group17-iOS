@@ -304,8 +304,7 @@ extension SupabaseManager {
         // 4. Return the response
         // publishReadyPosts is empty here because the database no longer stores them.
         return DiscoverIdeaResponse(
-            trendingTopics: populatedTopics,
-            publishReadyPosts: []
+            trendingTopics: populatedTopics
         )
     }
 }

@@ -96,79 +96,96 @@ class DiscoverViewController: UIViewController {
 //    }
     
     // In DiscoverViewController.swift
-
     func loadSupabaseData() async {
-        print("Starting Industry-Specific Data Load...")
-        
-        do {
-            // 1. Identify User & Fetch Profile Context (Required for Section 2)
-            guard let user = try? await SupabaseManager.shared.client.auth.session.user,
-                  let userProfile = await SupabaseManager.shared.fetchUserProfile() else {
-                print("No user profile found. Falling back to generic load.")
-                // Fallback: Maintain your original global fetch if profile isn't ready
-                let fetchedData = try await SupabaseManager.shared.loadPostsIdeas()
-                updateUI(with: fetchedData)
-                return
-            }
-
-            // 2. Fetch User's Industry from Onboarding Responses (Step 2)
-            let onboardingResponse: [String: [String]] = try await SupabaseManager.shared.client
-                .from("onboarding_responses")
-                .select("selection_tags")
-                .eq("user_id", value: user.id)
-                .eq("step_index", value: 2)
-                .single()
-                .execute()
-                .value
-
-            let userNiche = onboardingResponse["selection_tags"]?.first ?? "Technology & Software"
-            print("Industry Found: \(userNiche). Filtering trends...")
-
-            // 3. Fetch ONLY matching Trending Topics (Personalized Section 1)
-            let fetchedTrends: [TrendingTopic] = try await SupabaseManager.shared.client
-                .from("trending_topics")
-                .select("*")
-                .eq("category", value: userNiche)
-                .order("created_at", ascending: false)
-                .limit(10)
-                .execute()
-                .value
-
-            // 4. Update UI for Trending Section (Section 1)
-            await MainActor.run {
-                self.trendingTopics = fetchedTrends
-                // We use reloadData here initially to sync the new trend list
-                self.collectionView.reloadData()
-            }
-
-            // 5. Section 2: Trigger AI Post Generation based on the Newest Trend
-            let topTrend = fetchedTrends.first
-            let topTrendName = topTrend?.topicName ?? "Digital Marketing Trends"
-            let topTrendDesc = topTrend?.shortDescription ?? "Latest industry shifts"
-            let combinedTrendText = "\(topTrendName): \(topTrendDesc)"
+            print("🚀 Starting Industry-Specific Data Load...")
             
-            print("Generative AI: Starting generation for trend: \(topTrendName)")
+            do {
+                // 1. Get User Profile (Using the SupabaseManager's internal fallback logic)
+                // We do NOT check for session.user here, because SupabaseManager handles that.
+                var userProfile: UserProfile
+                var userNiche = "Technology & Software" // Default niche
+                
+                if let profile = await SupabaseManager.shared.fetchUserProfile() {
+                    userProfile = profile
+                    
+                    // Try to get niche from the profile we just fetched
+                    if let industry = profile.industry.first, !industry.isEmpty {
+                        userNiche = industry
+                    }
+                    print("✅ Loaded Profile for Niche: \(userNiche)")
+                } else {
+                    // If DB fetch fails completely, creates a local default so AI still works
+                    print("⚠️ Profile fetch failed. Using Default Context.")
+                    userProfile = UserProfile(
+                        professionalIdentity: ["Content Creator"],
+                        currentFocus: ["Trends"],
+                        industry: ["General"],
+                        primaryGoals: ["General Audience"],
+                        contentFormats: ["Growth"],
+                        platforms: [" engaging"],
+                        targetAudience: ["LinkedIn"]
+                    )
+                }
 
-            let generatedPosts = try await OnDevicePostEngine.shared.generatePublishReadyPosts(
-                trendText: combinedTrendText,
-                context: userProfile
-            )
+                // 2. Fetch Trending Topics
+                // We use the 'userNiche' we determined above
+                var fetchedTrends: [TrendingTopic] = []
+                
+                // Try fetching specific category first
+                fetchedTrends = try await SupabaseManager.shared.client
+                    .from("trending_topics")
+                    .select("*")
+                    .eq("category", value: userNiche)
+                    .order("created_at", ascending: false)
+                    .limit(10)
+                    .execute()
+                    .value
+                
+                // If specific fetch returned nothing, fetch global trends
+                if fetchedTrends.isEmpty {
+                    print("🔄 Niche trends empty. Fetching Global Trends...")
+                    fetchedTrends = try await SupabaseManager.shared.client
+                        .from("trending_topics")
+                        .select("*")
+                        .order("created_at", ascending: false)
+                        .limit(10)
+                        .execute()
+                        .value
+                }
 
-            // 6. Update Section 2 (Publish Ready)
-            await MainActor.run {
-                print("AI Generation Complete. Reloading Section 2.")
-                self.publishReadyPosts = generatedPosts
-                self.collectionView.reloadSections(IndexSet(integer: 2))
-            }
-            
-        } catch {
-            print("Personalized Fetch failed, falling back to original logic: \(error.localizedDescription)")
-            // Fallback: Run your original global fetch if anything in the personalization fails
-            if let fetchedData = try? await SupabaseManager.shared.loadPostsIdeas() {
-                updateUI(with: fetchedData)
+                // 3. Update UI for Section 1 immediately
+                await MainActor.run {
+                    self.trendingTopics = fetchedTrends
+                    self.collectionView.reloadData()
+                }
+
+                // 4. Trigger AI Generation (ALWAYS RUNS NOW)
+                if let topTrend = fetchedTrends.first {
+                    let topTrendName = topTrend.topicName
+                    let topTrendDesc = topTrend.shortDescription
+                    let combinedTrendText = "\(topTrendName): \(topTrendDesc)"
+                    
+                    print("🤖 Generative AI: Starting generation for: \(topTrendName)")
+
+                    let generatedPosts = try await OnDevicePostEngine.shared.generatePublishReadyPosts(
+                        trendText: combinedTrendText,
+                        context: userProfile
+                    )
+
+                    // 5. Update Section 2 (Publish Ready)
+                    await MainActor.run {
+                        print("✅ AI Generation Complete. Reloading Section 2.")
+                        self.publishReadyPosts = generatedPosts
+                        self.collectionView.reloadSections(IndexSet(integer: 2))
+                    }
+                } else {
+                    print("❌ No trends found, cannot generate AI posts.")
+                }
+                
+            } catch {
+                print("❌ Critical Error in Data Load: \(error)")
             }
         }
-    }
 
     // Helper to prevent code duplication in fallbacks
     @MainActor
@@ -461,7 +478,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
     
     func showLoading() {
         let alert = UIAlertController(title: nil, message: "Generating with AI...", preferredStyle: .alert)
-        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 5, width: 50, height: 50))
+        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 20, width: 50, height: 50))
         loadingIndicator.hidesWhenStopped = true
         loadingIndicator.style = .medium
         loadingIndicator.startAnimating()

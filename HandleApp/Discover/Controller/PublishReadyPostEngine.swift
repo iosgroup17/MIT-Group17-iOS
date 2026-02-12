@@ -61,7 +61,7 @@ actor OnDevicePostEngine {
                 6. "prediction_text": One sentence, 10 characters explaining WHY this angle works.
                 
                 7. IMAGES ("post_image"):
-                   - Library: ["img_01" ... "img_16"]
+                   - Library: ["img_01" ... "img_34"]
                    - FOR INSTAGRAM: You MUST always include 1 image from the library.
                    - FOR X (TWITTER) & LINKEDIN: Prefer text-only posts. Only add an image if absolutely necessary. If text-only, omit this field or return null.
                 
@@ -160,7 +160,7 @@ extension OnDevicePostEngine {
                    - CRITICAL: DO NOT put hashtags in this field.
                    
                 2. Visuals (Select from List): 
-                   - You have access to a stock library with IDs: ["img_01", "img_02", "img_03", "img_04", "img_05", "img_06", "img_07", "img_08", "img_09", "img_10", "img_11", "img_12", "img_13", "img_14", "img_15", "img_16"].
+                   - You have access to a stock library with IDs: ["img_01", "img_02", "img_03", "img_04", "img_05", "img_06", "img_07", "img_08", "img_09", "img_10", "img_11", "img_12", "img_13", "img_14", "img_15", "img_16".....till "img_34"].
                    - Select 2-3 specific Image IDs from this list that best match the mood of the post.
                    
                 3. Hashtags(STRICT CONSTARINTS): 

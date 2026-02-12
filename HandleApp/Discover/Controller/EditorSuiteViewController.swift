@@ -279,22 +279,38 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "showSchedulerSegue" {
-            
-            if let navVC = segue.destination as? UINavigationController,
-               let destinationVC = navVC.topViewController as? SchedulerViewController {
+            if segue.identifier == "showSchedulerSegue" {
                 
-
-                if let firstImageName = draft?.images?.first {
-                    destinationVC.postImage = UIImage(named: firstImageName)
+                // 1. Unwrap the Navigation Controller to find the Scheduler
+                if let navVC = segue.destination as? UINavigationController,
+                   let destinationVC = navVC.topViewController as? SchedulerViewController {
+                    
+                    // 2. Gather the Current Data
+                    // Use the text from the TextView (in case user edited it)
+                    let finalCaption = self.captionTextView.text ?? ""
+                    
+                    // Use displayedImages because it contains the actual UIImages (user selected or loaded)
+                    let finalImages = self.displayedImages.isEmpty ? nil : self.displayedImages
+                    
+                    // Get Draft Info (Platform, Icon, Hashtags)
+                    let platform = self.draft?.platformName ?? "Post"
+                    let icon = self.draft?.platformIconName
+                    let tags = self.draft?.hashtags ?? []
+                    
+                    // 3. Create the Struct
+                    let package = ScheduledPostData(
+                        platformName: platform,
+                        iconName: icon,
+                        caption: finalCaption,
+                        images: finalImages,
+                        hashtags: tags
+                    )
+                    
+                    // 4. Pass the Struct to Scheduler
+                    destinationVC.postData = package
                 }
-                
-                // Data passing
-                destinationVC.captionText = self.captionTextView.text
-                destinationVC.platformText = draft?.platformName ?? "Instagram Post"
             }
         }
-    }
     
 }
 
