@@ -46,6 +46,13 @@ struct OnboardingResponse: Codable {
     let selection_tags: [String]
 }
 
+struct DailyAnalyticsRow: Codable {
+    let date: String
+    let platform: String
+    let engagement: Int
+}
+
+
 class SupabaseManager {
     static let shared = SupabaseManager()
     
@@ -143,197 +150,235 @@ class SupabaseManager {
       
       // Save Social Handle for Scraping (Twitter/Instagram/LinkedIn)
       // Add this inside SupabaseManager class
-      func saveSocialHandle(platform: String, handle: String) async {
-          let userId = currentUserID
-          
-          struct SocialConnectionParams: Codable {
-              let user_id: UUID
-              let platform: String
-              let handle: String
-          }
-          
-          let params = SocialConnectionParams(user_id: userId, platform: platform, handle: handle)
-          
-          do {
-              // We use .upsert to update the handle if it already exists, or insert if new
-              try await client.from("social_connections")
-                  .upsert(params, onConflict: "user_id, platform")
-                  .execute()
-              print("✅ Saved \(platform) handle: \(handle)")
-          } catch {
-              print("❌ Failed to save handle: \(error)")
-          }
-      }
+    func saveSocialHandle(platform: String, handle: String) async {
+        guard let userId = client.auth.currentSession?.user.id else { return }
+        
+        struct SocialConnectionParams: Codable {
+            let user_id: UUID
+            let platform: String
+            let handle: String
+        }
+        
+        let params = SocialConnectionParams(user_id: userId, platform: platform, handle: handle)
+        
+        do {
+            // We use .upsert to update the handle if it already exists, or insert if new
+            try await client.from("social_connections")
+                .upsert(params, onConflict: "user_id, platform")
+                .execute()
+            print("✅ Saved \(platform) handle: \(handle)")
+        } catch {
+            print("❌ Failed to save handle: \(error)")
+        }
+    }
       
       // Trigger the Apify Scraper Edge Function
-      func runHandleScoreCalculation(handle: String) async -> Int {
-              let params: [String: String] = ["handle": handle, "user_id": currentUserID.uuidString]
-              do {
-                  // Invokes the edge function we just updated
-                  let response: [String: Int] = try await client.functions
-                      .invoke("process-tweet-scrape", options: FunctionInvokeOptions(body: params))
-                  return response["handle_score"] ?? 0
-              } catch {
-                  print("Scrape Error: \(error)")
-                  return 0
-              }
-          }
+    
+    // Trigger the Apify Scraper Edge Function
+    func runHandleScoreCalculation(handle: String) async -> Int {
+            let params: [String: String] = ["handle": handle, "user_id": currentUserID.uuidString]
+            do {
+                // Invokes the edge function we just updated
+                let response: [String: Int] = try await client.functions
+                    .invoke("process-tweet-scrape", options: FunctionInvokeOptions(body: params))
+                return response["handle_score"] ?? 0
+            } catch {
+                print("Scrape Error: \(error)")
+                return 0
+            }
+        }
+    
+    func runInstaScoreCalculation(handle: String) async -> Int {
+        let params: [String: String] = ["handle": handle, "user_id": currentUserID.uuidString]
+        do {
+            let response: [String: Int] = try await client.functions
+                .invoke("process-insta-scrape", options: FunctionInvokeOptions(body: params))
+            return response["handle_score"] ?? 0
+        } catch {
+            print("Instagram Scrape Error: \(error)")
+            return 0
+        }
+    }
+    
+    // MARK: - LinkedIn Scrape Logic
+        func runLinkedInScoreCalculation(handle: String) async -> Int {
+            guard let userId = client.auth.currentSession?.user.id else { return 0 }
+            
+            struct ScrapeParams: Codable {
+                let handle: String
+                let user_id: UUID
+            }
+            
+            // Define the expected response structure
+            struct Response: Codable {
+                let handle_score: Int
+                let post_count: Int
+            }
+            
+            let params = ScrapeParams(handle: handle, user_id: userId)
+            
+            do {
+                // FIX: Use 'options' for the body and remove .decode()
+                let response: Response = try await client.functions
+                    .invoke(
+                        "process-linkedin-scrape",
+                        options: FunctionInvokeOptions(body: params)
+                    )
+                
+                print("✅ LinkedIn Scrape: Score \(response.handle_score), Posts \(response.post_count)")
+                return response.handle_score
+            } catch {
+                print("❌ LinkedIn Scrape Failed: \(error)")
+                return 0
+            }
+        }
+    
+    func runTwitterScoreCalculation(handle: String) async -> Int {
+        guard let userId = client.auth.currentSession?.user.id else { return 0 }
+        
+        struct ScrapeParams: Codable {
+            let handle: String
+            let user_id: UUID
+        }
+        
+        struct Response: Codable {
+            let handle_score: Int
+            let post_count: Int
+        }
+        
+        let params = ScrapeParams(handle: handle, user_id: userId)
+        
+        do {
+            // Call the new Twitter Edge Function
+            let response: Response = try await client.functions
+                .invoke(
+                    "process-tweet-scrape",
+                    options: FunctionInvokeOptions(body: params)
+                )
+            
+            print("✅ Twitter Scrape: Score \(response.handle_score), Posts \(response.post_count)")
+            return response.handle_score
+        } catch {
+            print("❌ Twitter Scrape Failed: \(error)")
+            return 0
+        }
+    }
       
-      func runInstaScoreCalculation(handle: String) async -> Int {
-          let params: [String: String] = ["handle": handle, "user_id": currentUserID.uuidString]
-          do {
-              let response: [String: Int] = try await client.functions
-                  .invoke("process-insta-scrape", options: FunctionInvokeOptions(body: params))
-              return response["handle_score"] ?? 0
-          } catch {
-              print("Instagram Scrape Error: \(error)")
-              return 0
-          }
-      }
       
-      // MARK: - LinkedIn Scrape Logic
-          func runLinkedInScoreCalculation(handle: String) async -> Int {
-             let userId = currentUserID
-              
-              struct ScrapeParams: Codable {
-                  let handle: String
-                  let user_id: UUID
-              }
-              
-              // Define the expected response structure
-              struct Response: Codable {
-                  let handle_score: Int
-                  let post_count: Int
-              }
-              
-              let params = ScrapeParams(handle: handle, user_id: userId)
-              
-              do {
-                  // FIX: Use 'options' for the body and remove .decode()
-                  let response: Response = try await client.functions
-                      .invoke(
-                          "process-linkedin-scrape",
-                          options: FunctionInvokeOptions(body: params)
-                      )
-                  
-                  print("✅ LinkedIn Scrape: Score \(response.handle_score), Posts \(response.post_count)")
-                  return response.handle_score
-              } catch {
-                  print("❌ LinkedIn Scrape Failed: \(error)")
-                  return 0
-              }
-          }
+    func disconnectSocial(platform: String) async -> Bool {
+        do {
+            // 1. Delete from social_connections
+            try await client.from("social_connections")
+                .delete()
+                .match(["user_id": currentUserID, "platform": platform])
+                .execute()
+                
+            return true
+        } catch {
+            print("Disconnect Error: \(error)")
+            return false
+        }
+    }
+    
+    func fetchDailyAnalytics() async -> [DailyMetric] {
+        guard let userId = client.auth.currentSession?.user.id else { return [] }
+        
+        do {
+            // Fetch last 7 days
+            let rows: [DailyAnalyticsRow] = try await client
+                .from("daily_analytics")
+                .select()
+                .eq("user_id", value: userId)
+                .order("date", ascending: true)
+                .execute()
+                .value
+            
+            // Convert Date String (YYYY-MM-DD) to Day Name (Mon, Tue)
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            let dayFormatter = DateFormatter()
+            dayFormatter.dateFormat = "E" // "Mon", "Tue"
+            
+            return rows.compactMap { row in
+                guard let date = formatter.date(from: row.date) else { return nil }
+                return DailyMetric(
+                    day: dayFormatter.string(from: date),
+                    engagement: row.engagement,
+                    platform: row.platform
+                )
+            }
+        } catch {
+            print("❌ Error fetching graph data: \(error)")
+            return []
+        }
+    }
+    
+    
+    
       
-      func runTwitterScoreCalculation(handle: String) async -> Int {
-          let userId = currentUserID
-          
-          struct ScrapeParams: Codable {
-              let handle: String
-              let user_id: UUID
-          }
-          
-          struct Response: Codable {
-              let handle_score: Int
-              let post_count: Int
-          }
-          
-          let params = ScrapeParams(handle: handle, user_id: userId)
-          
-          do {
-              // Call the new Twitter Edge Function
-              let response: Response = try await client.functions
-                  .invoke(
-                      "process-tweet-scrape",
-                      options: FunctionInvokeOptions(body: params)
-                  )
-              
-              print("✅ Twitter Scrape: Score \(response.handle_score), Posts \(response.post_count)")
-              return response.handle_score
-          } catch {
-              print("❌ Twitter Scrape Failed: \(error)")
-              return 0
-          }
-      }
-      
-      
-      
-      func disconnectSocial(platform: String) async -> Bool {
-          do {
-              // 1. Delete from social_connections
-              try await client.from("social_connections")
-                  .delete()
-                  .match(["user_id": currentUserID, "platform": platform])
-                  .execute()
-                  
-              return true
-          } catch {
-              print("Disconnect Error: \(error)")
-              return false
-          }
-      }
-      
-      // MARK: - Auth Helpers
-          func ensureAnonymousSession() async {
-              if client.auth.currentSession != nil {
-                  print("✅ User already has a session: \(client.auth.currentSession?.user.id.uuidString ?? "Unknown")")
-                  return
-              }
-              
-              do {
-                  _ = try await client.auth.signInAnonymously()
-                  print("✅ Created new Anonymous User: \(client.auth.currentSession?.user.id.uuidString ?? "Unknown")")
-              } catch {
-                  print("❌ Anonymous Auth Failed: \(error)")
-              }
-          }
-      
-      func autoUpdateAnalytics() async {
-             let userId = currentUserID
-              
-              do {
-                  // 1. Fetch current status
-                  let analytics: UserAnalytics = try await client
-                      .from("user_analytics")
-                      .select()
-                      .eq("user_id", value: userId)
-                      .single()
-                      .execute()
-                      .value
-                  
-                  // 2. Check Time Diff (24 Hours)
-                  if let lastDateStr = analytics.last_updated,
-                     let lastDate = ISO8601DateFormatter().date(from: lastDateStr) {
-                      let hoursSince = Date().timeIntervalSince(lastDate) / 3600
-                      if hoursSince < 24 {
-                          print("⏳ Data is fresh (\(Int(hoursSince))h old). Skipping auto-scrape.")
-                          return
-                      }
-                  }
-                  
-                  print("🔄 Data is stale. Starting auto-scrape...")
-                  
-                  // 3. Fetch connected handles
-                  let connections: [SocialConnection] = try await client
-                      .from("social_connections")
-                      .select()
-                      .eq("user_id", value: userId)
-                      .execute()
-                      .value
-                  
-                  // 4. Run Scrapers in Parallel
-                  for conn in connections {
-                      if let handle = conn.handle {
-                          if conn.platform == "twitter" { _ = await runTwitterScoreCalculation(handle: handle) }
-                          if conn.platform == "instagram" { _ = await runInstaScoreCalculation(handle: handle) }
-                          if conn.platform == "linkedin" { _ = await runLinkedInScoreCalculation(handle: handle) }
-                      }
-                  }
-                  print("✅ Auto-scrape completed.")
-                  
-              } catch {
-                  print("Auto-update failed or no analytics row yet.")
-              }
-          }
+    // MARK: - Auth Helpers
+        func ensureAnonymousSession() async {
+            if client.auth.currentSession != nil {
+                print("✅ User already has a session: \(client.auth.currentSession?.user.id.uuidString ?? "Unknown")")
+                return
+            }
+            
+            do {
+                _ = try await client.auth.signInAnonymously()
+                print("✅ Created new Anonymous User: \(client.auth.currentSession?.user.id.uuidString ?? "Unknown")")
+            } catch {
+                print("❌ Anonymous Auth Failed: \(error)")
+            }
+        }
+    
+    func autoUpdateAnalytics() async {
+            guard let userId = client.auth.currentSession?.user.id else { return }
+            
+            do {
+                // 1. Fetch current status
+                let analytics: UserAnalytics = try await client
+                    .from("user_analytics")
+                    .select()
+                    .eq("user_id", value: userId)
+                    .single()
+                    .execute()
+                    .value
+                
+                // 2. Check Time Diff (24 Hours)
+                if let lastDateStr = analytics.last_updated,
+                   let lastDate = ISO8601DateFormatter().date(from: lastDateStr) {
+                    let hoursSince = Date().timeIntervalSince(lastDate) / 3600
+                    if hoursSince < 24 {
+                        print("⏳ Data is fresh (\(Int(hoursSince))h old). Skipping auto-scrape.")
+                        return
+                    }
+                }
+                
+                print("🔄 Data is stale. Starting auto-scrape...")
+                
+                // 3. Fetch connected handles
+                let connections: [SocialConnection] = try await client
+                    .from("social_connections")
+                    .select()
+                    .eq("user_id", value: userId)
+                    .execute()
+                    .value
+                
+                // 4. Run Scrapers in Parallel
+                for conn in connections {
+                    if let handle = conn.handle {
+                        if conn.platform == "twitter" { _ = await runTwitterScoreCalculation(handle: handle) }
+                        if conn.platform == "instagram" { _ = await runInstaScoreCalculation(handle: handle) }
+                        if conn.platform == "linkedin" { _ = await runLinkedInScoreCalculation(handle: handle) }
+                    }
+                }
+                print("✅ Auto-scrape completed.")
+                
+            } catch {
+                print("Auto-update failed or no analytics row yet.")
+            }
+        }
+    
     
 }
 

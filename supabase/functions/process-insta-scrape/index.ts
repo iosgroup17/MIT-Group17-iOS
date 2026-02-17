@@ -11,7 +11,7 @@ serve(async (req) => {
 
   try {
     const { handle, user_id, p_variable = 0 } = await req.json()
-    console.log(`\n=== 🚀 INSTA SCRAPE V5: ${handle} ===`)
+    console.log(`\n=== 🚀 INSTA SCRAPE V7 (FIX): ${handle} ===`)
 
     const RAPID_KEY = Deno.env.get('RAPIDAPI_KEY')
     const supabase = createClient(
@@ -20,24 +20,15 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     )
 
-    // 1. FETCH STATE
-    const { data: currentData } = await supabase
-        .from('user_analytics')
-        .select('consistency_weeks, last_updated, handle_score, previous_handle_score')
-        .eq('user_id', user_id)
-        .single()
+    const { data: currentData } = await supabase.from('user_analytics').select('*').eq('user_id', user_id).single()
 
-    // 2. SCRAPE
     const cleanHandle = handle.replace('@', '')
-    const url = `https://instagram-scraper21.p.rapidapi.com/api/v1/full-posts?username=${cleanHandle}&limit=10`
-    const response = await fetch(url, {
-      method: 'GET',
+    const response = await fetch(`https://instagram-scraper21.p.rapidapi.com/api/v1/full-posts?username=${cleanHandle}&limit=10`, {
       headers: { 'x-rapidapi-key': RAPID_KEY!, 'x-rapidapi-host': 'instagram-scraper21.p.rapidapi.com' }
     });
     const result = await response.json()
     const posts = result.data?.posts || result.posts || []
 
-    // 3. ANALYZE
     const now = new Date()
     const startOfWeek = new Date(now)
     startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7))
@@ -45,47 +36,55 @@ serve(async (req) => {
 
     let postsThisWeek = 0
     let totalRawEngagement = 0
+    const dailyMap: Record<string, number> = {}
     
     posts.forEach((p: any) => {
-        const likes = p.like_count || p.likes || 0
-        const comments = p.comment_count || p.comments || 0
-        totalRawEngagement += (likes + comments)
-
+        const eng = (p.like_count || 0) + (p.comment_count || 0)
+        
         if (p.taken_at) {
             const postDate = new Date(p.taken_at * 1000)
-            if (postDate >= startOfWeek) postsThisWeek += 1
+            if (postDate >= startOfWeek) {
+                postsThisWeek++
+                totalRawEngagement += eng
+                
+                const dateKey = postDate.toISOString().split('T')[0]
+                if (!dailyMap[dateKey]) dailyMap[dateKey] = 0
+                dailyMap[dateKey] += eng
+            }
         }
     })
 
-    // 4. SCORE
-    const Ew = posts.length > 0 ? totalRawEngagement / posts.length : 0
-    const Hw = Math.min(Math.round((Ew * 0.7) + (1.2 * 0.3) + p_variable), 1000)
+    if (Object.keys(dailyMap).length > 0) {
+        const dailyRows = Object.keys(dailyMap).map(date => ({
+            user_id: user_id,
+            date: date,
+            platform: 'instagram',
+            engagement: dailyMap[date]
+        }))
+        await supabase.from('daily_analytics').upsert(dailyRows, { onConflict: 'user_id,date,platform' })
+    }
 
-    // 5. STREAK & HISTORY
+    const avgEng = postsThisWeek > 0 ? totalRawEngagement / postsThisWeek : 0
+    const Hw = Math.min(Math.round((avgEng * 0.7) + (1.2 * 0.3) + p_variable), 1000)
+
     let newStreak = currentData?.consistency_weeks || 0
     let prevScore = currentData?.previous_handle_score || 0
     const lastUpdate = currentData?.last_updated ? new Date(currentData.last_updated) : new Date(0)
-    const isNewWeek = lastUpdate < startOfWeek
-
-    if (isNewWeek) {
+    
+    if (lastUpdate < startOfWeek) {
         prevScore = currentData?.handle_score || 0
         if (postsThisWeek > 0) newStreak += 1
-        else {
-            const daysSince = (now.getTime() - lastUpdate.getTime()) / (1000 * 3600 * 24)
-            if (daysSince > 8) newStreak = 0
-        }
+        else if ((now.getTime() - lastUpdate.getTime()) / 86400000 > 8) newStreak = 0
     } else {
         if (postsThisWeek > 0 && newStreak === 0) newStreak = 1
     }
 
-    // 6. SAVE
-    // ... inside the upsert function ...
     const { error: dbError } = await supabase.from('user_analytics').upsert({ 
       user_id: user_id, 
       insta_score: Hw,
       insta_post_count: postsThisWeek,
       insta_engagement: totalRawEngagement,
-      insta_avg_engagement: Math.round(Ew), // <--- NEW LINE (Insta uses 'Ew' for average)
+      insta_avg_engagement: Math.round(avgEng),
       consistency_weeks: newStreak,
       previous_handle_score: prevScore,
       last_updated: now.toISOString()
@@ -93,9 +92,11 @@ serve(async (req) => {
 
     if (dbError) throw dbError
 
-    return new Response(JSON.stringify({ handle_score: Hw, post_count: postsThisWeek }), { 
-      headers: { ...corsHeaders, "Content-Type": "application/json" } 
-    })
+    // ✅ FIX: Added post_count back!
+    return new Response(JSON.stringify({ 
+        handle_score: Hw,
+        post_count: postsThisWeek 
+    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } })
     
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: corsHeaders })

@@ -18,13 +18,15 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
     // Logic Flags
     var isManageMode = false
     var onCompletion: ((Bool) -> Void)?
+    
+    // 🛑 PREVENTS DOUBLE NAVIGATION
+    private var hasNavigated = false
 
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.setNavigationBarHidden(true, animated: false)
         
-        // 1. Silent Login & Check Status
         Task {
             await SupabaseManager.shared.ensureAnonymousSession()
             self.checkConnections()
@@ -33,25 +35,25 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        // Reset flag when view appears so we can navigate again if needed later
+        // hasNavigated = false
+        // (Actually, keep it true if we are done, but for this screen lifecycle, checkConnections handles it)
         checkConnections()
     }
     
     // MARK: - Connection Check Logic
     func checkConnections() {
         Task {
-            // 1. Fetch connected platforms
             let list = await SupabaseManager.shared.fetchConnectedPlatforms()
             self.connectedPlatforms = Set(list)
             
             DispatchQueue.main.async {
-                // 2. Update UI for all buttons
                 self.updateButtonVisuals(platform: "instagram", button: self.instagramButton)
                 self.updateButtonVisuals(platform: "twitter", button: self.twitterButton)
                 self.updateButtonVisuals(platform: "linkedin", button: self.linkedInButton)
                 
-                // 3. Auto-Navigation Logic
-                // Only auto-finish if we are NOT in "Manage Mode"
-                if !self.isManageMode && list.count >= 3 {
+                // Only Auto-Navigate if 3/3 AND not in Manage Mode AND haven't navigated yet
+                if !self.isManageMode && list.count >= 3 && !self.hasNavigated {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                         self.finishAuthFlow(success: true)
                     }
@@ -61,34 +63,25 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
     }
     
     func finishAuthFlow(success: Bool) {
-        // Notify parent
-        onCompletion?(success)
-        
-        // Navigation Logic
-        if let presentingVC = self.presentingViewController {
-            // Case A: Presented Modally -> Dismiss
-            self.dismiss(animated: true) {
-                // Refresh the Analytics screen underneath
-                (presentingVC as? AnalyticsViewController)?.viewWillAppear(true)
+            // 🛑 STOP: If we already navigated, do absolutely nothing.
+            if hasNavigated { return }
+            hasNavigated = true
+            
+            onCompletion?(success)
+            
+            if let presentingVC = self.presentingViewController {
+                self.dismiss(animated: true) {
+                    (presentingVC as? AnalyticsViewController)?.viewWillAppear(true)
+                }
+            } else {
+                self.performSegue(withIdentifier: "goToAnalytics", sender: self)
             }
-        } else {
-            // Case B: Root View -> Segue
-            self.performSegue(withIdentifier: "goToAnalytics", sender: self)
         }
-    }
 
-    // MARK: - Button Actions
-    @IBAction func didTapInstagram(_ sender: UIButton) {
-        handlePlatformToggle(platform: "instagram", button: sender)
-    }
-    
-    @IBAction func didTapTwitter(_ sender: UIButton) {
-        handlePlatformToggle(platform: "twitter", button: sender)
-    }
-    
-    @IBAction func didTapLinkedIn(_ sender: UIButton) {
-        handlePlatformToggle(platform: "linkedin", button: sender)
-    }
+    // MARK: - Actions
+    @IBAction func didTapInstagram(_ sender: UIButton) { handlePlatformToggle(platform: "instagram", button: sender) }
+    @IBAction func didTapTwitter(_ sender: UIButton) { handlePlatformToggle(platform: "twitter", button: sender) }
+    @IBAction func didTapLinkedIn(_ sender: UIButton) { handlePlatformToggle(platform: "linkedin", button: sender) }
     
     @IBAction func didTapSkip(_ sender: UIButton) {
         finishAuthFlow(success: true)
@@ -97,30 +90,23 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
     // MARK: - Toggle Logic
     func handlePlatformToggle(platform: String, button: UIButton) {
         if connectedPlatforms.contains(platform) {
-            // DISCONNECT FLOW
+            // DISCONNECT
             let alert = UIAlertController(title: "Disconnect \(platform.capitalized)?", message: "Stop tracking stats?", preferredStyle: .actionSheet)
             alert.addAction(UIAlertAction(title: "Disconnect", style: .destructive) { _ in
-                
-                // SHOW LOADER ⏳
                 self.toggleButtonLoading(button: button, isLoading: true)
-                
                 Task {
                     _ = await SupabaseManager.shared.disconnectSocial(platform: platform)
                     self.connectedPlatforms.remove(platform)
                     DispatchQueue.main.async {
-                        // HIDE LOADER ✅
                         self.toggleButtonLoading(button: button, isLoading: false)
-                        
-                        // Reset Visuals
                         button.backgroundColor = .clear
                     }
                 }
             })
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
             present(alert, animated: true)
-            
         } else {
-            // CONNECT FLOW
+            // CONNECT
             if platform == "instagram" { showConnectInstagramAlert(button) }
             if platform == "twitter" { showConnectTwitterAlert(button) }
             if platform == "linkedin" { showConnectLinkedInAlert(button) }
@@ -130,19 +116,14 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
     // MARK: - Loader Helper
     func toggleButtonLoading(button: UIButton, isLoading: Bool) {
         if isLoading {
-            // 1. Clear text and disable button
             button.setTitle("", for: .normal)
             button.isUserInteractionEnabled = false
-            
-            // 2. Add Spinner if not already there
             if button.viewWithTag(999) == nil {
                 let spinner = UIActivityIndicatorView(style: .medium)
-                spinner.color = .label // Adapts to light/dark mode
+                spinner.color = .label
                 spinner.tag = 999
                 spinner.translatesAutoresizingMaskIntoConstraints = false
                 button.addSubview(spinner)
-                
-                // Center the spinner in the button
                 NSLayoutConstraint.activate([
                     spinner.centerXAnchor.constraint(equalTo: button.centerXAnchor),
                     spinner.centerYAnchor.constraint(equalTo: button.centerYAnchor)
@@ -150,18 +131,15 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
                 spinner.startAnimating()
             }
         } else {
-            // 1. Remove Spinner
             if let spinner = button.viewWithTag(999) as? UIActivityIndicatorView {
                 spinner.stopAnimating()
                 spinner.removeFromSuperview()
             }
-            // 2. Re-enable button
             button.isUserInteractionEnabled = true
         }
     }
     
-    // MARK: - UI Helper Functions
-    
+    // MARK: - UI Helpers
     func updateButtonVisuals(platform: String, button: UIButton) {
         if connectedPlatforms.contains(platform) {
             button.backgroundColor = .systemGray5
@@ -203,27 +181,18 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
         present(alert, animated: true)
     }
     
-    // Shared Connect Function
     func performConnect(platform: String, handle: String, button: UIButton) {
-        // SHOW LOADER ⏳
         toggleButtonLoading(button: button, isLoading: true)
-        
         Task {
-            // 1. Save Handle
             await SupabaseManager.shared.saveSocialHandle(platform: platform, handle: handle)
-            
-            // 2. Run Scrape
             var score = 0
             if platform == "instagram" { score = await SupabaseManager.shared.runInstaScoreCalculation(handle: handle) }
             if platform == "twitter" { score = await SupabaseManager.shared.runTwitterScoreCalculation(handle: handle) }
             if platform == "linkedin" { score = await SupabaseManager.shared.runLinkedInScoreCalculation(handle: handle) }
             
-            // 3. Update UI
             self.connectedPlatforms.insert(platform)
             DispatchQueue.main.async {
-                // HIDE LOADER ✅
                 self.toggleButtonLoading(button: button, isLoading: false)
-                
                 self.updateButtonVisuals(platform: platform, button: button)
                 self.checkConnections()
             }

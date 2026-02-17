@@ -1,8 +1,22 @@
 # Supabase
 .branches
 .temp
+supabase/.temp
+supabase/functions/.env
 
-# dotenvx
+# Deno / Node
+node_modules/
+.deno/
+# Only ignore config.toml if it contains actual keys/secrets
+# supabase/config.toml 
+
+# Environment Secrets
+.env
 .env.keys
 .env.local
 .env.*.local
+.env.production
+.env.development
+
+# macOS
+.DS_Store
