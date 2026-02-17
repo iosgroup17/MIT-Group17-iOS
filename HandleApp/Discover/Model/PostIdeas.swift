@@ -53,29 +53,27 @@ struct PublishReadyPost: Codable, Identifiable {
         case predictionText = "prediction_text"
     }
     
-    // ✅ ROBUST DECODER: Never fails on missing keys
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        
-        // 1. ID: Try decode, else generate
+   
         self.id = try container.decodeIfPresent(String.self, forKey: .id) ?? UUID().uuidString
         self.topicDetailId = try container.decodeIfPresent(String.self, forKey: .topicDetailId)
+
         
-        // 2. REQUIRED FIELDS (With Fallbacks)
-        // If the AI or Database returns null/missing, we default to a safe value instead of crashing.
         self.postHeading = try container.decodeIfPresent(String.self, forKey: .postHeading) ?? "New Idea"
         self.platformIcon = try container.decodeIfPresent(String.self, forKey: .platformIcon) ?? "icon-linkedin"
         self.caption = try container.decodeIfPresent(String.self, forKey: .caption) ?? ""
         
-        // 3. ARRAYS
+  
         self.postImage = try container.decodeIfPresent([String].self, forKey: .postImage)
         self.hashtags = try container.decodeIfPresent([String].self, forKey: .hashtags) ?? []
         
-        // 4. PREDICTION
+   
         self.predictionText = try container.decodeIfPresent(String.self, forKey: .predictionText) ?? "AI Generated Insight"
     }
     
-    // Helper init for manual creation
+
     init(postHeading: String, platformIcon: String, caption: String, hashtags: [String], predictionText: String) {
         self.id = UUID().uuidString
         self.topicDetailId = nil

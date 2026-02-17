@@ -29,27 +29,21 @@ class PostTableViewCell: UITableViewCell {
 
     func configure(with post: Post) {
     
-            
-            // 2. Set Time (Unwrap Optional Date)
             if let scheduleDate = post.scheduledAt {
                 timeLabel.text = PostTableViewCell.timeFormatter.string(from: scheduleDate)
             } else {
-                timeLabel.text = "" // or "Draft"
+                timeLabel.text = ""
             }
-            
-            // 3. Set Platform Icon (Unwrap Optional String)
+        
             if let iconName = post.platformIconName {
                 platformIconImageView.image = UIImage(named: iconName)
             } else {
                 platformIconImageView.image = nil
             }
             
-            // 4. Set Image (Handle Array [String]?)
-            // We take the FIRST image in the array for the thumbnail
             if let images = post.imageNames, let firstImage = images.first {
                 thumbnailImageView.image = UIImage(named: firstImage)
             } else {
-                // Optional: Set a placeholder if no image exists
                 thumbnailImageView.image = nil
             }
         }

@@ -40,7 +40,7 @@
                                     <constraint firstAttribute="width" constant="18" id="OP2-Hg-1mL"/>
                                 </constraints>
                             </imageView>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="0HH-bv-XtQ">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="0HH-bv-XtQ">
                                 <rect key="frame" x="12" y="54" width="80" height="80"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="80" id="LCt-rR-v8Z"/>

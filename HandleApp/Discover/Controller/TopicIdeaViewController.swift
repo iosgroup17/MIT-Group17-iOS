@@ -236,7 +236,7 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
         }
         
         if indexPath.section == 2 {
-            // 1. Safely get the post object
+
             guard let posts = topic?.relevantPosts, indexPath.row < posts.count else {
                 return UICollectionViewCell()
             }
@@ -304,25 +304,22 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
         if indexPath.section == 2 {
             guard let posts = topic?.relevantPosts, indexPath.row < posts.count else { return }
             let previewPost = posts[indexPath.row]
-            
-            // 1. Show Spinner
+
             self.showLoading()
             
             Task {
                 do {
-                    // 2. Get Context
+  
                     guard let profile = await SupabaseManager.shared.fetchUserProfile() else {
                         await MainActor.run { self.hideLoading() }
                         return
                     }
-                    
-                    // 3. Generate Full Draft (On Device)
+         
                     let finalDraft = try await OnDevicePostEngine.shared.refinePostForEditor(
                         post: previewPost,
                         context: profile
                     )
-                    
-                    // 4. Navigate
+
                     await MainActor.run {
                         self.hideLoading()
                         let storyboard = UIStoryboard(name: "Discover", bundle: nil)

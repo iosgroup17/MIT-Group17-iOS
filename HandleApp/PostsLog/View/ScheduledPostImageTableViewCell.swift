@@ -35,31 +35,29 @@ class ScheduledPostImageTableViewCell: UITableViewCell {
     
     private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "h:mm a" // e.g., 6:49 AM
+        formatter.dateFormat = "h:mm a"
         return formatter
     }()
     
     func configure(with post: Post) {
         self.titleLabel.text = post.postHeading
-            
-            // Fix: Use 'captionLabel' instead of 'postLabel'
+
         self.captionLabel.text = post.fullCaption
         
-        // 1. Handle Optional Platform Icon
+
         if let iconName = post.platformIconName {
             platformIconImageView.image = UIImage(named: iconName)
         } else {
             platformIconImageView.image = nil
         }
         
-        // 2. Handle Image Array (Fix: 'imageName' -> 'imageNames')
+
         if let images = post.imageNames, let firstImage = images.first {
             thumbnailImageView.image = UIImage(named: firstImage)
         } else {
             thumbnailImageView.image = nil
         }
-        
-        // 3. Handle Schedule Date
+
         if let scheduledDate = post.scheduledAt {
             dateLabel.text = ScheduledPostImageTableViewCell.dateFormatter.string(from: scheduledDate)
             timeLabel.text = ScheduledPostImageTableViewCell.timeFormatter.string(from: scheduledDate)

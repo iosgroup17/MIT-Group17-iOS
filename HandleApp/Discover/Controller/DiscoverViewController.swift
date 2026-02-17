@@ -97,25 +97,22 @@ class DiscoverViewController: UIViewController {
     
     // In DiscoverViewController.swift
     func loadSupabaseData() async {
-            print("🚀 Starting Industry-Specific Data Load...")
+            print("Starting Industry-Specific Data Load...")
             
             do {
-                // 1. Get User Profile (Using the SupabaseManager's internal fallback logic)
-                // We do NOT check for session.user here, because SupabaseManager handles that.
                 var userProfile: UserProfile
-                var userNiche = "Technology & Software" // Default niche
+                var userNiche = "Technology & Software"
                 
                 if let profile = await SupabaseManager.shared.fetchUserProfile() {
                     userProfile = profile
                     
-                    // Try to get niche from the profile we just fetched
                     if let industry = profile.industry.first, !industry.isEmpty {
                         userNiche = industry
                     }
-                    print("✅ Loaded Profile for Niche: \(userNiche)")
+                    print("Loaded Profile for Niche: \(userNiche)")
                 } else {
-                    // If DB fetch fails completely, creates a local default so AI still works
-                    print("⚠️ Profile fetch failed. Using Default Context.")
+             
+                    print("Profile fetch failed. Using Default Context.")
                     userProfile = UserProfile(
                         professionalIdentity: ["Content Creator"],
                         currentFocus: ["Trends"],
@@ -127,11 +124,8 @@ class DiscoverViewController: UIViewController {
                     )
                 }
 
-                // 2. Fetch Trending Topics
-                // We use the 'userNiche' we determined above
                 var fetchedTrends: [TrendingTopic] = []
-                
-                // Try fetching specific category first
+
                 fetchedTrends = try await SupabaseManager.shared.client
                     .from("trending_topics")
                     .select("*")
@@ -141,9 +135,8 @@ class DiscoverViewController: UIViewController {
                     .execute()
                     .value
                 
-                // If specific fetch returned nothing, fetch global trends
                 if fetchedTrends.isEmpty {
-                    print("🔄 Niche trends empty. Fetching Global Trends...")
+                    print("Niche trends empty. Fetching Global Trends...")
                     fetchedTrends = try await SupabaseManager.shared.client
                         .from("trending_topics")
                         .select("*")
@@ -153,37 +146,36 @@ class DiscoverViewController: UIViewController {
                         .value
                 }
 
-                // 3. Update UI for Section 1 immediately
                 await MainActor.run {
                     self.trendingTopics = fetchedTrends
                     self.collectionView.reloadData()
                 }
 
-                // 4. Trigger AI Generation (ALWAYS RUNS NOW)
+
                 if let topTrend = fetchedTrends.first {
                     let topTrendName = topTrend.topicName
                     let topTrendDesc = topTrend.shortDescription
                     let combinedTrendText = "\(topTrendName): \(topTrendDesc)"
                     
-                    print("🤖 Generative AI: Starting generation for: \(topTrendName)")
+                    print("Generative AI: Starting generation for: \(topTrendName)")
 
                     let generatedPosts = try await OnDevicePostEngine.shared.generatePublishReadyPosts(
                         trendText: combinedTrendText,
                         context: userProfile
                     )
 
-                    // 5. Update Section 2 (Publish Ready)
+
                     await MainActor.run {
-                        print("✅ AI Generation Complete. Reloading Section 2.")
+                        print("AI Generation Complete. Reloading Section 2.")
                         self.publishReadyPosts = generatedPosts
                         self.collectionView.reloadSections(IndexSet(integer: 2))
                     }
                 } else {
-                    print("❌ No trends found, cannot generate AI posts.")
+                    print("No trends found, cannot generate AI posts.")
                 }
                 
             } catch {
-                print("❌ Critical Error in Data Load: \(error)")
+                print("Critical Error in Data Load: \(error)")
             }
         }
 

@@ -8,30 +8,22 @@
 import Foundation
 import FoundationModels
 
-// 1. The Input Model
-// This bundles the specific choices the user made during the Chat flow.
 struct GenerationRequest {
     let idea: String
     let tone: String
     let platform: String
-    let refinementInstruction: String? // Optional: for Step 4 (Refinement)
+    let refinementInstruction: String?
 }
 
 
-// MARK: - 3. The Generation Actor
 actor PostGenerationModel {
-    
-    // Singleton for easy access
+
     static let shared = PostGenerationModel()
-    
-    // Holds the active AI session
+
     private var session: LanguageModelSession?
     
     private init() {}
     
-    // MARK: - Session Management
-    
-    /// Connects to the device's System Intelligence. Reuses existing session if available.
     private func ensureSession() async throws -> LanguageModelSession {
         if let existingSession = session {
             return existingSession
@@ -42,14 +34,11 @@ actor PostGenerationModel {
         self.session = newSession
         return newSession
     }
-    
-    // MARK: - Generation Logic
-        
-    /// Generates the post and returns the structured EditorDraftData
+
     func generatePost(profile: UserProfile, request: GenerationRequest) async throws -> EditorDraftData {
         
 #if targetEnvironment(simulator)
-        // Simulator Mock (Since local models don't run on Simulator)
+
         try await Task.sleep(nanoseconds: 2 * 1_000_000_000)
         return EditorDraftData(
             postHeading: "A professional workspace",
@@ -63,10 +52,10 @@ actor PostGenerationModel {
         
 #else
         
-        // 1. Get Session
+
         let session = try await ensureSession()
         
-        // 2. Build Prompt
+
         let prompt = """
         You are an expert Social Media Manager.
         
@@ -92,11 +81,10 @@ actor PostGenerationModel {
             "postingTimes": ["Best time to post"]
         }
         """
-        
-        // 3. Generate
+
         let response = try await session.respond(to: prompt)
         
-        // 4. Parse
+
         let cleanJSON = stripMarkdown(from: response.content)
         
         guard let data = cleanJSON.data(using: .utf8) else {

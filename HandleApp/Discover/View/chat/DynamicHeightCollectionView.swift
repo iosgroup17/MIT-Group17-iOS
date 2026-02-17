@@ -16,7 +16,7 @@ class DynamicHeightCollectionView: UICollectionView {
     }
     
     override var intrinsicContentSize: CGSize {
-        // This is the magic line: Ask the LAYOUT for the size, not the view
+  
         return self.collectionViewLayout.collectionViewContentSize
     }
 }

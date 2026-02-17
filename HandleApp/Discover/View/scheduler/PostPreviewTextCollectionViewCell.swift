@@ -18,7 +18,7 @@ class PostPreviewTextCollectionViewCell: UICollectionViewCell {
         
         containerView.layer.cornerRadius = 12
         containerView.backgroundColor = .secondarySystemGroupedBackground
-        // Optional Shadow
+
         self.layer.shadowColor = UIColor.black.cgColor
         self.layer.shadowOpacity = 0.1
         self.layer.shadowRadius = 4

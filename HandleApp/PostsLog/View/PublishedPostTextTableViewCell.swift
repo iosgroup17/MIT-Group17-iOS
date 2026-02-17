@@ -28,7 +28,7 @@ class PublishedPostTextTableViewCell: UITableViewCell {
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
-        // Configure the view for the selected state
+
     }
     
     private static let dateFormatter: DateFormatter = {
@@ -39,25 +39,21 @@ class PublishedPostTextTableViewCell: UITableViewCell {
     
     private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "h:mm a" // e.g., 6:49 AM
+        formatter.dateFormat = "h:mm a"
         return formatter
     }()
     
     func configure(with post: Post) {
         self.titleLabel.text = post.postHeading
-            
-            // Fix: Use 'captionLabel' instead of 'postLabel'
+    
         self.captionLabel.text = post.fullCaption
-        
-        // 1. Handle Optional Platform Icon
+   
         if let iconName = post.platformIconName {
             platformIconImageView.image = UIImage(named: iconName)
         } else {
             platformIconImageView.image = nil
         }
         
-        
-        // 3. Handle Schedule Date
         if let publishedDate = post.publishedAt {
             dateLabel.text = PublishedPostTextTableViewCell.dateFormatter.string(from: publishedDate)
             timeLabel.text = PublishedPostTextTableViewCell.timeFormatter.string(from: publishedDate)

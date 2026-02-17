@@ -141,8 +141,7 @@ class EditorSuiteViewController: UIViewController {
     
 
     @IBAction func saveButtonTapped(_ sender: Any) {
-        
-        // 1. Show "Saving..." Alert
+
                 let loadingAlert = UIAlertController(title: "Saving...", message: nil, preferredStyle: .alert)
                 let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 20, width: 50, height: 50))
                 loadingIndicator.hidesWhenStopped = true
@@ -153,7 +152,7 @@ class EditorSuiteViewController: UIViewController {
                 present(loadingAlert, animated: true)
                 
         let savedPost = Post(
-                id: draft?.id ?? UUID(), // Use existing ID if available (See Step 2), else new
+                id: draft?.id ?? UUID(),
                 userId: SupabaseManager.shared.currentUserID,
                 topicId: nil,
 
@@ -179,23 +178,20 @@ class EditorSuiteViewController: UIViewController {
             )
         
         print(SupabaseManager.shared.currentUserID)
-                        
-                        // 3. Save to Supabase
+       
                         Task {
                             do {
                                 try await SupabaseManager.shared.upsertPost(post: savedPost)
-                                
-                                // 4. Success
+                
                                 await MainActor.run {
                                     loadingAlert.dismiss(animated: true) {
                                         self.dismiss(animated: true) {
-                                            // Optional: Add logic here if you want to go to a specific tab
                                             print("Post saved successfully.")
                                         }
                                     }
                                 }
                             } catch {
-                                // 5. Error
+
                                 await MainActor.run {
                                     loadingAlert.dismiss(animated: true) {
                                         let errAlert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
@@ -222,13 +218,12 @@ class EditorSuiteViewController: UIViewController {
     }
     func markPostAsPublished() {
         guard let draftID = draft?.id else { return }
-        
-        // Create a 'Post' object with published status
+
         let publishedPost = Post(
             id: draftID,
             userId: SupabaseManager.shared.currentUserID,
             topicId: nil,
-            status: .published, // Assuming your enum has this case
+            status: .published,
             postHeading: draft?.postHeading ?? "",
             fullCaption: draft?.caption,
             imageNames: draft?.images,
@@ -236,7 +231,7 @@ class EditorSuiteViewController: UIViewController {
             platformIconName: draft?.platformIconName,
             hashtags: draft?.hashtags,
             scheduledAt: nil,
-            publishedAt: Date(), // Set the current date as published date
+            publishedAt: Date(),
             likes: 0,
             engagementScore: 0.0,
             suggestedHashtags: nil,
@@ -248,7 +243,7 @@ class EditorSuiteViewController: UIViewController {
                 try await SupabaseManager.shared.upsertPost(post: publishedPost)
                 await MainActor.run {
                     self.showToast(message: "Post marked as Published!")
-                    // Optional: Dismiss or move the user back to the home screen
+
                     self.navigationController?.popToRootViewController(animated: true)
                 }
             } catch {
@@ -297,12 +292,11 @@ class EditorSuiteViewController: UIViewController {
         let activityVC = UIActivityViewController(activityItems: itemsToShare, applicationActivities: nil)
         
         activityVC.completionWithItemsHandler = { (activityType, completed, returnedItems, error) in
-            // 1. Clean up images
+
             imageURLs.forEach { try? FileManager.default.removeItem(at: $0) }
-            
-            // 2. Only proceed if the user actually clicked an app (completed)
+    
             if completed {
-                // Give the UI a moment to settle after the share sheet slides down
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     let alert = UIAlertController(
                         title: "Confirm Post",
@@ -453,12 +447,8 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
                     destinationVC.captionText = captionTextView.text
                     destinationVC.postHeading = draft?.postHeading
                     
-                    // ✅ FIX 1: Pass the Existing ID!
-                    // This ensures SchedulerVC updates the OLD row instead of creating a NEW one.
                     destinationVC.existingPostId = draft?.id
-                    
-                    // ✅ FIX 2: Pass the Image Filenames (Strings)
-                    // SchedulerVC needs these for the database string array, otherwise it saves as nil/empty
+         
                     destinationVC.imageNames = draft?.images
                 }
             }
@@ -550,8 +540,7 @@ class ShareTextSource: NSObject, UIActivityItemSource {
     }
 
     func activityViewController(_ activityViewController: UIActivityViewController, itemForActivityType activityType: UIActivity.ActivityType?) -> Any? {
-        // If the user picks Instagram, we return nil (empty) for the text
-        // because we already put it in the Clipboard. This prevents the crash.
+
         if activityType?.rawValue.contains("instagram") == true {
             return nil
         }

@@ -24,13 +24,11 @@ class SavedPostTextTableViewCell: UITableViewCell {
 
     
     func configure(with post: Post) {
-            // Fix: Use 'titleLabel' instead of 'platformLabel'
+
         self.titleLabel.text = post.postHeading
-            
-            // Fix: Use 'captionLabel' instead of 'postLabel'
+
         self.captionLabel.text = post.fullCaption
-            
-            // 1. Handle the Platform Icon (matches your other cell's logic)
+
         if let iconName = post.platformIconName {
             platformIconImageView.image = UIImage(named: iconName)
         } else {

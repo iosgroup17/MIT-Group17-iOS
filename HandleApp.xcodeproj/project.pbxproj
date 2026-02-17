@@ -187,7 +187,7 @@
 				CODE_SIGN_ENTITLEMENTS = HandleApp/HandleApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QW7NJ52GJ2;
+				DEVELOPMENT_TEAM = U32SNWLWG9;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HandleApp/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -200,7 +200,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "ketaki.kulkarni1-mitwpu.edu.in.HandleApp";
+				PRODUCT_BUNDLE_IDENTIFIER = "ketaki.kulkarni1-mitwpu.edu.in";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;

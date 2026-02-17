@@ -87,7 +87,7 @@ actor OnDevicePostEngine {
         let response = try await session.respond(to: prompt)
 
         guard let jsonString = extractAndCleanJSON(from: response.content) else {
-            print("🚨 AI Output was not valid JSON:\n\(response.content)")
+            print("AI Output was not valid JSON:\n\(response.content)")
             throw NSError(domain: "Decoder", code: 0, userInfo: [NSLocalizedDescriptionKey: "AI Output extraction failed"])
         }
         
@@ -104,7 +104,7 @@ actor OnDevicePostEngine {
             return decoded.posts
         } catch {
             print("Decoding Error: \(error)")
-            // If decoding fails, print the raw string to debug console to see the syntax error
+
             print("Offending JSON: \(jsonString)")
             throw error
         }
@@ -200,8 +200,7 @@ extension OnDevicePostEngine {
         }
         
         print("Cleaned AI JSON:\n\(jsonString)")
-        
-        // 1. Decode the AI response
+
         var draft = try JSONDecoder().decode(EditorDraftData.self, from: data)
         
         return draft

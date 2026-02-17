@@ -51,23 +51,20 @@ class UserIdeaViewController: UIViewController {
     
     @IBAction func sendButtonTapped(_ sender: Any) {
         guard let text = messageTextField.text, !text.isEmpty else { return }
-                
-        // Clear text field
+
         messageTextField.text = ""
         
-        // Pass the text to our Logic Handler
         handleUserResponse(text)
     }
     
 
         func handleUserResponse(_ responseText: String) {
             
-            // 1. Show User's Message IMMEDIATELY
             let userMsg = Message(text: responseText, isUser: true, type: .text)
             messages.append(userMsg)
             insertNewMessage()
+     
             
-            // 2. Add a tiny delay (0.6s) to simulate "Thinking" and fix the UI glitch
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
                 guard let self = self else { return }
                 
@@ -79,7 +76,18 @@ class UserIdeaViewController: UIViewController {
                     
                     self.addBotResponse(
                         text: "Got it! What tone should the post have?",
-                        options: ["Professional", "Casual", "Humorous", "Inspirational", "Bold"]
+                        options: [
+                            "Professional",
+                            "Educational",
+                            "Casual",
+                            "Direct",
+                            "Analytical",
+                            "Contrarian",
+                            "Conversational",
+                            "Inspirational",
+                            "Storytelling"
+
+                        ]
                     )
                     
                 case .waitingForTone:
@@ -88,28 +96,20 @@ class UserIdeaViewController: UIViewController {
                     
                     self.addBotResponse(
                         text: "And for which platform?",
-                        options: ["LinkedIn", "Twitter/X", "Instagram"]
+                        options: ["LinkedIn", "X", "Instagram"]
                     )
                     
                 case .waitingForPlatform:
                     self.selectedPlatform = responseText
-                    self.currentStep = .finished
-                    
+                    self.currentStep = .waitingForRefinement
                     self.fetchAIResponse()
-                
-                case .finished:
+
+                case .waitingForRefinement:
                     self.refinement = responseText
                     self.currentStep = .finished
-                    
-                    self.addBotResponse(
-                        text: "Any other refinements you'd like?",
-                        options: ["Make it more concise", "Strengthen the opening", "Add subtle expressiveness", "Reframe the post", "Include a Call to Action (CTA)"]
-                    )
-                    
-                    self.addBotResponse(text: "here's your refined draft:")
+                    self.showAnalysisMessage = false
                     self.fetchAIResponse()
-                    print("Flow finished")
-                    
+
                 default:
                     break
 
@@ -117,26 +117,26 @@ class UserIdeaViewController: UIViewController {
             }
         }
 
-        // MARK: - Helper
+    
         func addBotResponse(text: String, options: [String]? = nil) {
             var newIndexPaths: [IndexPath] = []
             
-            // 1. Add Text
+            
             let textMsg = Message(text: text, isUser: false, type: .text)
             messages.append(textMsg)
             newIndexPaths.append(IndexPath(row: messages.count - 1, section: 0))
             
-            // 2. Add Options (if any)
+
             if let opts = options {
                 let optsMsg = Message(text: "", isUser: false, type: .optionPills, options: opts)
                 messages.append(optsMsg)
                 newIndexPaths.append(IndexPath(row: messages.count - 1, section: 0))
             }
             
-            // 3. Insert into Table View
+
             tableView.insertRows(at: newIndexPaths, with: .bottom)
             
-            // 4. Scroll to bottom
+
             if let last = newIndexPaths.last {
                 tableView.scrollToRow(at: last, at: .bottom, animated: true)
             }
@@ -163,44 +163,38 @@ extension UserIdeaViewController: UITableViewDelegate, UITableViewDataSource {
         
         let message = messages[indexPath.row]
         
-        // ====================================================
-        // PART 1: OPTION PILLS (The Collection View Cell)
-        // ====================================================
+    
         if message.type == .optionPills {
             
-            // Dequeue the new cell we created (ensure identifier matches your XIB)
+
             guard let cell = tableView.dequeueReusableCell(withIdentifier: "ChatOptionsTableViewCell", for: indexPath) as? ChatOptionsTableViewCell else {
                 return UITableViewCell()
             }
-            
-            // Pass the array of strings (e.g. ["Casual", "Professional"])
+
             cell.configure(with: message.options ?? [])
             
-            // handle logic when a pill is clicked
+
             cell.onOptionSelected = { [weak self] selectedText in
-                // Pretend the user typed this text manually
+
                 self?.handleUserResponse(selectedText)
             }
             
             return cell
         }
         
-        // ====================================================
-        // PART 2: TEXT BUBBLES (Standard Chat Cell)
-        // ====================================================
+      
         else {
-            // Decide if it's a User (Right/Blue) or Bot (Left/Gray) cell
+  
             let cellIdentifier = message.isUser ? "UserCell" : "BotCell"
             
             guard let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath) as? ChatCellTableViewCell else {
                 return UITableViewCell()
             }
             
-            // Setup bubble appearance
+
             cell.configureBubble(isUser: message.isUser)
             cell.messageLabel.text = message.text
-            
-            // Handle the "Open Editor" button (Only shows if there is a draft attached)
+         
             if let btn = cell.editorButton {
                 if let draftData = message.draft {
                     btn.isHidden = false
@@ -227,7 +221,7 @@ extension UserIdeaViewController: UITableViewDelegate, UITableViewDataSource {
 extension UserIdeaViewController {
     
     func fetchAIResponse() {
-            // Construct the full prompt from our saved variables
+        
             let fullQuery = "Idea: \(userIdea). Tone: \(selectedTone). Platform: \(selectedPlatform)."
             
         if !showAnalysisMessage {
@@ -239,8 +233,7 @@ extension UserIdeaViewController {
         
 
         Task {
-                // 2. Create the User Profile Context
-                // (Here we use the default values you had. Later, you can fetch this from Supabase if needed)
+            
                 let profileContext = UserProfile(
                     professionalIdentity: ["Professional"],
                     currentFocus: ["General Work"],
@@ -251,29 +244,28 @@ extension UserIdeaViewController {
                     targetAudience: ["Everyone"]
                 )
             
-            // 3. Create the Request Object
+
                 let request = GenerationRequest(
                     idea: self.userIdea,
                     tone: self.selectedTone,
                     platform: self.selectedPlatform,
-                    // Only pass refinement if the string is not empty
                     refinementInstruction: self.refinement.isEmpty ? nil : self.refinement
                 )
             
             do {
-                // 4. Call your new Local Foundation Model
+
                 let draft = try await PostGenerationModel.shared.generatePost(
                     profile: profileContext,
                     request: request
                 )
                 
-                // 5. Update UI on Success
+
                 await MainActor.run {
                     self.handleSuccess(draft: draft)
                 }
                 
             } catch {
-                            // 6. Handle Errors
+ 
                 await MainActor.run {
                     self.handleError(error: error)
                 }
@@ -285,10 +277,7 @@ extension UserIdeaViewController {
     func handleSuccess(draft: EditorDraftData) {
         
         let platform = draft.platformName
-        
         let isStrategy = platform.lowercased() == "strategy"
-
-        
         let tags = draft.hashtags?.joined(separator: " ") ?? ""
 
         let displayText: String
@@ -313,6 +302,21 @@ extension UserIdeaViewController {
                
         self.messages.append(aiMessage)
         self.insertNewMessage()
+        
+        if self.currentStep == .waitingForRefinement {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
+                    self?.addBotResponse(
+                        text: "Any refinements you'd like to make to this draft?",
+                        options: [
+                            "Make the post more concise",
+                            "Strengthen the opening hook",
+                            "Add more emotional depth",
+                            "Reframe with sharper clarity",
+                            "Include a clear call to action"
+                        ]
+                    )
+                }
+            }
     }
         
         
@@ -327,10 +331,10 @@ extension UserIdeaViewController {
 extension UserIdeaViewController: UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-            // Check if the return key was pressed on the message text field
+
             if textField == messageTextField {
-                sendButtonTapped(textField) // Trigger the existing send logic
-                return false // Return false so it doesn't try to insert a new line
+                sendButtonTapped(textField)
+                return false 
             }
             return true
         }

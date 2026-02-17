@@ -50,8 +50,7 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
     private func setupCollectionView() {
         postPreviewCollectionView.delegate = self
         postPreviewCollectionView.dataSource = self
-        
-        // Register BOTH XIBs
+
         postPreviewCollectionView.register(
             UINib(nibName: "PostPreviewImageCollectionViewCell", bundle: nil),
             forCellWithReuseIdentifier: "PostPreviewImageCollectionViewCell"
@@ -64,26 +63,21 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
         
         postPreviewCollectionView.isScrollEnabled = false
         let layout = UICollectionViewCompositionalLayout { (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
-            
-            // ITEM: Takes up 100% of the Group
+      
             let itemSize = NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(1.0),
                 heightDimension: .fractionalHeight(1.0)
             )
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
-            
-            // GROUP: Fixed Height (300), Width fills the Section
+     
             let groupSize = NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(1.0),
                 heightDimension: .estimated(145)
             )
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
-            
-            // SECTION: Apply the padding here
+          
             let section = NSCollectionLayoutSection(group: group)
             
-            // This creates the "Screen Width - 48" effect
-            // (24 padding on Left + 24 padding on Right)
             section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 12)
             
             return section
@@ -93,7 +87,7 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
     }
     
     private func setupInitialUI() {
-        // Configure Pickers initial state
+
         datePicker.datePickerMode = .date
         timePicker.datePickerMode = .time
         
@@ -118,7 +112,7 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
             self.datePicker.isHidden = !sender.isOn
             self.datePicker.alpha = sender.isOn ? 1.0 : 0.0
             
-            //close time picker if opening date
+
             if sender.isOn {
                 self.timePicker.isHidden = true
                 self.timePicker.alpha = 0.0
@@ -140,7 +134,7 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
             self.timePicker.isHidden = !sender.isOn
             self.timePicker.alpha = sender.isOn ? 1.0 : 0.0
             
-            //Close date picker if opening Time
+
             if sender.isOn {
                 self.datePicker.isHidden = true
                 self.datePicker.alpha = 0.0
@@ -174,7 +168,7 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
         }
     
     @IBAction func scheduleButtonTapped(_ sender: UIBarButtonItem) {
-        // 1. Combine Date/Time
+    
                let calendar = Calendar.current
                let dateComponents = calendar.dateComponents([.year, .month, .day], from: datePicker.date)
                let timeComponents = calendar.dateComponents([.hour, .minute], from: timePicker.date)
@@ -188,7 +182,7 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
                
                let finalDate = calendar.date(from: mergedComps) ?? Date()
                
-               // 2. Show "Scheduling..." Alert
+    
                let loadingAlert = UIAlertController(title: "Scheduling...", message: nil, preferredStyle: .alert)
                let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 20, width: 50, height: 50))
                loadingIndicator.hidesWhenStopped = true
@@ -197,11 +191,9 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
                loadingAlert.view.addSubview(loadingIndicator)
                
                present(loadingAlert, animated: true)
-               
-               // 3. Create Post Object
-               // We use 'postData' for text, but 'self.imageNames' for the DB file paths
+              
                let newPost = Post(
-                    id: self.existingPostId ?? UUID(), // ✅ Use existing ID to update row
+                    id: self.existingPostId ?? UUID(),
                     userId: SupabaseManager.shared.currentUserID,
                    topicId: nil,
                    status: .scheduled,
@@ -217,12 +209,11 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
                    engagementScore: 0,
                )
                
-               // 4. Save to Supabase
+
                Task {
                    do {
                        try await SupabaseManager.shared.upsertPost(post: newPost)
-                       
-                       // 5. Success: Dismiss Alert -> Dismiss Modal
+  
                        await MainActor.run {
                            loadingAlert.dismiss(animated: true) {
                                self.dismiss(animated: true) {
@@ -231,7 +222,7 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
                            }
                        }
                    } catch {
-                       // 6. Error: Dismiss Alert -> Show Error
+   
                        await MainActor.run {
                            loadingAlert.dismiss(animated: true) {
                                let errAlert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
@@ -245,13 +236,13 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
     }
     
     func navigateToScheduledTab() {
-            // If your app uses a TabBarController
+
             if let tabBar = self.tabBarController {
-                // Change '1' to the index of your Posts/Schedule tab (0, 1, 2, etc.)
+  
                 tabBar.selectedIndex = 1
                 self.navigationController?.popToRootViewController(animated: false)
             } else {
-                // Fallback if no TabBar
+  
                 self.dismiss(animated: true)
             }
         }
