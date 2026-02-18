@@ -193,6 +193,7 @@ class EditorSuiteViewController: UIViewController {
                             } catch {
 
                                 await MainActor.run {
+                                    NotificationManager.shared.scheduleDraftReminder(for: savedPost)
                                     loadingAlert.dismiss(animated: true) {
                                         let errAlert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
                                         print(error.localizedDescription)
@@ -242,6 +243,7 @@ class EditorSuiteViewController: UIViewController {
             do {
                 try await SupabaseManager.shared.upsertPost(post: publishedPost)
                 await MainActor.run {
+                    NotificationManager.shared.cancelNotification(for: draftID)
                     self.showToast(message: "Post marked as Published!")
 
                     self.navigationController?.popToRootViewController(animated: true)

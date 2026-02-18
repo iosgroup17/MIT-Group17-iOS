@@ -17,6 +17,7 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        NotificationManager.shared.requestAuthorization()
         let imageNib = UINib(nibName: "SavedPostImageTableViewCell", bundle: nil)
             tableView.register(imageNib, forCellReuseIdentifier: "ImageSavedCell")
            
@@ -141,7 +142,8 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
                     completionHandler(false)
                     return
                 }
-
+                
+                NotificationManager.shared.cancelNotification(for: postId)
                 Task {
                     await SupabaseManager.shared.deleteLogPost(id: postId)
                     

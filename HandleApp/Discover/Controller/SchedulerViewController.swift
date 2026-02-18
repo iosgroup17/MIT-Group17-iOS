@@ -213,7 +213,10 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
                Task {
                    do {
                        try await SupabaseManager.shared.upsertPost(post: newPost)
-  
+                       if let id = newPost.id {
+                           NotificationManager.shared.cancelNotification(for: id)
+                       }
+                       NotificationManager.shared.schedulePostReminder(for: newPost)
                        await MainActor.run {
                            loadingAlert.dismiss(animated: true) {
                                self.dismiss(animated: true) {

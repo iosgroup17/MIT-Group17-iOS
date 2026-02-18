@@ -22,6 +22,7 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        NotificationManager.shared.requestAuthorization()
         let imageNib = UINib(nibName: "ScheduledPostImageTableViewCell", bundle: nil)
             tableView.register(imageNib, forCellReuseIdentifier: "ScheduledPostImageTableViewCell")
            
@@ -170,6 +171,8 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
             else { post = self.scheduledLaterPosts[indexPath.row] }
             
             guard let postId = post.id else { return completionHandler(false) }
+            
+            NotificationManager.shared.cancelNotification(for: postId)
 
             Task {
                 await SupabaseManager.shared.deleteLogPost(id: postId)
