@@ -310,9 +310,7 @@ extension UserIdeaViewController {
                         options: [
                             "Make the post more concise",
                             "Strengthen the opening hook",
-                            "Add more emotional depth",
-                            "Reframe with sharper clarity",
-                            "Include a clear call to action"
+                            "Reframe with sharper clarity"
                         ]
                     )
                 }

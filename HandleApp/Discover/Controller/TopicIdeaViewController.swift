@@ -362,7 +362,7 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
                     await MainActor.run {
                         self.hideLoading()
                         let storyboard = UIStoryboard(name: "Discover", bundle: nil)
-                        if let editorVC = storyboard.instantiateViewController(withIdentifier: "EditorSuiteViewController") as? EditorSuiteViewController {
+                        if let editorVC = storyboard.instantiateViewController(withIdentifier: "EditorModalEntry") as? EditorSuiteViewController {
                             editorVC.draft = finalDraft
                             self.navigationController?.pushViewController(editorVC, animated: true)
                         }

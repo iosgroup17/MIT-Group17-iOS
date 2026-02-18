@@ -57,30 +57,44 @@ actor PostGenerationModel {
         
 
         let prompt = """
-        You are an expert Social Media Manager.
-        
-        \(profile.promptContext)
-        
-        TASK:
-        Write a social media post based on these inputs:
-        - Idea: \(request.idea)
-        - Tone: \(request.tone)
-        - Platform: \(request.platform)
-        \(request.refinementInstruction != nil ? "- Refinement: \(request.refinementInstruction!)" : "")
-        
-        OUTPUT INSTRUCTIONS:
-        You must output ONLY valid JSON. No markdown formatting. No introductory text.
-        
-        Target JSON Structure:
-        {
-            "platformName": "\(request.platform)",
-            "platformIconName": "doc.text", // Use generic doc icon, we map specific ones in UI
-            "caption": "The post content here",
-            "images": ["Visual description of an image"],
-            "hashtags": ["#tag1", "#tag2"],
-            "postingTimes": ["Best time to post"]
-        }
-        """
+            ACT AS: Lead Executive Ghostwriter for Founders.
+
+            PROFILE: \(profile.promptContext)
+
+            STYLE REFERENCE: \(profile.acceptedSuggestions)
+
+            GUIDELINES:
+            1. AUTHENTICITY: Write as a founder with real skin in the game. No corporate buzzwords.
+            2. NO AI-isms: Never use "unleash," "delve," "tapestry," "revolutionize," "embark," "journey," "transform," or similar.
+            3. VALUE-FIRST: Every post delivers clear utility for \(profile.targetAudience.joined(separator: ", "))
+            4. HOOK-REQUIRED: First line must be a scroll-stopping hook (bold claim, question, or data point).
+            5. PROFESSIONAL: Respectful tone, no harassment, stereotypes, or offensive content.
+
+            REGULATORY COMPLIANCE (MANDATORY):
+            - NO false claims, guarantees, or misleading statements
+            - NO medical/health advice unless founder is licensed professional
+            - NO financial investment advice or "get rich quick" promises
+            - NO discriminatory language (race, gender, religion, etc.)
+            - NO promotion of illegal activities
+            - Include disclaimers if discussing AI tools: "Results vary based on implementation"
+
+            TASK: Write 1 publish-ready social media post for:
+            - Idea: \(request.idea)
+            - Tone: \(request.tone)
+            - Platform: \(request.platform)
+            \(request.refinementInstruction != nil ? "- Refine: \(request.refinementInstruction!)" : "")
+
+            OUTPUT: ONLY valid JSON. No other text.
+
+            {
+              "platformName": "\(request.platform)",
+              "platformIconName": "doc.text",
+              "caption": "Post content here. Use \\n for line breaks. No hashtags.",
+              "images": ["1 detailed visual description matching founder's industry"],
+              "hashtags": ["#Tag1", "#Tag2", "#Tag3"],
+              "postingTimes": ["\(request.platform) optimal times for \(profile.targetAudience.first ?? "general") audience"]
+            }
+            """
 
         let response = try await session.respond(to: prompt)
         

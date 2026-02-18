@@ -403,6 +403,8 @@ extension SupabaseManager {
                 answers[resp.step_index] = resp.selection_tags
             }
             
+            let localSuggestions = loadHardCodedSuggestions()
+            
             // mapping data to correct indices
             return UserProfile(
                 professionalIdentity: answers[0] ?? [], // Step 0: Identity
@@ -411,7 +413,8 @@ extension SupabaseManager {
                 primaryGoals: answers[3] ?? [],         // Step 3: Goals
                 contentFormats: answers[4] ?? [],       // Step 4: Formats
                 platforms: answers[5] ?? [],            // Step 5: Platforms (LinkedIn, etc.)
-                targetAudience: answers[6] ?? []        // Step 6: Audience
+                targetAudience: answers[6] ?? [],
+                acceptedSuggestions: localSuggestions// Step 6: Audience
             )
             
         } catch {
@@ -419,6 +422,21 @@ extension SupabaseManager {
             return nil
         }
     }
+    
+    private func loadHardCodedSuggestions() -> [AcceptedSuggestion] {
+            guard let url = Bundle.main.url(forResource: "Suggestions", withExtension: "json"),
+                  let data = try? Data(contentsOf: url) else {
+                print("⚠️ Suggestions.json file not found in bundle")
+                return []
+            }
+            
+            do {
+                return try JSONDecoder().decode([AcceptedSuggestion].self, from: data)
+            } catch {
+                print("❌ Error decoding local suggestions: \(error)")
+                return []
+            }
+        }
     
     // In SupabaseManager.swift
 
