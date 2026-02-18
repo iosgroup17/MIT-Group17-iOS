@@ -47,17 +47,32 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
             
             // 2. Filter Today
             let today = Date()
-            self.scheduledTodayPosts = allPosts.filter { post in
+            let todayPosts = allPosts.filter { post in
                 guard post.status == .scheduled, let date = post.scheduledAt else { return false }
                 return Calendar.current.isDate(date, inSameDayAs: today)
             }
             
-            // 3. Filter Tomorrow & Later using Extensions
-            self.scheduledTomorrowPosts = Post.loadTomorrowScheduledPosts(from: allPosts)
-            self.scheduledLaterPosts = Post.loadScheduledPostsLater(from: allPosts)
+            // 3. Filter Tomorrow & Later
+            let tomorrowPosts = Post.loadTomorrowScheduledPosts(from: allPosts)
+            let laterPosts = Post.loadScheduledPostsLater(from: allPosts)
 
+            self.allTodayPosts = todayPosts
+            self.allTomorrowPosts = tomorrowPosts
+            self.allLaterPosts = laterPosts
+            
+            // 4. Update UI on Main Thread
             await MainActor.run {
-                self.postTableView.reloadData()
+                // Check if a filter is already active.
+                // If "All", just show data. If "LinkedIn", apply the filter immediately.
+                if self.currentPlatformFilter == "All" {
+                    self.scheduledTodayPosts = todayPosts
+                    self.scheduledTomorrowPosts = tomorrowPosts
+                    self.scheduledLaterPosts = laterPosts
+                    self.postTableView.reloadData()
+                } else {
+                    // If the user refreshed while looking at "Instagram", keep showing only "Instagram"
+                    self.filterScheduledPosts(by: self.currentPlatformFilter)
+                }
             }
         }
     }
@@ -134,7 +149,6 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
 
         // 2. Check if the post has images to decide which identifier to use
         let hasImages = post.imageNames?.isEmpty == false
-        let identifier = hasImages ? "ImageCell" : "TextCell"
 
         // 3. Dequeue and configure
         if hasImages {
@@ -178,10 +192,18 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
                 await SupabaseManager.shared.deleteLogPost(id: postId)
                 
                 await MainActor.run {
-                    // Remove from local arrays
-                    if indexPath.section == 0 { self.scheduledTodayPosts.remove(at: indexPath.row) }
-                    else if indexPath.section == 1 { self.scheduledTomorrowPosts.remove(at: indexPath.row) }
-                    else { self.scheduledLaterPosts.remove(at: indexPath.row) }
+                    if indexPath.section == 0 {
+                        self.scheduledTodayPosts.remove(at: indexPath.row)
+                        if let id = post.id { self.allTodayPosts.removeAll { $0.id == id } }
+                    }
+                    else if indexPath.section == 1 {
+                        self.scheduledTomorrowPosts.remove(at: indexPath.row)
+                        if let id = post.id { self.allTomorrowPosts.removeAll { $0.id == id } }
+                    }
+                    else {
+                        self.scheduledLaterPosts.remove(at: indexPath.row)
+                        if let id = post.id { self.allLaterPosts.removeAll { $0.id == id } }
+                    }
                     
                     tableView.deleteRows(at: [indexPath], with: .automatic)
                     completionHandler(true)

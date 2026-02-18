@@ -138,59 +138,59 @@ extension OnDevicePostEngine {
         let originalHeading = post.postHeading
         
         let prompt = """
-        ACT AS: Expert Social Media Copywriter.
-        
+         EDITOR SUITE - STRICT COMPLIANCE REQUIRED 
+        You are an Expert Social Media Ghostwriter for High-Profile Founders. FOLLOW EVERY RULE EXACTLY.
+
         CONTEXT:
-        - Platform: \(platformName)
-        - Audience: \(context.targetAudience.joined(separator: ", "))
-        - Goal: \(context.primaryGoals.joined(separator: ", "))
-        
+        Platform: \(platformName)
+        Audience: \(context.targetAudience.joined(separator: ", "))
+        Goal: \(context.primaryGoals.joined(separator: ", "))
+        Industry: \(context.industry.joined(separator: ", "))
+
         INPUT IDEA:
-        - Hook: "\(post.postHeading)"
-        - Draft: "\(post.caption)"
-        
-        TASK:
-        Expand this idea into a final publish-ready draft.
-        
-        STRICT REQUIREMENTS:
-                1. Caption (Creative Expansion): 
-                   - Elaborate on the "Draft" input. 
-                   - Write a creative, engaging, value-packed caption (approx 100-120 words). 
-                   - Use storytelling, line breaks, and emojis. 
-                   - CRITICAL: DO NOT put hashtags in this field.
-                   
-                2. Visuals (Select from List): 
-                   - You have access to a stock library with IDs: ["img_01", "img_02", "img_03", "img_04", "img_05", "img_06", "img_07", "img_08", "img_09", "img_10", "img_11", "img_12", "img_13", "img_14", "img_15", "img_16".....till "img_34"].
-                   - Select 2-3 specific Image IDs from this list that best match the mood of the post.
-                   
-                3. Hashtags(STRICT CONSTARINTS): 
-                   - Generate exactly 4 hashtags.
-                   - CONSTRAINT: Max length 12 characters per tag.
-                   - CONSTRAINT: No single words (e.g. use "#TechTips" NOT "#Tech").
-                   - CONSTRAINT: No generic tags like "#FYP" or "#Viral".
-                   - Must be relevant to: \(context.industry.joined(separator: ", ")).
-                   
-                4. Posting Times (Strategic Analysis): 
-                   - Analyze when the specific Target Audience ("\(context.targetAudience.joined(separator: ", "))") is most active on \(platformName).
-                   - Suggest 2 specific, optimal times (e.g., "Sunday at [Time]", "Thursday at [Time]"). 
-                   - Do NOT use generic 9 AM defaults unless strictly appropriate.
-        
-                5. Post Heading (Consistency):
-                   - You MUST include the "post_heading" key.
-                   - The value MUST be exactly: "\(originalHeading)".
-                   - Do not rewrite or alter the hook.
-                
-                OUTPUT JSON (Strictly match this schema):
-                {
-                    "post_heading": "\(originalHeading)",
-                    "platformName": "\(platformName)",
-                    "platformIconName": "\(post.platformIcon)",
-                    "caption": "The elaborated, creative caption body goes here...",
-                    "images": ["img_01", "img_05"],
-                    "hashtags": ["#specific", "#industry", "#tags"],
-                    "postingTimes": ["[Day] at [Optimal Time]", "[Day] at [Optimal Time]"]
-                }
+        Hook: "\(post.postHeading)"
+        Draft: "\(post.caption)"
+
+         BRAND VOICE & COMMUNITY GUIDELINES (MANDATORY):
+        - VOICE: Human, authoritative, and experience-led.
+        - NO AI-isms: Strictly avoid "Unleash," "Delve," "Tapestry," "Revolutionize," "In today's fast-paced world."
+        - VALUE: Every caption must provide a specific "Alpha" or "So-what" for the reader.
+        - NO SPAM: Do not use excessive exclamation marks or "Brospeak" marketing tropes.
+
+         INDIA IT RULES 2026 - MANDATORY (Effective Feb 20, 2026):
+        - NO false claims, unverified stats, or guarantees.
+        - NO medical/health/financial advice unless qualified.
+        - NO deepfakes, CSAM, explosives, or illegal content.
+        - ALL images = "AI-assisted stock images" (embedded metadata compliant).
+        - 3-hour takedown ready: no harmful synthetic content.
+
+         UI CONSTRAINTS (VIOLATION = APP CRASH):
+        1. Caption: EXACTLY 100-120 words. Storytelling + emojis + line breaks. ZERO hashtags.
+        2. Images: EXACTLY 2-3 from ["img_01", "img_02", ..., "img_34"]. Match post mood.
+        3. Hashtags: EXACTLY 4 tags. ≤12 chars each. NO single words (#TechTips NOT #Tech). NO #FYP/#Viral. Industry-specific.
+        4. Posting Times: EXACTLY 2 specific "[Day] at [Time]" for \(context.targetAudience.joined(separator: ", ")) on \(platformName).
+        5. post_heading: MUST BE IDENTICAL: "\(originalHeading)" ZERO changes
+
+        CHECKLIST (VERIFY BEFORE OUTPUT):
+         Caption: 100-120 words (Verify count)
+         Images: 2-3 valid IDs from img_01-img_34
+         Hashtags: exactly 4, ≤12 chars, compound, relevant
+         Times: 2 specific audience-optimized
+         Heading: exactly "\(originalHeading)"
+         JSON: perfect schema, no extra fields
+
+        OUTPUT JSON (Strictly adhere to this structure):
+        {
+          "post_heading": "\(originalHeading)",
+          "platformName": "\(platformName)",
+          "platformIconName": "\(post.platformIcon)",
+          "caption": "[100-120 word expansion with storytelling, max 2-3 professional emojis, and clear line breaks]",
+          "images": ["img_XX", "img_XX"],
+          "hashtags": ["#TagOne","#TagTwo","#TagThree","#TagFour"],
+          "postingTimes": ["Day at Time", "Day at Time"]
+        }
         """
+    
         let response = try await session.respond(to: prompt)
         
         guard let jsonString = extractAndCleanJSON(from: response.content),

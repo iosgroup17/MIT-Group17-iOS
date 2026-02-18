@@ -61,7 +61,7 @@ actor PostGenerationModel {
 
             PROFILE: \(profile.promptContext)
 
-            STYLE REFERENCE: \(profile.acceptedSuggestions)
+            STYLE REFERENCE: 
 
             GUIDELINES:
             1. AUTHENTICITY: Write as a founder with real skin in the game. No corporate buzzwords.
@@ -92,7 +92,7 @@ actor PostGenerationModel {
               "caption": "Post content here. Use \\n for line breaks. No hashtags.",
               "images": ["1 detailed visual description matching founder's industry"],
               "hashtags": ["#Tag1", "#Tag2", "#Tag3"],
-              "postingTimes": ["\(request.platform) optimal times for \(profile.targetAudience.first ?? "general") audience"]
+              "postingTimes": ["Day at Time", "Day at Time"]
             }
             """
 

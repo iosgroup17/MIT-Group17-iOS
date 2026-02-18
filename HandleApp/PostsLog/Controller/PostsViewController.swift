@@ -93,23 +93,27 @@ class PostsViewController: UIViewController {
     //Fetch posts from supabase.
     func fetchData() {
         Task {
-            // 1. Fetch EVERYTHING
-            let fetchedPosts = await SupabaseManager.shared.fetchUserPosts()
-            self.allPosts = fetchedPosts
-            
-            // 2. Filter locally for "Today's Schedule"
-            let today = Date()
-            self.todayScheduledPosts = fetchedPosts.filter { post in
-                guard post.status == .scheduled, let date = post.scheduledAt else { return false }
-                return Calendar.current.isDate(date, inSameDayAs: today)
+                // 1. Fetch EVERYTHING
+                let fetchedPosts = await SupabaseManager.shared.fetchUserPosts()
+                self.allPosts = fetchedPosts
+                
+                // 2. Filter locally for "Today's Schedule"
+                let today = Date()
+                self.todayScheduledPosts = fetchedPosts.filter { post in
+                    guard post.status == .scheduled, let date = post.scheduledAt else { return false }
+                    return Calendar.current.isDate(date, inSameDayAs: today)
+                }
+                
+                await MainActor.run {
+                    // A. Reload the list below
+                    self.postsTableView.reloadData()
+                    self.updateTableViewHeight()
+                    
+                    // B. THIS IS THE MISSING LINE: Refresh the calendar dots
+                    // We pass 'currentWeekStartDate' so it doesn't reset the scroll position
+                    self.setupCustomCalendar(for: self.currentWeekStartDate)
+                }
             }
-            
-            await MainActor.run {
-                self.postsTableView.reloadData()
-                self.updateTableViewHeight()
-                // Update your calendar dots/counts here using 'allPosts'
-            }
-        }
     }
     
     //Setting up the weekly calendar
@@ -242,21 +246,37 @@ class PostsViewController: UIViewController {
 
     func getStatusColor(for dateToCheck: Date) -> UIColor {
         let calendar = Calendar.current
-        
-        //Check if any post in 'allPosts' has the same day as 'dateToCheck'
-        let hasPostOnDate = allPosts.contains { post in
+            
+        // 1. Filter 'allPosts' to get ONLY the posts for this specific date
+        let postsForDay = allPosts.filter { post in
             guard let postDate = post.scheduledAt else { return false }
             return calendar.isDate(postDate, inSameDayAs: dateToCheck)
         }
-        
-        //If no post exists, return clear (invisible)
-        guard hasPostOnDate else { return .clear }
+            
+        // 2. If no posts exist on this day, return invisible
+        guard !postsForDay.isEmpty else { return .clear }
+            
+        // 3. Check for specific Statuses
+        let hasScheduledPost = postsForDay.contains { post in
+            return post.status == .scheduled
+        }
+        let hasPublishedPost = postsForDay.contains { post in
+            return post.status == .published
+        }
 
-        //If post exists, check time status
-        if dateToCheck < Date() {
-            return .systemGreen //Published
-        } else {
-            return .systemYellow //Scheduled
+        // --- LOGIC FIX BELOW ---
+        
+        // Priority 1: If there is ANYTHING scheduled, show Yellow (Work Remaining)
+        if hasScheduledPost {
+            return .systemYellow
+        }
+        // Priority 2: If nothing is scheduled, but something is published, show Green (Day Complete)
+        else if hasPublishedPost {
+            return .systemGreen
+        }
+        // Fallback
+        else {
+            return .clear
         }
     }
 

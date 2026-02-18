@@ -102,7 +102,6 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
      
         let post = displayedPosts[indexPath.row]
         let hasImages = post.imageNames?.isEmpty == false
-        let identifier = hasImages ? "ImageSavedCell" : "TextSavedCell"
 
         // 3. Dequeue and configure
         if hasImages {

@@ -221,57 +221,46 @@ extension UserIdeaViewController: UITableViewDelegate, UITableViewDataSource {
 extension UserIdeaViewController {
     
     func fetchAIResponse() {
-        
-            let fullQuery = "Idea: \(userIdea). Tone: \(selectedTone). Platform: \(selectedPlatform)."
-            
-        if !showAnalysisMessage {
-            let loadingMessage = Message(text: "🔍 Generating your draft on-device...", isUser: false, type: .text)
-            messages.append(loadingMessage)
-            insertNewMessage()
-            showAnalysisMessage = true
-        }
-        
+            if !showAnalysisMessage {
+                let loadingMessage = Message(text: "🔍 Analyzing your profile & generating draft...", isUser: false, type: .text)
+                messages.append(loadingMessage)
+                insertNewMessage()
+                showAnalysisMessage = true
+            }
 
-        Task {
-            
-                let profileContext = UserProfile(
-                    professionalIdentity: ["Professional"],
-                    currentFocus: ["General Work"],
-                    industry: ["General"],
-                    primaryGoals: ["Growth"],
-                    contentFormats: ["Text"],
-                    platforms: [self.selectedPlatform],
-                    targetAudience: ["Everyone"]
-                )
-            
+            Task {
+                do {
+                    // 1. Fetch the REAL profile from Supabase & Local JSON
+                    // This now includes professionalIdentity, goals, and acceptedSuggestions
+                    guard let profileContext = await SupabaseManager.shared.fetchUserProfile() else {
+                        throw NSError(domain: "AppError", code: 404, userInfo: [NSLocalizedDescriptionKey: "Could not load user profile."])
+                    }
 
-                let request = GenerationRequest(
-                    idea: self.userIdea,
-                    tone: self.selectedTone,
-                    platform: self.selectedPlatform,
-                    refinementInstruction: self.refinement.isEmpty ? nil : self.refinement
-                )
-            
-            do {
-
-                let draft = try await PostGenerationModel.shared.generatePost(
-                    profile: profileContext,
-                    request: request
-                )
+                    // 2. Prepare the request
+                    let request = GenerationRequest(
+                        idea: self.userIdea,
+                        tone: self.selectedTone,
+                        platform: self.selectedPlatform,
+                        refinementInstruction: self.refinement.isEmpty ? nil : self.refinement
+                    )
                 
+                    // 3. Generate the post using the full context
+                    let draft = try await PostGenerationModel.shared.generatePost(
+                        profile: profileContext,
+                        request: request
+                    )
 
-                await MainActor.run {
-                    self.handleSuccess(draft: draft)
-                }
-                
-            } catch {
- 
-                await MainActor.run {
-                    self.handleError(error: error)
+                    await MainActor.run {
+                        self.handleSuccess(draft: draft)
+                    }
+                    
+                } catch {
+                    await MainActor.run {
+                        self.handleError(error: error)
+                    }
                 }
             }
         }
-    }
     
     
     func handleSuccess(draft: EditorDraftData) {

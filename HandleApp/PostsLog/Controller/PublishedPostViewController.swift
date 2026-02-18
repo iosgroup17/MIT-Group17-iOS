@@ -169,7 +169,6 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
       
         let post = displayedPosts[indexPath.row]
         let hasImages = post.imageNames?.isEmpty == false
-        let identifier = hasImages ? "ImagePublishedCell" : "TextPublishedCell"
 
         // 3. Dequeue and configure
         if hasImages {

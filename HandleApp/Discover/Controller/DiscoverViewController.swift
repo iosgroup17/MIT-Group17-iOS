@@ -120,7 +120,7 @@ class DiscoverViewController: UIViewController {
                         primaryGoals: ["General Audience"],
                         contentFormats: ["Growth"],
                         platforms: [" engaging"],
-                        targetAudience: ["LinkedIn"]
+                        targetAudience: ["LinkedIn"],
                     )
                 }
 
