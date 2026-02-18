@@ -52,6 +52,13 @@ struct DailyAnalyticsRow: Codable {
     let engagement: Int
 }
 
+struct DailyMetric: Identifiable {
+    let id = UUID()
+    let date: Date       // <--- NEW: Real Date for sorting
+    let engagement: Int
+    let platform: String
+}
+
 
 class SupabaseManager {
     static let shared = SupabaseManager()
@@ -83,11 +90,11 @@ class SupabaseManager {
     }
     
     var currentUserID: UUID {
-//        // Priority 1: Real Authenticated User
-//        if let authID = client.auth.currentSession?.user.id {
-//            return authID
-//        }
-//        // Priority 2: Fallback for Simulator/Testing
+        // Priority 1: Real Authenticated User
+        if let authID = client.auth.currentSession?.user.id {
+            return authID
+        }
+        // Priority 2: Fallback for Simulator/Testing
         return testUserID
     }
     
@@ -284,25 +291,21 @@ class SupabaseManager {
         guard let userId = client.auth.currentSession?.user.id else { return [] }
         
         do {
-            // Fetch last 7 days
             let rows: [DailyAnalyticsRow] = try await client
                 .from("daily_analytics")
                 .select()
                 .eq("user_id", value: userId)
-                .order("date", ascending: true)
+                .order("date", ascending: true) // Database-level sort
                 .execute()
                 .value
             
-            // Convert Date String (YYYY-MM-DD) to Day Name (Mon, Tue)
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            let dayFormatter = DateFormatter()
-            dayFormatter.dateFormat = "E" // "Mon", "Tue"
+            let dbFormatter = DateFormatter()
+            dbFormatter.dateFormat = "yyyy-MM-dd"
             
             return rows.compactMap { row in
-                guard let date = formatter.date(from: row.date) else { return nil }
+                guard let date = dbFormatter.date(from: row.date) else { return nil }
                 return DailyMetric(
-                    day: dayFormatter.string(from: date),
+                    date: date,
                     engagement: row.engagement,
                     platform: row.platform
                 )
@@ -312,7 +315,6 @@ class SupabaseManager {
             return []
         }
     }
-    
     
     
       

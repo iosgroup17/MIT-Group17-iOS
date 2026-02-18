@@ -126,20 +126,32 @@ class AnalyticsViewController: UIViewController {
             let metrics = await SupabaseManager.shared.fetchDailyAnalytics()
             
             DispatchQueue.main.async {
-                if metrics.isEmpty { return } // Keep placeholder if empty
-                
+                // 1. Clear previous attempts
                 container.subviews.forEach { $0.removeFromSuperview() }
+                self.children.forEach { if $0 is UIHostingController<EngagementChartView> { $0.removeFromParent() } }
                 
+                if metrics.isEmpty { return }
+                
+                // 2. Setup Hosting Controller
                 let chartView = EngagementChartView(metrics: metrics)
                 let hostingController = UIHostingController(rootView: chartView)
                 
                 self.addChild(hostingController)
-                hostingController.view.frame = container.bounds
-                hostingController.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+                hostingController.view.translatesAutoresizingMaskIntoConstraints = false // 🛑 CRITICAL
                 hostingController.view.backgroundColor = .clear
                 
                 container.addSubview(hostingController.view)
+                
+                // 3. FORCE constraints so it can NEVER overflow the container
+                NSLayoutConstraint.activate([
+                    hostingController.view.topAnchor.constraint(equalTo: container.topAnchor),
+                    hostingController.view.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+                    hostingController.view.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+                    hostingController.view.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+                ])
+                
                 hostingController.didMove(toParent: self)
+                container.layoutIfNeeded() // Force immediate layout
             }
         }
     }

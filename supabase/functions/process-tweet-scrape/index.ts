@@ -20,10 +20,8 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     )
 
-    // 1. FETCH STATE
     const { data: currentData } = await supabase.from('user_analytics').select('*').eq('user_id', user_id).single()
 
-    // 2. RESOLVE ID
     const cleanHandle = handle.replace('@', '').trim()
     const profileResp = await fetch(`https://twitter241.p.rapidapi.com/user?username=${cleanHandle}`, {
       headers: { 'x-rapidapi-key': RAPID_KEY!, 'x-rapidapi-host': 'twitter241.p.rapidapi.com' }
@@ -35,7 +33,6 @@ serve(async (req) => {
 
     if (!twitterID) throw new Error("Twitter User Not Found")
 
-    // 3. GET TWEETS
     const tweetsResp = await fetch(`https://twitter241.p.rapidapi.com/user-tweets?user=${twitterID}&count=20`, {
       headers: { 'x-rapidapi-key': RAPID_KEY!, 'x-rapidapi-host': 'twitter241.p.rapidapi.com' }
     })
@@ -49,7 +46,6 @@ serve(async (req) => {
         if (instr.type === "TimelinePinEntry" && instr.entry) entries.push(instr.entry)
     })
 
-    // 4. ANALYZE
     const now = new Date()
     const startOfWeek = new Date(now)
     startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7))
@@ -72,14 +68,14 @@ serve(async (req) => {
                 totalRawEngagement += eng
                 validPostCount++
                 
-                const dateKey = postDate.toISOString().split('T')[0]
+                // ✅ FIX: Use local string to prevent timezone drift
+                const dateKey = postDate.toLocaleDateString('en-CA')
                 if (!dailyMap[dateKey]) dailyMap[dateKey] = 0
                 dailyMap[dateKey] += eng
             }
         }
     })
 
-    // 5. UPSERT DAILY GRAPH
     if (Object.keys(dailyMap).length > 0) {
         const dailyRows = Object.keys(dailyMap).map(date => ({
             user_id: user_id,
@@ -90,7 +86,6 @@ serve(async (req) => {
         await supabase.from('daily_analytics').upsert(dailyRows, { onConflict: 'user_id,date,platform' })
     }
 
-    // 6. SCORE
     const avgEng = validPostCount > 0 ? totalRawEngagement / validPostCount : 0
     const Hw = Math.min(Math.round((avgEng * 4.0) + 50 + p_variable), 1000)
 
@@ -106,7 +101,6 @@ serve(async (req) => {
         if (postsThisWeek > 0 && newStreak === 0) newStreak = 1
     }
 
-    // 7. SAVE
     const { error: dbError } = await supabase.from('user_analytics').upsert({ 
         user_id: user_id, 
         x_score: Hw,
@@ -120,7 +114,6 @@ serve(async (req) => {
 
     if (dbError) throw dbError
 
-    // ✅ FIX: Added post_count back!
     return new Response(JSON.stringify({ 
         handle_score: Hw,
         post_count: postsThisWeek 

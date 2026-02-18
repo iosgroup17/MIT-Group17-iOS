@@ -1,108 +1,92 @@
 import SwiftUI
 import Charts
 
-struct DailyMetric: Identifiable {
-    let id = UUID()
-    let day: String
-    let engagement: Int
-    let platform: String // "instagram", "twitter", "linkedin"
-}
-
 struct EngagementChartView: View {
-    var metrics: [DailyMetric]
+    let metrics: [DailyMetric]
     
-    // 1. FIXED: Use KeyValuePairs for Chart Colors (Fixes the Error)
-    let platformColors: KeyValuePairs<String, Color> = [
+    private var filteredAndSortedMetrics: [DailyMetric] {
+        let range = currentWeekRange
+        return metrics
+            .filter { range.contains(Calendar.current.startOfDay(for: $0.date)) }
+            .sorted { $0.date < $1.date }
+    }
+    
+    private let platformColors: [String: Color] = [
         "instagram": .pink,
         "twitter": .black,
         "linkedin": .blue
     ]
     
-    // 2. Legend Helper: Unique Platforms Only (Sorted)
-    var activePlatforms: [String] {
-        let all = Set(metrics.map { $0.platform })
-        let order = ["instagram": 0, "twitter": 1, "linkedin": 2]
-        return Array(all).sorted { (order[$0] ?? 99) < (order[$1] ?? 99) }
+    var currentWeekRange: ClosedRange<Date> {
+        var calendar = Calendar.current
+        calendar.firstWeekday = 2 // Monday
+        let now = calendar.startOfDay(for: Date())
+        let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)
+        guard let monday = calendar.date(from: components) else { return now...now }
+        let sunday = calendar.date(byAdding: .day, value: 6, to: monday)!
+        return monday...sunday
     }
-    
-    // 3. Axis Formatter (100k)
-    func axisLabel(_ value: Int) -> String {
-        let doubleVal = Double(value)
-        if doubleVal >= 1_000_000 {
-            return String(format: "%.1fM", doubleVal / 1_000_000).replacingOccurrences(of: ".0", with: "")
-        } else if doubleVal >= 1_000 {
-            return String(format: "%.0fk", doubleVal / 1_000)
-        }
-        return "\(value)"
-    }
-    
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            
-            // --- CUSTOM LEGEND (Prevents Repetition) ---
-            if !metrics.isEmpty {
-                HStack(spacing: 16) {
-                    ForEach(activePlatforms, id: \.self) { platform in
-                        HStack(spacing: 4) {
-                            // Manual Color Lookup
-                            Circle()
-                                .fill(colorForPlatform(platform))
-                                .frame(width: 8, height: 8)
-                            
-                            Text(platform.capitalized)
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
-                .padding(.leading, 4)
-                .padding(.bottom, 10)
-            }
-            
-            // --- THE CHART ---
-            if metrics.isEmpty {
-                ContentUnavailableView("No Data Yet", systemImage: "chart.xyaxis.line", description: Text("Connect platforms to see trends."))
-                    .frame(height: 200)
-            } else {
-                Chart(metrics) { item in
-                    
-                    // A. The Line
-                    LineMark(
-                        x: .value("Day", item.day),
-                        y: .value("Engagement", item.engagement)
-                    )
-                    .foregroundStyle(by: .value("Platform", item.platform)) // Distinct Lines
-                    .interpolationMethod(.catmullRom)
-                    .lineStyle(StrokeStyle(lineWidth: 2))
-                    
-                    // B. The Points (Decorations)
-                    PointMark(
-                        x: .value("Day", item.day),
-                        y: .value("Engagement", item.engagement)
-                    )
-                    .foregroundStyle(by: .value("Platform", item.platform))
-                    .symbolSize(30)
-                }
-                .chartForegroundStyleScale(platformColors) // Apply Fixed Colors
-                .chartLegend(.hidden) // 🛑 HIDE DEFAULT LEGEND (Fixes Repetition)
-                .chartYScale(domain: .automatic(includesZero: false)) // 🛑 FIX FLAT LINES
-                .chartYAxis {
-                    AxisMarks(position: .leading) { value in
-                        AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [4]))
-                        if let intValue = value.as(Int.self) {
-                            AxisValueLabel(axisLabel(intValue)) // Custom "100k" Label
-                        }
-                    }
-                }
-                .frame(height: 220)
+        Chart {
+            ForEach(filteredAndSortedMetrics) { item in
+                let dayStart = Calendar.current.startOfDay(for: item.date)
+                
+                // TREND LINE
+                LineMark(
+                    x: .value("Day", dayStart),
+                    y: .value("Engagement", item.engagement)
+                )
+                .foregroundStyle(by: .value("Platform", item.platform.lowercased()))
+                .interpolationMethod(.linear)
+                .lineStyle(StrokeStyle(lineWidth: 1.5,dash:[4,4])) // Solid thin line
+
+                // DATA POINT
+                PointMark(
+                    x: .value("Day", dayStart),
+                    y: .value("Engagement", item.engagement)
+                )
+                .foregroundStyle(by: .value("Platform", item.platform.lowercased()))
+                .symbolSize(60)
             }
         }
-        .padding(10)
+        .chartForegroundStyleScale([
+            "instagram": .pink,
+            "twitter": .black,
+            "linkedin": .blue
+        ])
+        .chartXScale(domain: currentWeekRange)
+        .chartYScale(domain: .automatic(includesZero: true))
+        .chartLegend(.hidden)
+        .chartXAxis {
+            // 🛑 FIX: Align labels directly under the vertical lines
+            AxisMarks(values: .stride(by: .day)) { value in
+                if let _ = value.as(Date.self) {
+                    AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 4]))
+                    AxisTick()
+                    AxisValueLabel(format: .dateTime.weekday(.narrow), centered: false) // 'centered: false' snaps it to the line
+                        .font(.caption2.bold())
+                }
+            }
+        }
+        .chartYAxis {
+            AxisMarks(position: .leading) { value in
+                AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5))
+                if let intValue = value.as(Int.self) {
+                    AxisValueLabel(formatValue(intValue))
+                }
+            }
+        }
+        .padding(.horizontal, 15) // Increased padding so 'M' isn't cut off
+        .padding(.top, 20)
+        .background(Color(.systemBackground))
+        .clipped()
     }
     
-    // Helper to extract color from KeyValuePairs safely
-    func colorForPlatform(_ platform: String) -> Color {
-        return platformColors.first(where: { $0.key == platform })?.value ?? .gray
+    func formatValue(_ value: Int) -> String {
+        let num = Double(value)
+        if num >= 1_000_000 { return String(format: "%.1fM", num / 1_000_000) }
+        if num >= 1_000 { return String(format: "%.0fK", num / 1_000) }
+        return "\(value)"
     }
 }

@@ -47,7 +47,8 @@ serve(async (req) => {
                 postsThisWeek++
                 totalRawEngagement += eng
                 
-                const dateKey = postDate.toISOString().split('T')[0]
+                // ✅ FIX: Use local string to prevent timezone drift
+                const dateKey = postDate.toLocaleDateString('en-CA') 
                 if (!dailyMap[dateKey]) dailyMap[dateKey] = 0
                 dailyMap[dateKey] += eng
             }
@@ -92,7 +93,6 @@ serve(async (req) => {
 
     if (dbError) throw dbError
 
-    // ✅ FIX: Added post_count back!
     return new Response(JSON.stringify({ 
         handle_score: Hw,
         post_count: postsThisWeek 

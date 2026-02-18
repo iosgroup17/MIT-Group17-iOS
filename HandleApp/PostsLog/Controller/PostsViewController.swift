@@ -34,11 +34,11 @@ class PostsViewController: UIViewController {
 
         navigationController? .hidesBarsOnSwipe = false
         
-        let imageNib = UINib(nibName: "ScheduledPostImageTableViewCell", bundle: nil)
-            postsTableView.register(imageNib, forCellReuseIdentifier: "ScheduledPostImageTableViewCell")
+        let imageNib = UINib(nibName: "SchForTodayImageTableViewCell", bundle: nil)
+            postsTableView.register(imageNib, forCellReuseIdentifier: "SchForTodayImageTableViewCell")
                     
-            let textNib = UINib(nibName: "ScheduledPostTextTableViewCell", bundle:nil)
-        postsTableView.register(textNib, forCellReuseIdentifier: "ScheduledPostTextTableViewCell")
+            let textNib = UINib(nibName: "SchForTodayTableViewCell", bundle:nil)
+        postsTableView.register(textNib, forCellReuseIdentifier: "SchForTodayTableViewCell")
         
         postsTableView.rowHeight = UITableView.automaticDimension
             postsTableView.estimatedRowHeight = 100
@@ -346,11 +346,11 @@ extension PostsViewController: UITableViewDataSource, UITableViewDelegate {
 
         // 3. Dequeue and configure
         if hasImages {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "ScheduledPostImageTableViewCell", for: indexPath) as! ScheduledPostImageTableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "SchForTodayImageTableViewCell", for: indexPath) as! SchForTodayImageTableViewCell
             cell.configure(with: post)
             return cell
         } else {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "ScheduledPostTextTableViewCell", for: indexPath) as! ScheduledPostTextTableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "SchForTodayTableViewCell", for: indexPath) as! SchForTodayTableViewCell
             cell.configure(with: post)
             return cell
         }

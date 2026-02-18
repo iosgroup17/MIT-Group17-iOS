@@ -20,10 +20,8 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     )
 
-    // 1. FETCH STATE
     const { data: currentData } = await supabase.from('user_analytics').select('*').eq('user_id', user_id).single()
 
-    // 2. FETCH DATA
     const cleanHandle = handle.replace('@', '').split('/').filter(Boolean).pop()
     const postsResp = await fetch(`https://fresh-linkedin-scraper-api.p.rapidapi.com/api/v1/user/posts?username=${cleanHandle}`, {
       headers: { 'x-rapidapi-key': RAPID_KEY!, 'x-rapidapi-host': 'fresh-linkedin-scraper-api.p.rapidapi.com' }
@@ -31,7 +29,6 @@ serve(async (req) => {
     const result = await postsResp.json()
     const posts = result.data || []
 
-    // 3. ANALYZE
     const now = new Date()
     const startOfWeek = new Date(now)
     startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7)) 
@@ -48,7 +45,6 @@ serve(async (req) => {
         let postDate: Date | null = null
         if (p.created_at) postDate = new Date(p.created_at)
         else if (p.postedAtTimestamp) {
-             // Handle potential milliseconds vs seconds
              const ts = p.postedAtTimestamp > 10000000000 ? p.postedAtTimestamp : p.postedAtTimestamp * 1000
              postDate = new Date(ts)
         }
@@ -57,14 +53,13 @@ serve(async (req) => {
             postsThisWeek++
             totalRawEngagement += eng
             
-            // Daily Graph Data
-            const dateKey = postDate.toISOString().split('T')[0]
+            // ✅ FIX: Use local string to prevent timezone drift
+            const dateKey = postDate.toLocaleDateString('en-CA')
             if (!dailyMap[dateKey]) dailyMap[dateKey] = 0
             dailyMap[dateKey] += eng
         }
     })
 
-    // 4. UPSERT DAILY GRAPH
     if (Object.keys(dailyMap).length > 0) {
         const dailyRows = Object.keys(dailyMap).map(date => ({
             user_id: user_id,
@@ -75,7 +70,6 @@ serve(async (req) => {
         await supabase.from('daily_analytics').upsert(dailyRows, { onConflict: 'user_id,date,platform' })
     }
 
-    // 5. SUMMARY SAVING
     const avgEng = postsThisWeek > 0 ? totalRawEngagement / postsThisWeek : 0
     const Hw = Math.min(Math.round((avgEng * 3.0) + 100 + p_variable), 1000)
 
@@ -104,7 +98,6 @@ serve(async (req) => {
 
     if (dbError) throw dbError
 
-    // ✅ FIX: Added post_count back!
     return new Response(JSON.stringify({ 
         handle_score: Hw, 
         post_count: postsThisWeek 

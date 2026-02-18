@@ -224,6 +224,7 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
                                 postingTimes: selectedPost.optimalPostingTimes ?? []
                             )
                  editorVC.draft = draftData
+                
             }
         }
     }
