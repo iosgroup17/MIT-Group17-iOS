@@ -208,7 +208,7 @@
                                                                 <rect key="frame" x="0.0" y="0.0" width="362" height="220.33333333333334"/>
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Scheduled For Today" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Zv4-O8-EIV">
-                                                                        <rect key="frame" x="8" y="4.0000000000000036" width="346" height="58.333333333333343"/>
+                                                                        <rect key="frame" x="8" y="8.0000000000000036" width="346" height="54.333333333333343"/>
                                                                         <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
@@ -236,7 +236,7 @@
                                                                 <constraints>
                                                                     <constraint firstItem="Zv4-O8-EIV" firstAttribute="leading" secondItem="1bc-ZU-QG0" secondAttribute="leading" constant="8" id="BqF-WY-3IQ"/>
                                                                     <constraint firstItem="5TA-RQ-B3t" firstAttribute="top" secondItem="Zv4-O8-EIV" secondAttribute="bottom" constant="8" id="C27-y4-LkJ"/>
-                                                                    <constraint firstItem="Zv4-O8-EIV" firstAttribute="top" secondItem="1bc-ZU-QG0" secondAttribute="top" constant="4" id="LCG-wG-fFC"/>
+                                                                    <constraint firstItem="Zv4-O8-EIV" firstAttribute="top" secondItem="1bc-ZU-QG0" secondAttribute="top" constant="8" id="LCG-wG-fFC"/>
                                                                     <constraint firstAttribute="trailing" secondItem="5TA-RQ-B3t" secondAttribute="trailing" constant="8" id="RzF-PN-fvM"/>
                                                                     <constraint firstAttribute="trailing" secondItem="Zv4-O8-EIV" secondAttribute="trailing" constant="8" id="WWj-yP-e0g"/>
                                                                     <constraint firstItem="5TA-RQ-B3t" firstAttribute="leading" secondItem="1bc-ZU-QG0" secondAttribute="leading" constant="8" id="ZiH-ra-tAj"/>

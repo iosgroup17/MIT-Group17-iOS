@@ -22,65 +22,100 @@ actor OnDevicePostEngine {
         return newSession
     }
  
-    func generatePublishReadyPosts(trendText: String, context: UserProfile) async throws -> [PublishReadyPost] {
+    func generatePublishReadyPosts(context: UserProfile) async throws -> [PublishReadyPost] {
         let session = try await ensureSession()
         
         let prompt = """
-                You are a world-class social media strategist for a:
+                You are a world-class social media strategist for:
                 \(context.professionalIdentity.joined(separator: ", "))
-                
-                DEEP CONTEXT:
-                - Industry: \(context.industry.joined(separator: ", "))
-                - Current Focus: \(context.currentFocus.joined(separator: ", ")) (Tailor posts to this specific focus)
-                - Target Audience: \(context.targetAudience.joined(separator: ", "))
-                - Main Goal: \(context.primaryGoals.joined(separator: ", "))
-                - Voice/Style: \(context.contentFormats.joined(separator: ", "))
-                
-                
-                TASK:
-                Generate 6 DISTINCT, high-impact content ideas using the following 6 specific angles (Do not repeat angles):
-                
-                1. The Contrarian (Go against common industry advice regarding the trend).
-                2. The "How-To" (Actionable, step-by-step utility).
-                3. The Personal Insight (A lesson learned or mistake made).
-                4. The Future Prediction (Where is this trend going in 6 months?).
-                5. The Behind-the-Scenes (How you/your company handles this trend).
-                6. The Resource/Tool (A specific tool or hack related to the trend).
-                
-                DISTRIBUTION RULES:
-                - Mix the platforms: Generate specifically for "icon-linkedin", "icon-x", and "icon-instagram".
-                - Do not put all ideas on one platform.
-                
-                OUTPUT CONSTRAINTS:
-                1. Return ONLY raw JSON. No markdown.
-                2. "post_heading": Punchy, click-worthy hooks (Max 25 chars).
-                3. "platform_icon": "icon-x", "icon-instagram", or "icon-linkedin".
-                4. "caption": 80-100 chars. Conversational teaser. NO hashtags here.
-                5. "hashtags": Exactly 3 relevant tags.
-                6. "prediction_text": One sentence, 10 characters explaining WHY this angle works.
-                
-                7. IMAGES ("post_image"):
-                   - Library: ["img_01" ... "img_34"]
-                   - FOR INSTAGRAM: You MUST always include 1 image from the library.
-                   - FOR X (TWITTER) & LINKEDIN: Prefer text-only posts. Only add an image if absolutely necessary. If text-only, omit this field or return null.
-                
-                You MUST wrap the array of objects inside a root JSON object with the key "posts".
 
-                REQUIRED JSON STRUCTURE:
+                PAST SUCCESSES: 
+
+                CONTEXT:
+                Industry: \(context.industry.joined(separator: ", "))
+                Focus: \(context.currentFocus.joined(separator: ", "))
+                Audience: \(context.targetAudience.joined(separator: ", "))
+                Goals: \(context.primaryGoals.joined(separator: ", "))
+                Voice: \(context.contentFormats.joined(separator: ", "))
+
+                LEGAL (India 2026 AI Rules):
+                - NO false claims/unverified stats
+                - NO medical/financial advice
+                - Add "AI-assisted" disclosure if required
+                - NO deepfakes/illegal promotion
+
+                QUALITY:
+                - Founder voice: Authentic, no buzzwords
+                - 100% utility: 1 clear takeaway/post
+                - Hooks: First 5 words = attention grab
+
+                TASK: 6 DISTINCT posts, EXACT angles (1 each):
+                1. Contrarian: Challenge industry myth
+                2. How-To: 3-step actionable
+                3. Personal: Your real lesson
+                4. Prediction: 6-month forecast  
+                5. Behind-Scenes: Your process
+                6. Tool: Specific hack + results
+
+                PLATFORM MIX: 2x each "icon-linkedin", "icon-x", "icon-instagram"
+
+                {
+
+                "posts": [
+
+                {
+                  "post_heading": "Hook ≤20 chars",
+                  "platform_icon": "icon-linkedin"|"icon-x"|"icon-instagram",
+                  "post_image": Instagram=["img_XX"], others=null,
+                  "caption": "Publish-ready. Instagram:≤125chars, X:≤240, LinkedIn:≤250. No hashtags.",
+                  "hashtags": ["#Tag1","#Tag2","#Tag3"],
+                  "prediction_text": "Why it converts"  //<= 80 chars
+                }
+
+                ]
+                } STRICT OUTPUT CONSTRAINTS - VIOLATION = FAIL 
+                READ TWICE BEFORE WRITING:
+
+                1. ONLY raw JSON. ZERO markdown, explanations, or extra text.
+                2. post_heading: EXACTLY ≤25 chars. Count: "Punchy hook here" = 15 chars.
+                3. platform_icon: ONLY "icon-x", "icon-instagram", or "icon-linkedin". No others.
+                4. caption: EXACTLY 150-200 chars (spaces count). Teaser only. ZERO hashtags.
+                5. hashtags: EXACTLY 3 tags: ["#Tag1","#Tag2","#Tag3"]
+                6. prediction_text: EXACTLY 1 sentence ≤100 chars explaining WHY angle works.
+
+                7. post_image RULES (MANDATORY):
+                   - Instagram: ALWAYS 1 image: ["img_01"] to ["img_34"]
+                   - X & LinkedIn: null OR omit if text-only (PREFER null)
+                   - Library ONLY: img_01-img_34. Match industry.
+
+                JSON CHECKLIST (Follow exactly):
+                - Root: {"posts": [array of 6]}
+                - 6 posts TOTAL. No more, no less.
+                - Platforms: Mix 2 each icon-x, icon-instagram, icon-linkedin
+
+                EXAMPLE (Copy this format):
                 {
                   "posts": [
                     {
-                      "post_heading": "Headline",
-                      "platform_icon": "icon-linkedin",
-                      "post_image": ["img_01"], 
-                      "caption": "Post text body goes here without tags",
-                      "hashtags": ["#tag1", "#tag2"],
-                      "prediction_text": "Why this works"
+                      "post_heading": "Stop this now",
+                      "platform_icon": "icon-x",
+                      "post_image": null,
+                      "caption": "200 chars teaser here exactly. Actionable insight for founders. Clear CTA ends it.",
+                      "hashtags": ["#FounderTips","#Growth","#SaaS"],
+                      "prediction_text": "Contrarian sparks debate (32 chars)"
+                    },
+                    {
+                      "post_heading": "3-step hack",
+                      "platform_icon": "icon-instagram", 
+                      "post_image": ["img_15"],
+                      "caption": "Instagram visual caption 150-200 chars exactly...",
+                      "hashtags": ["#HowTo","#Startup","#Marketing"],
+                      "prediction_text": "Actionable = shares"
                     }
                   ]
                 }
 
-                IMPORTANT: Start your response immediately with { "posts": [
+                START YOUR RESPONSE NOW: {"posts": [
                 """
         
         let response = try await session.respond(to: prompt)
@@ -207,81 +242,95 @@ extension OnDevicePostEngine {
 }
 
 extension OnDevicePostEngine {
-
-    /// Generates trending topics based on the user's industry and audience context
-    func generateTrendingTopics(context: UserProfile) async throws -> [TrendingTopic] {
+    func generateTrendingTopicPosts(topic: TrendingTopic, context: UserProfile) async throws -> [PublishReadyPost] {
         let session = try await ensureSession()
         
         let prompt = """
-        ACT AS: Senior Market Trend Analyst & Social Media Strategist.
-        
-        CONTEXT:
-        - User Professional Identity: \(context.professionalIdentity.joined(separator: ", "))
-        - Industry: \(context.industry.joined(separator: ", "))
-        - Target Audience: \(context.targetAudience.joined(separator: ", "))
-        - Primary Goals: \(context.primaryGoals.joined(separator: ", "))
-        
-        TASK:
-        Identify 5 emerging or evergreen "Trending Topics" specifically relevant to this user's industry and audience right now. These should be topics that would perform well on social media.
-        
-        FIELD REQUIREMENTS (Based on Schema):
-        1. "topic_name": Short, punchy title (Max 4 words).
-        2. "short_description": A clear, 1-sentence explanation of what this trend is.
-        3. "category": A broad classification (e.g., "Technology", "Mindset", "Strategy", "News").
-        4. "trending_context": deeply specific insight on WHY this is relevant right now (e.g., "With the rise of X, this topic is gaining traction because...").
-        5. "platform_icon": Choose the BEST platform for this specific trend. Must be exactly one of: "icon-linkedin", "icon-x", "icon-instagram".
-        6. "hashtags": Array of 3 relevant, high-volume hashtags.
-        
-        OUTPUT CONSTRAINTS:
-        - Return ONLY raw JSON.
-        - No markdown formatting (no ```json).
-        - Must be a valid JSON object with a root key "topics".
-        
-        REQUIRED JSON STRUCTURE:
-        {
-          "topics": [
-            {
-              "topic_name": "Sustainable AI",
-              "short_description": "Exploring the environmental impact of large language models.",
-              "category": "Technology",
-              "trending_context": "As AI scales, scrutiny on energy consumption is hitting mainstream media, making this a hot debate topic.",
-              "platform_icon": "icon-linkedin",
-              "hashtags": ["#GreenTech", "#AI", "#Sustainability"]
-            }
-          ]
-        }
-        """
+     TRENDING TOPIC POST GENERATOR 🚨
+    READ TWICE. FOLLOW EVERY CONSTRAINT EXACTLY.
 
+    TRENDING TOPIC (EMPHASIZE IN ALL POSTS):
+     \(topic.topicName)
+    \(topic.shortDescription)
+    WHY HOT NOW: \(topic.trendingContext)
+    CATEGORY: \(topic.category)
+    Hashtags: \(topic.hashtags.joined(separator: ", "))
+
+    USER:
+    \(context.professionalIdentity.joined(separator: ", "))
+    \(context.industry.joined(separator: ", "))
+    \(context.targetAudience.joined(separator: ", "))
+
+     STRICT OUTPUT CONSTRAINTS - VIOLATION = FAIL 
+    ALL 4 POSTS BASED ONLY ON THIS SPECIFIC TOPIC:
+
+    1. ONLY raw JSON. ZERO markdown, explanations, or extra text.
+    2. post_heading: EXACTLY ≤25 chars. MUST reference "\(topic.topicName)"
+    3. platform_icon: ONLY "icon-x", "icon-instagram", or "icon-linkedin"
+    4. caption: EXACTLY 80-100 chars (spaces count). Teaser only. ZERO hashtags. 
+    5. hashtags: EXACTLY 3 tags FROM \(topic.hashtags)
+    6. prediction_text: EXACTLY 1 sentence ≤100 chars explaining WHY angle works.
+
+    7. post_image RULES (MANDATORY):
+       - Instagram: ALWAYS 1 image: ["img_01"] to ["img_34"]
+       - X & LinkedIn: null OR omit if text-only (PREFER null)
+       - Library ONLY: img_01-img_34. Match \(context.industry.joined(separator: ", "))
+
+    JSON CHECKLIST (Follow exactly):
+    - Root: {"posts": [array of EXACTLY 4]}
+    - 4 posts TOTAL. Platforms: 1x each + 1 wildcard
+    - EVERY caption mentions "\(topic.topicName)" + \(topic.trendingContext) insight
+
+    4 POST TYPES FOR THIS TOPIC ONLY:
+     Contrarian take on \(topic.topicName)
+     How-to using \(topic.topicName)
+     Personal story with \(topic.topicName)
+     Prediction about \(topic.topicName)
+
+    EXAMPLE (Copy this format):
+    {
+     "posts": [
+       {
+         "post_heading": "\(topic.topicName) myth",
+         "platform_icon": "icon-x",
+         "post_image": null,
+         "caption": "80 chars teaser here exactly about \(topic.topicName). Actionable insight from \(topic.trendingContext). Clear CTA.",
+         "hashtags": ["\(topic.hashtags[0])","#Growth","#SaaS"],
+         "prediction_text": "Trend timing = 5x engagement (24 chars)"
+       }
+     ]
+    }
+
+    START YOUR RESPONSE NOW: {"posts": [
+        {
+          "post_heading": "\(topic.topicName) exposed",
+          "platform_icon": "icon-x",
+          "post_image": null,
+          "caption": "",
+          "hashtags": ["\(topic.hashtags[0])","\(topic.hashtags[1])","\(topic.hashtags[2])"],
+          "prediction_text": ""
+        }
+    """
+        
         let response = try await session.respond(to: prompt)
         
-        // 1. Clean JSON
         guard let jsonString = extractAndCleanJSON(from: response.content) else {
-            print("🚨 AI Output was not valid JSON:\n\(response.content)")
-            throw NSError(domain: "TopicGen", code: 0, userInfo: [NSLocalizedDescriptionKey: "AI Output extraction failed"])
+            print("🚨 Trending Topic JSON failed:\n\(response.content)")
+            throw NSError(domain: "TrendPostGen", code: 0, userInfo: [NSLocalizedDescriptionKey: "JSON extraction failed"])
         }
         
         guard let data = jsonString.data(using: .utf8) else {
-            throw NSError(domain: "TopicGen", code: 1, userInfo: [NSLocalizedDescriptionKey: "String to Data conversion failed"])
+            throw NSError(domain: "TrendPostGen", code: 1, userInfo: [NSLocalizedDescriptionKey: "Data conversion failed"])
         }
         
-        print("📊 Generated Trends JSON:\n\(jsonString)")
+        print("📈 TRENDING POSTS JSON:\n\(jsonString)")
         
-        // 2. Decode
-        do {
-            // Helper struct to unwrap the root "topics" key
-            struct TopicWrapper: Codable {
-                let topics: [TrendingTopic]
-            }
-            
-            // NOTE: Ensure your TrendingTopic struct in the main app is Codable
-            // and has keys matching the JSON (snake_case) or uses CodingKeys.
-            let decoded = try JSONDecoder().decode(TopicWrapper.self, from: data)
-            return decoded.topics
-            
-        } catch {
-            print("❌ Decoding Error: \(error)")
-            print("❌ Offending JSON: \(jsonString)")
-            throw error
+        struct PostWrapper: Codable {
+            let posts: [PublishReadyPost]
         }
+        
+        let decoded = try JSONDecoder().decode(PostWrapper.self, from: data)
+        return decoded.posts
     }
+
 }

@@ -13,7 +13,7 @@ enum ChatStep {
     case waitingForTone
     case waitingForPlatform
     case waitingForRefinement
-    case finished
+    case continuousChat
 }
 
 

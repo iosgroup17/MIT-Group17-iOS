@@ -152,15 +152,10 @@ class DiscoverViewController: UIViewController {
                 }
 
 
-                if let topTrend = fetchedTrends.first {
-                    let topTrendName = topTrend.topicName
-                    let topTrendDesc = topTrend.shortDescription
-                    let combinedTrendText = "\(topTrendName): \(topTrendDesc)"
                     
-                    print("Generative AI: Starting generation for: \(topTrendName)")
+                    print("Generative AI: Starting generation")
 
                     let generatedPosts = try await OnDevicePostEngine.shared.generatePublishReadyPosts(
-                        trendText: combinedTrendText,
                         context: userProfile
                     )
 
@@ -170,9 +165,7 @@ class DiscoverViewController: UIViewController {
                         self.publishReadyPosts = generatedPosts
                         self.collectionView.reloadSections(IndexSet(integer: 2))
                     }
-                } else {
-                    print("No trends found, cannot generate AI posts.")
-                }
+
                 
             } catch {
                 print("Critical Error in Data Load: \(error)")

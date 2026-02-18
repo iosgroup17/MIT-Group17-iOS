@@ -106,12 +106,15 @@ class UserIdeaViewController: UIViewController {
 
                 case .waitingForRefinement:
                     self.refinement = responseText
-                    self.currentStep = .finished
+                    self.currentStep = .continuousChat
                     self.showAnalysisMessage = false
                     self.fetchAIResponse()
 
-                default:
-                    break
+                case .continuousChat:
+                    self.refinement = responseText
+                    
+                    self.showAnalysisMessage = false
+                    self.fetchAIResponse()
 
                 }
             }

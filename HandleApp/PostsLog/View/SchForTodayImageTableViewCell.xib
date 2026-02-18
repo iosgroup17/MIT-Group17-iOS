@@ -17,7 +17,7 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="R28-ui-DLm">
-                        <rect key="frame" x="0.0" y="0.0" width="362" height="146"/>
+                        <rect key="frame" x="0.0" y="8" width="362" height="138"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="AZr-tL-TJZ">
                                 <rect key="frame" x="12" y="12" width="22" height="22"/>
@@ -33,7 +33,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron.right" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="w85-Jr-Zck">
-                                <rect key="frame" x="332" y="15.999999999999995" width="18" height="12.333333333333352"/>
+                                <rect key="frame" x="332" y="15.999999999999993" width="18" height="12.333333333333357"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="18" id="A8g-2w-zHL"/>
                                     <constraint firstAttribute="height" constant="16" id="g3a-Vr-x1W"/>
@@ -47,13 +47,13 @@
                                 </constraints>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mUL-MR-Ojd">
-                                <rect key="frame" x="108" y="48.333333333333343" width="242" height="49.666666666666657"/>
+                                <rect key="frame" x="108" y="48.333333333333343" width="242" height="41.666666666666657"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleCallout"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" spacing="60" translatesAutoresizingMaskIntoConstraints="NO" id="ZpS-VK-Mb9">
-                                <rect key="frame" x="107.99999999999999" y="114" width="186.66666666666663" height="20"/>
+                            <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" spacing="40" translatesAutoresizingMaskIntoConstraints="NO" id="ZpS-VK-Mb9">
+                                <rect key="frame" x="107.99999999999999" y="106" width="166.66666666666663" height="20"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="CXJ-ZD-GNh">
                                         <rect key="frame" x="0.0" y="0.0" width="63.666666666666664" height="20"/>
@@ -71,14 +71,14 @@
                                         </subviews>
                                     </stackView>
                                     <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="z1X-DW-jon">
-                                        <rect key="frame" x="123.66666666666666" y="0.0" width="63" height="20"/>
+                                        <rect key="frame" x="103.66666666666666" y="0.0" width="63" height="20"/>
                                         <subviews>
                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="clock.badge.checkmark" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="hIW-dn-OnN">
                                                 <rect key="frame" x="0.0" y="0.66666666666666607" width="22.666666666666668" height="20"/>
                                                 <color key="tintColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </imageView>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6Lw-TL-PNn">
-                                                <rect key="frame" x="30.000000000000028" y="0.0" width="33" height="20"/>
+                                                <rect key="frame" x="30" y="0.0" width="33" height="20"/>
                                                 <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
@@ -115,7 +115,7 @@
                 <constraints>
                     <constraint firstItem="R28-ui-DLm" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="Anh-0f-XnT"/>
                     <constraint firstAttribute="trailing" secondItem="R28-ui-DLm" secondAttribute="trailing" id="BXU-8C-XYs"/>
-                    <constraint firstItem="R28-ui-DLm" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="D4P-aT-H1W"/>
+                    <constraint firstItem="R28-ui-DLm" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="D4P-aT-H1W"/>
                     <constraint firstAttribute="bottom" secondItem="R28-ui-DLm" secondAttribute="bottom" constant="8" id="uTH-cP-Ce5"/>
                 </constraints>
             </tableViewCellContentView>

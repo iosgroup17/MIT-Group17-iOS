@@ -79,12 +79,11 @@ class TopicIdeaViewController: UIViewController {
                 
                 do {
                     // 2. Call the Foundation Model Engine
-                    print("🤖 Generating posts for topic: \(currentTopic.topicName)")
-                    let aiPosts = try await OnDevicePostEngine.shared.generatePublishReadyPosts(
-                        trendText: trendContextString,
-                        context: userProfile
+                    print("Generating posts for topic: \(currentTopic.topicName)")
+                    let aiPosts = try await OnDevicePostEngine.shared.generateTrendingTopicPosts(
+                                        topic: currentTopic,
+                                        context: userProfile
                     )
-                    
                     // 3. Update UI
                     await MainActor.run {
                         self.generatedPosts = aiPosts
