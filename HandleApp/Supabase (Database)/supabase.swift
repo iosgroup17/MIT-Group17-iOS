@@ -59,6 +59,17 @@ struct DailyMetric: Identifiable {
     let platform: String
 }
 
+struct BestPost: Codable {
+    let platform: String
+    let post_text: String?
+    let likes: Int
+    let comments: Int
+    let shares_reposts: Int?
+    let extra_metric: Int?
+    let post_url: String?
+    let post_date: String? // New field
+}
+
 
 class SupabaseManager {
     static let shared = SupabaseManager()
@@ -334,52 +345,52 @@ class SupabaseManager {
         }
     
     func autoUpdateAnalytics() async {
-            guard let userId = client.auth.currentSession?.user.id else { return }
+        guard let userId = client.auth.currentSession?.user.id else { return }
+        
+        do {
+            // 1. Fetch current status
+            let analytics: UserAnalytics = try await client
+                .from("user_analytics")
+                .select()
+                .eq("user_id", value: userId)
+                .single()
+                .execute()
+                .value
             
-            do {
-                // 1. Fetch current status
-                let analytics: UserAnalytics = try await client
-                    .from("user_analytics")
-                    .select()
-                    .eq("user_id", value: userId)
-                    .single()
-                    .execute()
-                    .value
-                
-                // 2. Check Time Diff (24 Hours)
-                if let lastDateStr = analytics.last_updated,
-                   let lastDate = ISO8601DateFormatter().date(from: lastDateStr) {
-                    let hoursSince = Date().timeIntervalSince(lastDate) / 3600
-                    if hoursSince < 24 {
-                        print("⏳ Data is fresh (\(Int(hoursSince))h old). Skipping auto-scrape.")
-                        return
-                    }
+            // 2. Check Time Diff (24 Hours)
+            if let lastDateStr = analytics.last_updated,
+               let lastDate = ISO8601DateFormatter().date(from: lastDateStr) {
+                let hoursSince = Date().timeIntervalSince(lastDate) / 3600
+                if hoursSince < 24 {
+                    print("⏳ Data is fresh (\(Int(hoursSince))h old). Skipping auto-scrape.")
+                    return
                 }
-                
-                print("🔄 Data is stale. Starting auto-scrape...")
-                
-                // 3. Fetch connected handles
-                let connections: [SocialConnection] = try await client
-                    .from("social_connections")
-                    .select()
-                    .eq("user_id", value: userId)
-                    .execute()
-                    .value
-                
-                // 4. Run Scrapers in Parallel
-                for conn in connections {
-                    if let handle = conn.handle {
-                        if conn.platform == "twitter" { _ = await runTwitterScoreCalculation(handle: handle) }
-                        if conn.platform == "instagram" { _ = await runInstaScoreCalculation(handle: handle) }
-                        if conn.platform == "linkedin" { _ = await runLinkedInScoreCalculation(handle: handle) }
-                    }
-                }
-                print("✅ Auto-scrape completed.")
-                
-            } catch {
-                print("Auto-update failed or no analytics row yet.")
             }
+            
+            print("🔄 Data is stale. Starting auto-scrape...")
+            
+            // 3. Fetch connected handles
+            let connections: [SocialConnection] = try await client
+                .from("social_connections")
+                .select()
+                .eq("user_id", value: userId)
+                .execute()
+                .value
+            
+            // 4. Run Scrapers in Parallel
+            for conn in connections {
+                if let handle = conn.handle {
+                    if conn.platform == "twitter" { _ = await runTwitterScoreCalculation(handle: handle) }
+                    if conn.platform == "instagram" { _ = await runInstaScoreCalculation(handle: handle) }
+                    if conn.platform == "linkedin" { _ = await runLinkedInScoreCalculation(handle: handle) }
+                }
+            }
+            print("✅ Auto-scrape completed.")
+            
+        } catch {
+            print("Auto-update failed or no analytics row yet.")
         }
+    }
     
     
 }

@@ -11,6 +11,10 @@ struct EngagementChartView: View {
             .sorted { $0.date < $1.date }
     }
     
+    private var activePlatforms: [String] {
+        Array(Set(filteredAndSortedMetrics.map { $0.platform.lowercased() })).sorted()
+    }
+    
     private let platformColors: [String: Color] = [
         "instagram": .pink,
         "twitter": .black,
@@ -28,65 +32,84 @@ struct EngagementChartView: View {
     }
 
     var body: some View {
-        Chart {
-            ForEach(filteredAndSortedMetrics) { item in
-                let dayStart = Calendar.current.startOfDay(for: item.date)
+        VStack(alignment: .leading, spacing: 12) {
+            
+            if filteredAndSortedMetrics.isEmpty {
+                VStack(spacing: 8) {
+                    Spacer()
+                    Image(systemName: "chart.bar.xaxis")
+                        .font(.system(size: 40))
+                        .foregroundColor(Color(UIColor.systemGray4))
+                    
+                    Text("No original posts this week")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, minHeight: 200)
                 
-                // TREND LINE
-                LineMark(
-                    x: .value("Day", dayStart),
-                    y: .value("Engagement", item.engagement)
-                )
-                .foregroundStyle(by: .value("Platform", item.platform.lowercased()))
-                .interpolationMethod(.linear)
-                .lineStyle(StrokeStyle(lineWidth: 1.5,dash:[4,4])) // Solid thin line
-
-                // DATA POINT
-                PointMark(
-                    x: .value("Day", dayStart),
-                    y: .value("Engagement", item.engagement)
-                )
-                .foregroundStyle(by: .value("Platform", item.platform.lowercased()))
-                .symbolSize(60)
-            }
-        }
-        .chartForegroundStyleScale([
-            "instagram": .pink,
-            "twitter": .black,
-            "linkedin": .blue
-        ])
-        .chartXScale(domain: currentWeekRange)
-        .chartYScale(domain: .automatic(includesZero: true))
-        .chartLegend(.hidden)
-        .chartXAxis {
-            // 🛑 FIX: Align labels directly under the vertical lines
-            AxisMarks(values: .stride(by: .day)) { value in
-                if let _ = value.as(Date.self) {
-                    AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 4]))
-                    AxisTick()
-                    AxisValueLabel(format: .dateTime.weekday(.narrow), centered: false) // 'centered: false' snaps it to the line
-                        .font(.caption2.bold())
+            } else {
+                // 📊 THE NEW HABIT TRACKER BAR CHART
+                Chart {
+                    ForEach(filteredAndSortedMetrics) { item in
+                        let dayStart = Calendar.current.startOfDay(for: item.date)
+                        
+                        BarMark(
+                            x: .value("Day", dayStart),
+                            y: .value("Posts", item.engagement) // 'engagement' now stores post count
+                        )
+                        .foregroundStyle(by: .value("Platform", item.platform.lowercased()))
+                        .cornerRadius(4) // Gives the bars a nice rounded look
+                    }
                 }
-            }
-        }
-        .chartYAxis {
-            AxisMarks(position: .leading) { value in
-                AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5))
-                if let intValue = value.as(Int.self) {
-                    AxisValueLabel(formatValue(intValue))
+                .chartForegroundStyleScale([
+                    "instagram": .pink,
+                    "twitter": .black,
+                    "linkedin": .blue
+                ])
+                .chartXScale(domain: currentWeekRange)
+                .chartYScale(domain: .automatic(includesZero: true))
+                .chartLegend(.hidden)
+                .chartXAxis {
+                    AxisMarks(values: .stride(by: .day)) { value in
+                        if let _ = value.as(Date.self) {
+                            AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 4]))
+                            AxisValueLabel(format: .dateTime.weekday(.narrow), centered: true)
+                                .font(.caption2.bold())
+                        }
+                    }
                 }
+                .chartYAxis {
+                    // Y-Axis now explicitly shows 0, 1, 2, 3... posts
+                    AxisMarks(position: .leading, values: .automatic(desiredCount: 4)) { value in
+                        AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5))
+                        if let intValue = value.as(Int.self) {
+                            AxisValueLabel("\(intValue)")
+                        }
+                    }
+                }
+                .frame(minHeight: 200)
+                
+                // 🏷️ CUSTOM LEGEND
+                HStack(spacing: 16) {
+                    ForEach(activePlatforms, id: \.self) { platform in
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(platformColors[platform] ?? .gray)
+                                .frame(width: 8, height: 8)
+                            Text(platform.capitalized)
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                .padding(.leading, 10)
             }
         }
-        .padding(.horizontal, 15) // Increased padding so 'M' isn't cut off
+        .padding(.horizontal, 15)
         .padding(.top, 20)
-        .background(Color(.systemBackground))
+        .padding(.bottom, 10)
+        .background(Color(UIColor.systemBackground))
         .clipped()
-    }
-    
-    func formatValue(_ value: Int) -> String {
-        let num = Double(value)
-        if num >= 1_000_000 { return String(format: "%.1fM", num / 1_000_000) }
-        if num >= 1_000 { return String(format: "%.0fK", num / 1_000) }
-        return "\(value)"
     }
 }

@@ -34,30 +34,58 @@ class AnalyticsViewController: UIViewController {
     // Graph Container
     @IBOutlet weak var graphContainerView: UIView!
     
+    // Best Post Card Outlets
+    @IBOutlet weak var bestPostPlatformImage: UIImageView!
+    @IBOutlet weak var bestPostTextLabel: UILabel!
+    @IBOutlet weak var bestPostMetricsStack: UIStackView! // 🛑 Crucial for dynamic metrics
+    private var currentBestPostURL: String?  // Stores the URL from Supabase
+
+    private var currentBestPost: BestPost?
+    
+    
+    @IBOutlet weak var bestPostDateLabel: UILabel! // Connect in Storyboard
+    @IBOutlet weak var bestPostCard: UIView!
+    
+    
+    
     // Loader
     let activityIndicator = UIActivityIndicatorView(style: .large)
 
     // MARK: - Lifecycle
     override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        navigationController?.setNavigationBarHidden(false, animated: true)
-        navigationItem.backButtonTitle = ""
-        
-        setupDesign()
-        setupLinkButton()
-        setupData()
-        setupGraph()
-        
-        // Auto-refresh
-        Task {
-            await SupabaseManager.shared.autoUpdateAnalytics()
+            super.viewWillAppear(animated)
+            navigationController?.setNavigationBarHidden(false, animated: true)
+            
+            setupDesign()
+            setupLinkButton()
+            
+            // Refresh everything
+            setupData()
+            setupGraph()
+            fetchBestPost() // 👈 ADD THIS LINE
+            
+            Task {
+                await SupabaseManager.shared.autoUpdateAnalytics()
+            }
         }
-    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationItem.hidesBackButton = true
+        // Setup Tap Gesture for the Best Post Card
+        let tap = UITapGestureRecognizer(target: self, action: #selector(openBestPostURL))
+        bestPostCard.addGestureRecognizer(tap)
+        bestPostCard.isUserInteractionEnabled = true
+    }
+    
+//    Best post on tap function
+    @objc func openBestPostURL() {
+        // 🛑 CHECK THE SAVED OBJECT
+        guard let urlStr = currentBestPost?.post_url, let url = URL(string: urlStr) else {
+            showToast(message: "Post link unavailable", isSuccess: false)
+            return
+        }
+        UIApplication.shared.open(url)
     }
 
     // MARK: - Setup UI
@@ -239,11 +267,8 @@ class AnalyticsViewController: UIViewController {
             scoreArrowImage.tintColor = .systemGray
         }
         
-        // 3. STAT CARDS
-        func formatNumber(_ n: Int) -> String {
-            if n >= 1000 { return String(format: "%.1fk", Double(n)/1000.0) }
-            return "\(n)"
-        }
+        // 3. STAT CARDS -> format number is outside the func updateLabels
+
         
         if let label = totalEngagementLabel { label.text = formatNumber(totalInteractions) }
         if let label = topPlatformLabel { label.text = topPlatformName }
@@ -254,6 +279,11 @@ class AnalyticsViewController: UIViewController {
         
         // 4. STREAK
         weeksStreakLabel.text = "\(data.consistency_weeks)"
+    }
+    
+    func formatNumber(_ n: Int) -> String {
+        if n >= 1000 { return String(format: "%.1fk", Double(n)/1000.0) }
+        return "\(n)"
     }
     
     // MARK: - Actions & Animations
@@ -290,6 +320,119 @@ class AnalyticsViewController: UIViewController {
             }
         }
     }
+    
+    
+    func fetchBestPost() {
+        guard let userId = SupabaseManager.shared.client.auth.currentSession?.user.id else { return }
+        
+        Task {
+            do {
+                let post: BestPost = try await SupabaseManager.shared.client
+                    .from("best_posts")
+                    .select()
+                    .eq("user_id", value: userId)
+                    .single()
+                    .execute()
+                    .value
+                
+                // 🛑 SAVE THE FULL OBJECT HERE
+                self.currentBestPost = post
+                
+                DispatchQueue.main.async {
+                    self.updateBestPostUI(with: post)
+                }
+            } catch {
+                print("No best post found.")
+            }
+        }
+    }
+    // MARK: - Best Post UI Logic
+        
+    func updateBestPostUI(with post: BestPost) {
+            // 1. Icon & Text
+            bestPostPlatformImage.image = UIImage(named: "icon-\(post.platform.lowercased())")
+            bestPostTextLabel.text = post.post_text ?? "View this week's highlight..."
+            
+            // 2. Dynamic Date Formatting 📅
+            if let dateStr = post.post_date {
+                let dbFormatter = DateFormatter()
+                dbFormatter.dateFormat = "yyyy-MM-dd"
+                if let date = dbFormatter.date(from: dateStr) {
+                    let displayFormatter = DateFormatter()
+                    displayFormatter.dateStyle = .medium // e.g., "Feb 18, 2026"
+                    bestPostDateLabel.text = displayFormatter.string(from: date)
+                }
+            } else {
+                bestPostDateLabel.text = "This Week"
+            }
+            
+            // 3. Dynamic Metrics Stack (Deduplicated logic)
+            bestPostMetricsStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+            
+            var stats: [(String, Int)] = [
+                ("Likes", post.likes),
+                ("Comments", post.comments)
+            ]
+            
+            if post.platform.lowercased() == "twitter" {
+                stats.append(("Reposts", post.shares_reposts ?? 0))
+                // 🛑 SMART HIDE: Only show views if the API actually provided them
+                if let v = post.extra_metric, v > 0 {
+                    stats.append(("Views", v))
+                }
+            } else if post.platform.lowercased() == "linkedin" {
+                stats.append(("Shares", post.shares_reposts ?? 0))
+            }
+            
+            // 4. Populate Stack
+            for (label, value) in stats {
+                let metricView = createVerticalMetricStack(title: label, count: value)
+                bestPostMetricsStack.addArrangedSubview(metricView)
+            }
+        }
+
+        // Helper to build the "Value over Title" look
+    private func createVerticalMetricStack(title: String, count: Int) -> UIView {
+            let container = UIStackView()
+            container.axis = .vertical
+            container.alignment = .center
+            container.spacing = 2
+            
+            let countLabel = UILabel()
+            countLabel.text = formatNumber(count)
+            countLabel.font = .systemFont(ofSize: 16, weight: .bold)
+            
+            let titleLabel = UILabel()
+            titleLabel.text = title
+            titleLabel.font = .systemFont(ofSize: 10, weight: .medium)
+            titleLabel.textColor = .secondaryLabel
+            
+            container.addArrangedSubview(countLabel)
+            container.addArrangedSubview(titleLabel)
+            return container
+        }
+
+        // Helper to create small metric labels dynamically
+        func createMetricView(label: String, value: Int) -> UIView {
+            let container = UIStackView()
+            container.axis = .vertical
+            container.alignment = .center
+            
+            let valueLabel = UILabel()
+            valueLabel.text = formatNumber(value)
+            valueLabel.font = .systemFont(ofSize: 14, weight: .bold)
+            
+            let titleLabel = UILabel()
+            titleLabel.text = label
+            titleLabel.font = .systemFont(ofSize: 10)
+            titleLabel.textColor = .secondaryLabel
+            
+            container.addArrangedSubview(valueLabel)
+            container.addArrangedSubview(titleLabel)
+            return container
+        }
+    
+    
     
     // Suggestions Logic
     @IBAction func didTapDismissSuggestion(_ sender: UIButton) {
