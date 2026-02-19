@@ -27,15 +27,15 @@ class TopicActionCollectionViewCell: UICollectionViewCell {
         
         // Initialization code
     }
-    
-    func configure(with action: TopicAction) {
-        actionTitleLabel.text = action.callToAction
-        descritpionLabel.text = action.actionDescription
-        
-        if let iconName = action.actionIcon, !iconName.isEmpty {
-            actionIcon.image = UIImage(systemName: iconName)
-            actionIcon.tintColor = .systemTeal
-        }
-    }
+//    
+//    func configure(with action: TopicAction) {
+//        actionTitleLabel.text = action.callToAction
+//        descritpionLabel.text = action.actionDescription
+//        
+//        if let iconName = action.actionIcon, !iconName.isEmpty {
+//            actionIcon.image = UIImage(systemName: iconName)
+//            actionIcon.tintColor = .systemTeal
+//        }
+//    }
     
 }

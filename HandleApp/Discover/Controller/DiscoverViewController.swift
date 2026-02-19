@@ -208,7 +208,7 @@ class DiscoverViewController: UIViewController {
                 
                 
                 sectionLayout.contentInsets = NSDirectionalEdgeInsets(
-                    top: 0, leading: 16, bottom: 10, trailing: 16
+                    top: 10, leading: 16, bottom: 10, trailing: 16
                 )
                 
                 return sectionLayout

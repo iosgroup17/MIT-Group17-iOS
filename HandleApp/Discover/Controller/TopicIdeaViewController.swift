@@ -243,7 +243,7 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
         if section == 0 {
             return 1 
         } else if section == 1 {
-            return data.actions?.count ?? 0
+            return 1
         } else {
             return generatedPosts.count
         }
@@ -272,10 +272,10 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
             ) as! TopicActionCollectionViewCell
             
             
-            if let actions = topic?.actions, indexPath.row < actions.count {
-                let action = actions[indexPath.row]
-                cell.configure(with: action)
-            }
+//            if let actions = topic?.actions, indexPath.row < actions.count {
+//                let action = actions[indexPath.row]
+//                cell.configure(with: action)
+//            }
             
             return cell
         }
