@@ -1,116 +1,122 @@
-////
-////  LoginAuthViewController.swift
-////  HandleApp
-////
-////  Created by SDC_USER on 03/02/26.
-////
 //
-//import UIKit
-//import AuthenticationServices
-//import GoogleSignIn
+//  LoginAuthViewController.swift
+//  HandleApp
 //
-//class LoginAuthViewController: UIViewController {
-//    @IBOutlet weak var manualStack: UIStackView!
-//    @IBOutlet weak var socialStack: UIStackView!
-//    @IBOutlet weak var signUpButton: UIButton!
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//        setupFooterLink()
-//        self.manualStack.isHidden = true
-//        // Do any additional setup after loading the view.
-//    }
-//    @IBAction func handleAppleSignIn(_ sender: UIButton) {
-//        let appleIDProvider = ASAuthorizationAppleIDProvider()
-//        let request = appleIDProvider.createRequest()
-//        request.requestedScopes = [.fullName, .email]
+//  Created by SDC_USER on 03/02/26.
 //
-//        let authorizationController = ASAuthorizationController(authorizationRequests: [request])
-//        authorizationController.delegate = self
-//        authorizationController.presentationContextProvider = self
-//        authorizationController.performRequests()
-//    }
-//
-//    @IBAction func handleGoogleSignIn(_ sender: UIButton) {
-//        GIDSignIn.sharedInstance.signIn(withPresenting: self) { signInResult, error in
-//            if let error = error {
-//                print("Google Sign-In Error: \(error.localizedDescription)")
-//                return
-//            }
-//            guard let result = signInResult else { return }
-//            
-//            let user = result.user
-//            print("Google User: \(user.profile?.name ?? "No Name")")
-//        }
-//    }
-//    
-//    @IBAction func signUpTapped(_ sender: UIButton) {
-//        // Animate the transition for a professional feel
-//        UIView.animate(withDuration: 0.3) {
-//            // Hide social, show manual
-//            self.socialStack.isHidden = true
-//            self.manualStack.isHidden = false
-//            
-//            // Hide the footer link since they are now in the sign-up state
-//            self.signUpButton.alpha = 0
-//            
-//            // Force the layout to update immediately for the animation
-//            self.view.layoutIfNeeded()
-//        }
-//    }
-//    func setupFooterLink() {
-//        // 1. The full string
-//        let fullText = "Don't have an account? Sign Up"
-//        
-//        // 2. Create the attributed string
-//        let attributedString = NSMutableAttributedString(string: fullText)
-//        
-//        // 3. Find the range of "Sign Up" to make it bold/different color
-//        let range = (fullText as NSString).range(of: "Sign Up")
-//        
-//        attributedString.addAttributes([
-//            .font: UIFont.boldSystemFont(ofSize: 14),
-//            .foregroundColor: UIColor.systemTeal // Or black to match your theme
-//        ], range: range)
-//        
-//        // 4. Set the rest of the text to a lighter color/font
-//        let grayRange = (fullText as NSString).range(of: "Don't have an account?")
-//        attributedString.addAttributes([
-//            .font: UIFont.systemFont(ofSize: 14),
-//            .foregroundColor: UIColor.darkGray
-//        ], range: grayRange)
-//        
-//        // 5. Assign to button
-//        signUpButton.setAttributedTitle(attributedString, for: .normal)
-//    }
-//
-//    /*
-//    // MARK: - Navigation
-//
-//    // In a storyboard-based application, you will often want to do a little preparation before navigation
-//    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-//        // Get the new view controller using segue.destination.
-//        // Pass the selected object to the new view controller.
-//    }
-//    */
-//
-//}
-//extension LoginAuthViewController: ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
-//    
-//    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-//        return self.view.window!
-//    }
-//
-//    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-//        if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
-//            let userIdentifier = appleIDCredential.user
-//            let fullName = appleIDCredential.fullName
-//            let email = appleIDCredential.email
-//            print("Apple User ID: \(userIdentifier)")
-//        }
-//    }
-//
-//    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-//        print("Apple Sign-In Failed: \(error.localizedDescription)")
-//    }
-//}
-//
+
+import UIKit
+import Supabase
+import AuthenticationServices
+import GoogleSignIn
+
+class LoginAuthViewController: UIViewController {
+
+    @IBOutlet weak var footerButton: UIButton! // The "Don't have an account?" button
+    
+    // MARK: - State
+    // This variable tracks which mode we are in
+    var isSignUpMode = false {
+        didSet { updateUI() }
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Initialize UI for Login mode
+        updateUI()
+    }
+    
+    // MARK: - UI Configuration
+    func updateUI() {
+        // Toggle texts based on the mode
+        if isSignUpMode {
+            setAttributedFooter(question: "Already have an account?", action: "Log In")
+        } else {
+            setAttributedFooter(question: "Don't have an account?", action: "Sign Up")
+        }
+    }
+    
+    // Helper to make the footer look professional (Two colors)
+    func setAttributedFooter(question: String, action: String) {
+        let fullText = "\(question) \(action)"
+        let attributedString = NSMutableAttributedString(string: fullText)
+        
+        // Color the "Action" part blue/bold
+        let range = (fullText as NSString).range(of: action)
+        attributedString.addAttributes([
+            .foregroundColor: UIColor.systemBlue,
+            .font: UIFont.boldSystemFont(ofSize: 14)
+        ], range: range)
+        
+        // Color the "Question" part gray
+        let questionRange = (fullText as NSString).range(of: question)
+        attributedString.addAttributes([
+            .foregroundColor: UIColor.darkGray,
+            .font: UIFont.systemFont(ofSize: 14)
+        ], range: questionRange)
+        
+        footerButton.setAttributedTitle(attributedString, for: .normal)
+    }
+
+    // MARK: - Interactions
+    
+    // 1. Footer Tapped -> Switch Mode
+    @IBAction func footerTapped(_ sender: UIButton) {
+        // Animate the transition slightly for polish
+        UIView.transition(with: view, duration: 0.3, options: .transitionCrossDissolve) {
+            self.isSignUpMode.toggle()
+        }
+    }
+
+    // 2. Main Action (Login OR Sign Up)
+    
+    
+    // MARK: - 3. Google Login
+    @IBAction func googleTapped(_ sender: UIButton) {
+        GIDSignIn.sharedInstance.signIn(withPresenting: self) { [weak self] result, error in
+            if let error = error {
+                self?.showAlert(message: "Google Error: \(error.localizedDescription)")
+                return
+            }
+            
+            // Ensure you are getting the idToken string
+            guard let result = result,
+                  let idToken = result.user.idToken?.tokenString else { return }
+            
+            Task {
+                do {
+                    try await SupabaseManager.shared.client.auth.signInWithIdToken(
+                        credentials: .init(provider: .google, idToken: idToken)
+                    )
+                    self?.navigateToHome()
+                } catch {
+                    self?.showAlert(message: "Supabase Error: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
+    
+    
+    // MARK: - Navigation Helper
+    func navigateToHome() {
+        DispatchQueue.main.async {
+            // Replace "MainAppVC" with your actual Home Screen Identifier
+            if let window = self.view.window {
+                let storyboard = UIStoryboard(name: "Profile", bundle: nil)
+                let homeVC = storyboard.instantiateViewController(withIdentifier: "OnboardingParentVC")
+                window.rootViewController = homeVC
+                UIView.transition(with: window, duration: 0.5, options: .transitionFlipFromRight, animations: nil)
+            }
+        }
+    }
+    
+    func showAlert(message: String) {
+        let alert = UIAlertController(title: "Alert", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+}
+
+
+
