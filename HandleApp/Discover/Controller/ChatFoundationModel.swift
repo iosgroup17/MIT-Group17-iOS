@@ -129,3 +129,74 @@ enum ContentError: Error {
     case noJSONFound
 }
 
+
+extension PostGenerationModel {
+   
+    func generateTopicBasedPost(profile: UserProfile, topicContext: String, request: GenerationRequest) async throws -> EditorDraftData {
+        
+#if targetEnvironment(simulator)
+        try await Task.sleep(nanoseconds: 2 * 1_000_000_000)
+        return EditorDraftData(
+            postHeading: "Trending Post Idea",
+            platformName: request.platform,
+            platformIconName: "doc.text",
+            caption: "[Simulator Mock]: Based on the trending topic '\(topicContext)' and idea '\(request.idea)', here is a \(request.tone) post for \(request.platform).",
+            images: ["A relevant trend visual"],
+            hashtags: ["#Simulator", "#Trending"],
+            postingTimes: ["10:00 AM"]
+        )
+#else
+        
+        // Explicitly starting a NEW session as requested
+        let model = SystemLanguageModel.default
+        let newSession = LanguageModelSession(model: model)
+        
+        let prompt = """
+            ACT AS: Lead Executive Ghostwriter for Founders.
+            
+            PROFILE: \(profile.promptContext)
+            TRENDING TOPIC CONTEXT: \(topicContext)
+            
+            GUIDELINES:
+            1. AUTHENTICITY: Write as a founder with real skin in the game. No corporate buzzwords.
+            2. NO AI-isms: Never use "unleash," "delve," "tapestry," "revolutionize," "embark," "journey," "transform," or similar.
+            3. VALUE-FIRST: Every post delivers clear utility for \(profile.targetAudience.joined(separator: ", "))
+            4. HOOK-REQUIRED: First line must be a scroll-stopping hook leveraging the Trending Topic.
+            5. PROFESSIONAL: Respectful tone, no harassment, stereotypes, or offensive content.
+            
+            REGULATORY COMPLIANCE (MANDATORY):
+            - NO false claims, guarantees, or misleading statements
+            - NO medical/health advice unless founder is licensed professional
+            - NO financial investment advice or "get rich quick" promises
+            - Include disclaimers if discussing AI tools: "Results vary based on implementation"
+            
+            TASK: Write 1 publish-ready social media post focusing on the provided TRENDING TOPIC.
+            - User's Custom Angle: \(request.idea)
+            - Tone: \(request.tone)
+            - Platform: \(request.platform)
+            \(request.refinementInstruction != nil ? "- Refine: \(request.refinementInstruction!)" : "")
+            
+            OUTPUT: ONLY valid JSON. No other text.
+            
+            {
+              "platformName": "\(request.platform)",
+              "platformIconName": "doc.text",
+              "caption": "Post content here. Use \\n for line breaks. No hashtags.",
+              "images": ["1 detailed visual description matching founder's industry"],
+              "hashtags": ["#Tag1", "#Tag2", "#Tag3"],
+              "postingTimes": ["Day at Time", "Day at Time"]
+            }
+            """
+        
+        let response = try await newSession.respond(to: prompt)
+        let cleanJSON = stripMarkdown(from: response.content)
+        
+        guard let data = cleanJSON.data(using: .utf8) else {
+            throw ContentError.jsonParsingFailed
+        }
+        
+        return try JSONDecoder().decode(EditorDraftData.self, from: data)
+#endif
+    }
+}
+

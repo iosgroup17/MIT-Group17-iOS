@@ -332,12 +332,16 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
         
         if indexPath.section == 1 {
 
-            guard let actions = topic?.actions, indexPath.row < actions.count else { return }
-            
-            let action = actions[indexPath.row]
-            
-            if let urlString = action.destinationUrl, let url = URL(string: urlString) {
-                UIApplication.shared.open(url)
+            let storyboard = UIStoryboard(name: "Discover", bundle: nil)
+            if let chatVC = storyboard.instantiateViewController(withIdentifier: "ChatViewController") as? UserIdeaViewController {
+                
+                // Pass the topic details over to the chat view controller
+                if let currentTopic = self.topic {
+                    chatVC.prefilledTopicName = currentTopic.topicName
+                    chatVC.prefilledTopicContext = "\(currentTopic.shortDescription). \(currentTopic.trendingContext)"
+                }
+                
+                self.navigationController?.pushViewController(chatVC, animated: true)
             }
         }
         if indexPath.section == 2 {

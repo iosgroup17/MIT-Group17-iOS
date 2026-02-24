@@ -22,6 +22,9 @@ class UserIdeaViewController: UIViewController {
     var selectedPlatform: String = ""
     var refinement: String = ""
     
+    var prefilledTopicName: String?
+    var prefilledTopicContext: String?
+    
     var showAnalysisMessage = false
     
     override func viewDidLoad() {
@@ -30,11 +33,36 @@ class UserIdeaViewController: UIViewController {
         setupTableView()
         setupKeyboardObservers()
         
-        messages.append(Message(
-            text: "Hello! I'm here to help turn your thoughts into viral posts. What's on your mind and on which platform do you plan to post on?",
-            isUser: false,
-            type: .text)
-        )
+        
+        if let topicName = prefilledTopicName {
+                currentStep = .waitingForTone
+                userIdea = "Focusing on the trend: \(topicName)" // Set idea automatically
+                
+                messages.append(Message(
+                    text: "I see you want to write a post about the trending topic: '\(topicName)'. What tone should the post have?",
+                    isUser: false,
+                    type: .text)
+                )
+                
+                // Push the tone options automatically
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
+                    self?.addBotResponse(
+                        text: "Select a tone below:",
+                        options: [
+                            "Professional", "Educational", "Casual", "Direct",
+                            "Analytical", "Contrarian", "Conversational",
+                            "Inspirational", "Storytelling"
+                        ]
+                    )
+                }
+            } else {
+                // Original standard flow
+                messages.append(Message(
+                    text: "Hello! I'm here to help turn your thoughts into viral posts. What's on your mind and on which platform do you plan to post on?",
+                    isUser: false,
+                    type: .text)
+                )
+            }
 
         // Do any additional setup after loading the view.
     }
@@ -247,11 +275,21 @@ extension UserIdeaViewController {
                         refinementInstruction: self.refinement.isEmpty ? nil : self.refinement
                     )
                 
-                    // 3. Generate the post using the full context
-                    let draft = try await PostGenerationModel.shared.generatePost(
-                        profile: profileContext,
-                        request: request
-                    )
+                    let draft: EditorDraftData
+                                
+                    // Check if we are running a Topic-based generation or standard generation
+                    if let topicCtx = self.prefilledTopicContext {
+                        draft = try await PostGenerationModel.shared.generateTopicBasedPost(
+                            profile: profileContext,
+                            topicContext: topicCtx,
+                            request: request
+                        )
+                    } else {
+                        draft = try await PostGenerationModel.shared.generatePost(
+                            profile: profileContext,
+                            request: request
+                        )
+                    }
 
                     await MainActor.run {
                         self.handleSuccess(draft: draft)
