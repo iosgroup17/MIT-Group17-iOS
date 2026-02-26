@@ -35,7 +35,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let storyboard = UIStoryboard(name: "Profile", bundle: nil) // Check your file name!
         
         // Instantiate the Quiz Parent VC
-        let onboardingVC = storyboard.instantiateViewController(withIdentifier: "LoginAuthVC")
+        let onboardingVC = storyboard.instantiateViewController(withIdentifier: "OnboardingParentVC")
  
         window.rootViewController = onboardingVC
     }
