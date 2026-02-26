@@ -20,22 +20,21 @@ class AnalyticsCardView: UIView {
 
         self.layer.cornerRadius = 16
         
-        // 2. BORDER / STROKE
-        //Adding a thin light grey outline
+        //border/stroke
         self.layer.borderWidth = 1.0
         self.layer.borderColor = UIColor.systemGray5.cgColor
         
-        // 3. SHADOW 
-        // "masksToBounds = false" this is used because if true shadow will be clipped"
+        //shadow
+        // masksToBounds = false - avoids shadow clipping
         self.layer.masksToBounds = false
-        // clipstobounds false is used to allow shadow to be visible outside the view bounds
+        // clipstobounds = false - allows shadow to be visible outside the view bounds
         self.clipsToBounds = false
         
-        // Shadow Specs
+        // Shadow details
         self.layer.shadowColor = UIColor.black.cgColor
         self.layer.shadowOpacity = 0.10  // Visibility
         self.layer.shadowOffset = CGSize(width: 0, height: 4) // this will push shadow down
-        self.layer.shadowRadius = 6      // it will specify the blur amount
+        self.layer.shadowRadius = 6      //blur
     }
 }
 

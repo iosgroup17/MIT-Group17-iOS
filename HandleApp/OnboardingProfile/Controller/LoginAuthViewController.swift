@@ -88,9 +88,9 @@ class LoginAuthViewController: UIViewController {
                     try await SupabaseManager.shared.client.auth.signInWithIdToken(
                         credentials: .init(provider: .google, idToken: idToken)
                     )
-                    self?.navigateToHome()
+                    await self?.navigateToHome()
                 } catch {
-                    self?.showAlert(message: "Supabase Error: \(error.localizedDescription)")
+                    await self?.showAlert(message: "Supabase Error: \(error.localizedDescription)")
                 }
             }
         }

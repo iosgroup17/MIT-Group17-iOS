@@ -59,7 +59,7 @@ actor PostGenerationModel {
         let prompt = """
             ACT AS: Lead Executive Ghostwriter for Founders.
 
-            PROFILE: \(profile.promptContext)
+            PROFILE: \(await profile.promptContext)
 
             STYLE REFERENCE: 
 
@@ -105,7 +105,9 @@ actor PostGenerationModel {
             throw ContentError.jsonParsingFailed
         }
         
-        return try JSONDecoder().decode(EditorDraftData.self, from: data)
+        return try await MainActor.run {
+            try JSONDecoder().decode(EditorDraftData.self, from: data)
+        }
 #endif
     }
         
@@ -154,7 +156,7 @@ extension PostGenerationModel {
         let prompt = """
             ACT AS: Lead Executive Ghostwriter for Founders.
             
-            PROFILE: \(profile.promptContext)
+            PROFILE: \(await profile.promptContext)
             TRENDING TOPIC CONTEXT: \(topicContext)
             
             GUIDELINES:
@@ -195,7 +197,9 @@ extension PostGenerationModel {
             throw ContentError.jsonParsingFailed
         }
         
-        return try JSONDecoder().decode(EditorDraftData.self, from: data)
+        return try await MainActor.run {
+            try JSONDecoder().decode(EditorDraftData.self, from: data)
+        }
 #endif
     }
 }

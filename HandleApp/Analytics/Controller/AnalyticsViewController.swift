@@ -37,13 +37,13 @@ class AnalyticsViewController: UIViewController {
     // Best Post Card Outlets
     @IBOutlet weak var bestPostPlatformImage: UIImageView!
     @IBOutlet weak var bestPostTextLabel: UILabel!
-    @IBOutlet weak var bestPostMetricsStack: UIStackView! // 🛑 Crucial for dynamic metrics
-    private var currentBestPostURL: String?  // Stores the URL from Supabase
+    @IBOutlet weak var bestPostMetricsStack: UIStackView! //dynamic metrics
+    private var currentBestPostURL: String?  // Stores Supabase URL
 
     private var currentBestPost: BestPost?
     
     
-    @IBOutlet weak var bestPostDateLabel: UILabel! // Connect in Storyboard
+    @IBOutlet weak var bestPostDateLabel: UILabel!
     @IBOutlet weak var bestPostCard: UIView!
     
     
@@ -62,7 +62,7 @@ class AnalyticsViewController: UIViewController {
             // Refresh everything
             setupData()
             setupGraph()
-            fetchBestPost() // 👈 ADD THIS LINE
+            fetchBestPost() 
             
             Task {
                 await SupabaseManager.shared.autoUpdateAnalytics()
@@ -78,9 +78,9 @@ class AnalyticsViewController: UIViewController {
         bestPostCard.isUserInteractionEnabled = true
     }
     
-//    Best post on tap function
+//    Best post on tap
     @objc func openBestPostURL() {
-        // 🛑 CHECK THE SAVED OBJECT
+        // check saved object
         guard let urlStr = currentBestPost?.post_url, let url = URL(string: urlStr) else {
             showToast(message: "Post link unavailable", isSuccess: false)
             return
@@ -108,7 +108,7 @@ class AnalyticsViewController: UIViewController {
                     target: self,
                     action: #selector(self.didTapLinkButton)
                 )
-                // Grey out if full, but keep tappable
+                // Greyed out if all connected, but keep tappable to disconnect
                 linkButton.tintColor = (connected.count >= 3) ? .systemGray : self.view.tintColor
                 self.navigationItem.rightBarButtonItem = linkButton
             }
@@ -170,7 +170,7 @@ class AnalyticsViewController: UIViewController {
                 
                 container.addSubview(hostingController.view)
                 
-                // 3. FORCE constraints so it can NEVER overflow the container
+                // force constraints to avoid overflow
                 NSLayoutConstraint.activate([
                     hostingController.view.topAnchor.constraint(equalTo: container.topAnchor),
                     hostingController.view.leadingAnchor.constraint(equalTo: container.leadingAnchor),
@@ -179,12 +179,12 @@ class AnalyticsViewController: UIViewController {
                 ])
                 
                 hostingController.didMove(toParent: self)
-                container.layoutIfNeeded() // Force immediate layout
+                container.layoutIfNeeded()
             }
         }
     }
 
-    // MARK: - UI Updates (The Smart Logic)
+    // MARK: - UI Updates
     func updateLabels(with data: UserAnalytics, connected: Set<String>) {
         var totalScore = 0
         var platformCount = 0
@@ -197,7 +197,7 @@ class AnalyticsViewController: UIViewController {
         var totalAvg = 0
         var avgCount = 0
         
-        // --- SMART LOGIC: Only count if connected! ---
+        // Only count if connected! ---
         
         // Instagram
         if connected.contains("instagram") {
@@ -210,7 +210,7 @@ class AnalyticsViewController: UIViewController {
             
             instaPostsLabel.text = "\(data.insta_post_count ?? 0)"
         } else {
-            // Explicitly clear stale data if disconnected
+            // Clear stale data if disconnected
             instaPostsLabel.text = "-"
         }
         
@@ -242,11 +242,11 @@ class AnalyticsViewController: UIViewController {
             xPostsLabel.text = "-"
         }
         
-        // 1. MASTER SCORE
+        // Handle Score
         let finalScore = platformCount > 0 ? (totalScore / platformCount) : 0
         animateScore(to: finalScore)
         
-        // 2. GREEN/RED ARROW
+        // Change arrow logic
         let prevScore = data.previous_handle_score ?? 0
         let diff = finalScore - prevScore
         
@@ -267,7 +267,7 @@ class AnalyticsViewController: UIViewController {
             scoreArrowImage.tintColor = .systemGray
         }
         
-        // 3. STAT CARDS -> format number is outside the func updateLabels
+        // stat cards
 
         
         if let label = totalEngagementLabel { label.text = formatNumber(totalInteractions) }
@@ -277,7 +277,7 @@ class AnalyticsViewController: UIViewController {
         let finalAvg = avgCount > 0 ? (totalAvg / avgCount) : 0
         if let label = avgImpactLabel { label.text = formatNumber(finalAvg) }
         
-        // 4. STREAK
+        // streak cards
         weeksStreakLabel.text = "\(data.consistency_weeks)"
     }
     
@@ -335,7 +335,7 @@ class AnalyticsViewController: UIViewController {
                     .execute()
                     .value
                 
-                // 🛑 SAVE THE FULL OBJECT HERE
+                // save full object
                 self.currentBestPost = post
                 
                 DispatchQueue.main.async {
@@ -353,7 +353,7 @@ class AnalyticsViewController: UIViewController {
             bestPostPlatformImage.image = UIImage(named: "icon-\(post.platform.lowercased())")
             bestPostTextLabel.text = post.post_text ?? "View this week's highlight..."
             
-            // 2. Dynamic Date Formatting 📅
+            // dynamic date formatting for best post
             if let dateStr = post.post_date {
                 let dbFormatter = DateFormatter()
                 dbFormatter.dateFormat = "yyyy-MM-dd"
@@ -366,7 +366,7 @@ class AnalyticsViewController: UIViewController {
                 bestPostDateLabel.text = "This Week"
             }
             
-            // 3. Dynamic Metrics Stack (Deduplicated logic)
+            // best post metric stac
             bestPostMetricsStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
             
             var stats: [(String, Int)] = [
@@ -376,7 +376,7 @@ class AnalyticsViewController: UIViewController {
             
             if post.platform.lowercased() == "twitter" {
                 stats.append(("Reposts", post.shares_reposts ?? 0))
-                // 🛑 SMART HIDE: Only show views if the API actually provided them
+                // only show views if provided by api
                 if let v = post.extra_metric, v > 0 {
                     stats.append(("Views", v))
                 }
@@ -391,7 +391,7 @@ class AnalyticsViewController: UIViewController {
             }
         }
 
-        // Helper to build the "Value over Title" look
+        // Helper to build the Value over Title look
     private func createVerticalMetricStack(title: String, count: Int) -> UIView {
             let container = UIStackView()
             container.axis = .vertical

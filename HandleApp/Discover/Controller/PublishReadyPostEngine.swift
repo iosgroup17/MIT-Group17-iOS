@@ -24,7 +24,7 @@ actor OnDevicePostEngine {
         let prompt = """
                 ### SYSTEM
                     Role: World-Class Social Strategist.
-                    CONTEXT: \(context.promptContext)
+                    CONTEXT: \(await context.promptContext)
 
                     ### DIRECTIVES (India IT Rules 2026)
                     - No false claims, medical advice, or deepfakes.
@@ -42,7 +42,7 @@ actor OnDevicePostEngine {
                           "platform_icon": "Enum ('icon-linkedin', 'icon-x', 'icon-instagram')",
                           "caption": "String (80-100 chars teaser)",
                           "hashtags": "Array (Exactly 3)",
-                          "prediction_text": "String (Max 60 chars)",
+                          "prediction_text": "String (Max 40 chars)",
                           "post_image": "Array/Null (Insta: ['img_01'-'img_34'], others: null)"
                         }
                       ]
@@ -56,13 +56,13 @@ actor OnDevicePostEngine {
                 throw NSError(domain: "Decoder", code: 0, userInfo: [NSLocalizedDescriptionKey: "No JSON found"])
             }
 
-            // 2. REPAIR LAYER: If AI returned a list of {} instead of {"posts": []}
+            
             if !jsonString.contains("\"posts\":") {
                 if jsonString.hasPrefix("{") {
-                    // It gave us {obj}, {obj} -> Wrap in array and root
+             
                     jsonString = "{\"posts\": [\(jsonString)]}"
                 } else if jsonString.hasPrefix("[") {
-                    // It gave us [{obj}, {obj}] -> Just wrap in root
+              
                     jsonString = "{\"posts\": \(jsonString)}"
                 }
             }
@@ -112,12 +112,11 @@ extension OnDevicePostEngine {
         
         let platformName = post.platformIcon.contains("linkedin") ? "LinkedIn" : (post.platformIcon.contains("instagram") ? "Instagram" : "X (Twitter)")
         
-        let originalHeading = post.postHeading
         
         let prompt = """
          ### ROLE
          Expert Social Media Elite Writer for Founders.
-         CONTEXT: \(context.promptContext)
+         CONTEXT: \(await context.promptContext)
 
          ### INPUT DRAFT
          - Platform: \(platformName)
@@ -156,9 +155,9 @@ extension OnDevicePostEngine {
         
         print("Cleaned AI JSON:\n\(jsonString)")
 
-        var draft = try JSONDecoder().decode(EditorDraftData.self, from: data)
-        
-        return draft
+        return try await MainActor.run {
+            try JSONDecoder().decode(EditorDraftData.self, from: data)
+        }
     }
 }
 
@@ -168,7 +167,7 @@ extension OnDevicePostEngine {
         
         let prompt = """
      ### ROLE: Elite Writer
-     CTX: \(context.promptContext)
+     CTX: \(await context.promptContext)
 
      ### TOPIC DATA
      TRND: \(topic.topicName)
@@ -209,13 +208,13 @@ extension OnDevicePostEngine {
                 throw NSError(domain: "Decoder", code: 0, userInfo: [NSLocalizedDescriptionKey: "No JSON found"])
             }
 
-            // 2. REPAIR LAYER: If AI returned a list of {} instead of {"posts": []}
+       
             if !jsonString.contains("\"posts\":") {
                 if jsonString.hasPrefix("{") {
-                    // It gave us {obj}, {obj} -> Wrap in array and root
+              
                     jsonString = "{\"posts\": [\(jsonString)]}"
                 } else if jsonString.hasPrefix("[") {
-                    // It gave us [{obj}, {obj}] -> Just wrap in root
+              
                     jsonString = "{\"posts\": \(jsonString)}"
                 }
             }

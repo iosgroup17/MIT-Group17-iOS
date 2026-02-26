@@ -19,7 +19,7 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
     var isManageMode = false
     var onCompletion: ((Bool) -> Void)?
     
-    // 🛑 PREVENTS DOUBLE NAVIGATION
+    // prevents double navigation
     private var hasNavigated = false
 
     // MARK: - Lifecycle
@@ -35,9 +35,7 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        // Reset flag when view appears so we can navigate again if needed later
-        // hasNavigated = false
-        // (Actually, keep it true if we are done, but for this screen lifecycle, checkConnections handles it)
+        // Reset flag when view appears
         checkConnections()
     }
     
@@ -63,7 +61,7 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
     }
     
     func finishAuthFlow(success: Bool) {
-            // 🛑 STOP: If we already navigated, do absolutely nothing.
+            // if navigated already do nothing -> this prevents double nav
             if hasNavigated { return }
             hasNavigated = true
             
@@ -106,7 +104,7 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
             present(alert, animated: true)
         } else {
-            // CONNECT
+            //connect platforms
             if platform == "instagram" { showConnectInstagramAlert(button) }
             if platform == "twitter" { showConnectTwitterAlert(button) }
             if platform == "linkedin" { showConnectLinkedInAlert(button) }

@@ -37,7 +37,7 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron.right" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="ES7-hi-jma">
-                                        <rect key="frame" x="340" y="15.999999999999993" width="18" height="12.333333333333357"/>
+                                        <rect key="frame" x="340" y="15.999999999999995" width="18" height="12.333333333333352"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="16" id="ar1-5Z-lRt"/>
                                             <constraint firstAttribute="width" constant="18" id="mvU-XQ-Tsa"/>
@@ -99,6 +99,7 @@
                                     <constraint firstItem="5TU-Df-dJo" firstAttribute="top" secondItem="Vw3-MF-8F3" secondAttribute="bottom" constant="16" id="kmA-uI-hf7"/>
                                     <constraint firstAttribute="trailing" secondItem="6fX-J3-jJw" secondAttribute="trailing" constant="12" id="mHN-a9-cGT"/>
                                     <constraint firstItem="6fX-J3-jJw" firstAttribute="top" secondItem="5TU-Df-dJo" secondAttribute="bottom" constant="12" id="npl-cg-rtc"/>
+                                    <constraint firstAttribute="trailing" secondItem="Nnj-O1-JxO" secondAttribute="trailing" constant="12" id="uEw-Ak-RRp"/>
                                     <constraint firstAttribute="trailing" secondItem="ES7-hi-jma" secondAttribute="trailing" constant="12" id="wLg-7m-pGO"/>
                                 </constraints>
                             </view>

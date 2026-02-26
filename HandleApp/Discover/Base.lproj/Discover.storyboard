@@ -28,7 +28,7 @@
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="Zj2-TM-OVZ">
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="collectionView" id="Zj2-TM-OVZ">
                                         <rect key="frame" x="0.0" y="0.0" width="128" height="128"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="9xe-jd-Gab">
@@ -238,7 +238,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hjg-p5-3eo">
-                                <rect key="frame" x="0.0" y="230" width="402" height="527"/>
+                                <rect key="frame" x="0.0" y="178" width="402" height="628"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="4dy-69-Rw6">
                                         <rect key="frame" x="0.0" y="0.0" width="402" height="935.33333333333337"/>
@@ -280,7 +280,7 @@
                                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                                 </collectionViewFlowLayout>
                                                 <cells>
-                                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="gJz-yw-Ndn">
+                                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="imagesCollectionView" id="gJz-yw-Ndn">
                                                         <rect key="frame" x="0.0" y="10" width="150" height="150"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                         <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="n9R-De-Ysg">
@@ -291,7 +291,7 @@
                                                 </cells>
                                             </collectionView>
                                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="hek-gE-fig">
-                                                <rect key="frame" x="16" y="302.33333333333337" width="370" height="100"/>
+                                                <rect key="frame" x="16" y="302.33333333333331" width="370" height="100"/>
                                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="100" id="HYP-Kp-zBm"/>
@@ -336,7 +336,7 @@
                                                             <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                                         </collectionViewFlowLayout>
                                                         <cells>
-                                                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="wCL-UQ-sAx">
+                                                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="hashtagsCollectionView" id="wCL-UQ-sAx">
                                                                 <rect key="frame" x="0.0" y="0.0" width="128" height="128"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                                 <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="Fqc-KL-DWz">
@@ -350,6 +350,7 @@
                                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                 <constraints>
                                                     <constraint firstItem="nnA-wg-624" firstAttribute="leading" secondItem="5kc-n3-xTn" secondAttribute="leading" constant="12" id="7yP-ws-Dgf"/>
+                                                    <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="zFy-km-62c" secondAttribute="trailing" constant="20" symbolic="YES" id="87y-Yc-fOS"/>
                                                     <constraint firstItem="nnA-wg-624" firstAttribute="top" secondItem="zFy-km-62c" secondAttribute="bottom" constant="8" id="KTg-Pg-ftP"/>
                                                     <constraint firstAttribute="bottom" secondItem="nnA-wg-624" secondAttribute="bottom" constant="12" id="P3m-ja-A5w"/>
                                                     <constraint firstItem="zFy-km-62c" firstAttribute="top" secondItem="5kc-n3-xTn" secondAttribute="top" constant="12" id="aN2-TU-i7C"/>
@@ -380,7 +381,7 @@
                                                             <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                                         </collectionViewFlowLayout>
                                                         <cells>
-                                                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="zTo-6A-d7f">
+                                                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="timeCollectionView" id="zTo-6A-d7f">
                                                                 <rect key="frame" x="0.0" y="0.0" width="128" height="128"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                                 <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="1DG-Io-OxS">
@@ -394,6 +395,7 @@
                                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                 <constraints>
                                                     <constraint firstItem="H1g-Xr-s4F" firstAttribute="leading" secondItem="LLz-5U-7oj" secondAttribute="leading" constant="12" id="3jJ-Xw-yPI"/>
+                                                    <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="vAe-5Q-pqM" secondAttribute="trailing" constant="20" symbolic="YES" id="Bey-WI-dm1"/>
                                                     <constraint firstItem="vAe-5Q-pqM" firstAttribute="top" secondItem="LLz-5U-7oj" secondAttribute="top" constant="12" id="LTU-c5-5Za"/>
                                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="140" id="SgV-JI-awa"/>
                                                     <constraint firstAttribute="bottom" secondItem="H1g-Xr-s4F" secondAttribute="bottom" constant="12" id="aP1-GE-Bwu"/>
@@ -513,7 +515,7 @@
                                                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                                                 </collectionViewFlowLayout>
                                                                 <cells>
-                                                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="vgD-r8-Sfx">
+                                                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="postPreviewCollectionView" id="vgD-r8-Sfx">
                                                                         <rect key="frame" x="0.0" y="0.0" width="128" height="128"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                                         <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="2jA-tE-Wa0">
@@ -738,7 +740,7 @@
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="Tfh-uT-a3v">
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="collectionView" id="Tfh-uT-a3v">
                                         <rect key="frame" x="0.0" y="0.0" width="128" height="128"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="d4D-Lb-vRD">
@@ -803,7 +805,7 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="DwR-tX-FwO"/>
+        <segue reference="IW9-7Y-YeL"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="paperplane.fill" catalog="system" width="128" height="119"/>

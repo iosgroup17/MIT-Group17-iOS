@@ -16,6 +16,7 @@ class DiscoverViewController: UIViewController {
     var trendingTopics: [TrendingTopic] = []
     var publishReadyPosts: [PublishReadyPost] = []
     
+    var isGeneratingPosts: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -60,7 +61,10 @@ class DiscoverViewController: UIViewController {
             withReuseIdentifier: "HeaderCollectionReusableView"
         )
         
-        
+        collectionView.register(
+                    UICollectionViewCell.self,
+                    forCellWithReuseIdentifier: "LoadingCell"
+        )
         
         collectionView.setCollectionViewLayout(generateLayout(), animated: true)
         
@@ -148,6 +152,7 @@ class DiscoverViewController: UIViewController {
 
                 await MainActor.run {
                     self.trendingTopics = fetchedTrends
+                    self.isGeneratingPosts = true
                     self.collectionView.reloadData()
                 }
 
@@ -163,12 +168,17 @@ class DiscoverViewController: UIViewController {
                     await MainActor.run {
                         print("AI Generation Complete. Reloading Section 2.")
                         self.publishReadyPosts = generatedPosts
+                        self.isGeneratingPosts = false
                         self.collectionView.reloadSections(IndexSet(integer: 2))
                     }
 
                 
             } catch {
                 print("Critical Error in Data Load: \(error)")
+                await MainActor.run {
+                    self.isGeneratingPosts = false
+                    self.collectionView.reloadSections(IndexSet(integer: 2))
+                }
             }
         }
 
@@ -315,7 +325,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
         func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
             if section == 0 { return 1 }
             if section == 1 { return trendingTopics.count }
-            if section == 2 { return publishReadyPosts.count }
+            if section == 2 { return isGeneratingPosts ? 1 : publishReadyPosts.count }
             
             return 0
         }
@@ -354,11 +364,29 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
             }
             
             if indexPath.section == 2 {
-                let post = publishReadyPosts[indexPath.row]
+                if isGeneratingPosts {
+                    let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "LoadingCell", for: indexPath)
+                    
+                    // Clear out any old views just in case cells are reused
+                    cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+                    
+                    let spinner = UIActivityIndicatorView(style: .medium)
+                    spinner.translatesAutoresizingMaskIntoConstraints = false
+                    spinner.startAnimating()
+                    
+                    cell.contentView.addSubview(spinner)
+                    NSLayoutConstraint.activate([
+                        spinner.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor),
+                        spinner.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
+                    ])
+                    
+                    return cell
+                }
                 
-                // Check if Image URL exists and is not empty
+                
+                let post = publishReadyPosts[indexPath.row]
+           
                 if let img = post.postImage, !img.isEmpty {
-                    // Use the Image Cell XIB
                     let cell = collectionView.dequeueReusableCell(
                         withReuseIdentifier: "PublishReadyImageCollectionViewCell",
                         for: indexPath
@@ -368,7 +396,6 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
                     return cell
                     
                 } else {
-                    // Use the Text Cell XIB
                     let cell = collectionView.dequeueReusableCell(
                         withReuseIdentifier: "PublishReadyTextCollectionViewCell",
                         for: indexPath
@@ -431,12 +458,12 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
             if indexPath.section == 2 {
                 let selectedPost = publishReadyPosts[indexPath.row]
     
-                        self.showLoading()
+                self.showRefinementLoading()
                         
                         Task {
                             do {
                                 guard let profile = await SupabaseManager.shared.fetchUserProfile() else {
-                                    await MainActor.run { self.hideLoading() }
+                                    await MainActor.run { self.hideRefinementLoading() }
                                     return
                                 }
   
@@ -446,13 +473,13 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
                                 )
                                 
                                 await MainActor.run {
-                                    self.hideLoading()
+                                    self.hideRefinementLoading()
 
                                     self.performSegue(withIdentifier: "ShowEditorSegue", sender: finalDraft)
                                 }
                             } catch {
                                 await MainActor.run {
-                                    self.hideLoading()
+                                    self.hideRefinementLoading()
                                     print("Error refining post: \(error)")
                                 }
                             }
@@ -461,8 +488,8 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
             }
         }
     
-    func showLoading() {
-        let alert = UIAlertController(title: nil, message: "Generating with AI...", preferredStyle: .alert)
+    func showRefinementLoading() {
+        let alert = UIAlertController(title: nil, message: "Preparing Editor...", preferredStyle: .alert)
         let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 20, width: 50, height: 50))
         loadingIndicator.hidesWhenStopped = true
         loadingIndicator.style = .medium
@@ -471,7 +498,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
         present(alert, animated: true, completion: nil)
     }
 
-    func hideLoading() {
+    func hideRefinementLoading() {
         dismiss(animated: true, completion: nil)
     }
     

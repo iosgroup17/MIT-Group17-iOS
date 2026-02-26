@@ -8,30 +8,21 @@
 import Foundation
 
 struct UserProfile: Sendable {
-    // MARK: - Onboarding Data Fields
-    
-    // Step 0: How do you identify professionally? (e.g., Founder, Employee)
+
     let professionalIdentity: [String]
-    
-    // Step 1: What are you working on? (e.g., Startup, Full-time role)
+
     let currentFocus: [String]
     
-    // Step 2: Industry/Domain
     let industry: [String]
     
-    // Step 3: Main Goal
     let primaryGoals: [String]
     
-    // Step 4: Content Formats
     let contentFormats: [String]
-    
-    // Step 5: Platforms (LinkedIn, X, etc.)
+  
     let platforms: [String]
     
-    // Step 6: Target Audience
     let targetAudience: [String]
 
-    // MARK: - Computed Context
     var promptContext: String {
 //        return """
 //        USER PROFILE CONTEXT:

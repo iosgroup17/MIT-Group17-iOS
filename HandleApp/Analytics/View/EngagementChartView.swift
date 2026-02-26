@@ -4,7 +4,7 @@ import Charts
 struct EngagementChartView: View {
     let metrics: [DailyMetric]
     
-    // 1. 🛑 NEW FILTER: Strictly bounds the data to only this week
+    //strictly this week
     private var filteredAndSortedMetrics: [DailyMetric] {
         let monday = currentWeekRange.lowerBound
         let nextMonday = currentWeekRange.upperBound
@@ -26,7 +26,7 @@ struct EngagementChartView: View {
         "linkedin": .blue
     ]
     
-    // 2. 🛑 NATIVE FIX: The domain now spans exactly 7 full 24-hour periods!
+    //24x7 for 1 week
     var currentWeekRange: ClosedRange<Date> {
         var calendar = Calendar.current
         calendar.firstWeekday = 2 // Monday
@@ -34,7 +34,7 @@ struct EngagementChartView: View {
         let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)
         guard let monday = calendar.date(from: components) else { return now...now }
         
-        // We end exactly at the START of next Monday so Sunday gets a full 24h bin
+    // end exactly at the start of next monday so sunday gets 24 hours
         let nextMonday = calendar.date(byAdding: .day, value: 7, to: monday)!
         
         return monday...nextMonday
@@ -65,7 +65,7 @@ struct EngagementChartView: View {
                         BarMark(
                             x: .value("Day", dayStart, unit: .day),
                             y: .value("Posts", item.engagement),
-                            width: .ratio(0.6) // 👈 Tweak this to change bar thickness! (0.1 to 1.0)
+                            width: .ratio(0.6) //bar thickness
                         )
                         .foregroundStyle(by: .value("Platform", item.platform.lowercased()))
                         .cornerRadius(4)
@@ -80,7 +80,7 @@ struct EngagementChartView: View {
                 .chartYScale(domain: .automatic(includesZero: true))
                 .chartLegend(.hidden)
                 .chartXAxis {
-                    // 3. 🛑 PERFECT ALIGNMENT: Because our domain is perfect, native striding works flawlessly
+                    // Alignment
                     AxisMarks(values: .stride(by: .day, count: 1)) { value in
                         if let _ = value.as(Date.self) {
                             AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 4]))
@@ -99,7 +99,7 @@ struct EngagementChartView: View {
                 }
                 .frame(minHeight: 200)
                 
-                // 🏷️ CUSTOM LEGEND
+                // legend for graph
                 HStack(spacing: 16) {
                     ForEach(activePlatforms, id: \.self) { platform in
                         HStack(spacing: 4) {

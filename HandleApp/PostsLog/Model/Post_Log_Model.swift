@@ -13,7 +13,7 @@ struct Post: Codable, Identifiable {
     // Content
     var postHeading: String
     var fullCaption: String?
-    var imageNames: [String]? // Changed from String to [String] for multiple images
+    var imageNames: [String]? 
     var platformName: String
     var platformIconName: String?
     let hashtags: [String]?

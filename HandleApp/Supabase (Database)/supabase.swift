@@ -8,26 +8,26 @@
 import Supabase
 import Foundation
 
-struct UserAnalytics: Codable {
+struct UserAnalytics: Codable{
     let handle_score: Int?
     let consistency_weeks: Int
     let last_updated: String?
     
-    // Platform Specifics
+    
     let insta_score: Int?
     let insta_post_count: Int?
     let insta_engagement: Int?
-    let insta_avg_engagement: Int? // NEW
+    let insta_avg_engagement: Int?
     
     let linkedin_score: Int?
     let linkedin_post_count: Int?
     let linkedin_engagement: Int?
-    let linkedin_avg_engagement: Int? // NEW
+    let linkedin_avg_engagement: Int?
     
     let x_score: Int?
     let x_post_count: Int?
     let x_engagement: Int?
-    let x_avg_engagement: Int? // NEW
+    let x_avg_engagement: Int?
     
     let previous_handle_score: Int?
 }
@@ -35,8 +35,8 @@ struct UserAnalytics: Codable {
 struct SocialConnection: Codable {
     let user_id: UUID
     let platform: String
-    let handle: String?      // Added this for scraping
-    let access_token: String? // Made optional since we won't always have a token
+    let handle: String?
+    let access_token: String?
 }
 
 
@@ -54,7 +54,7 @@ struct DailyAnalyticsRow: Codable {
 
 struct DailyMetric: Identifiable {
     let id = UUID()
-    let date: Date       // <--- NEW: Real Date for sorting
+    let date: Date
     let engagement: Int
     let platform: String
 }
@@ -67,7 +67,7 @@ struct BestPost: Codable {
     let shares_reposts: Int?
     let extra_metric: Int?
     let post_url: String?
-    let post_date: String? // New field
+    let post_date: String?
 }
 
 
@@ -77,7 +77,7 @@ class SupabaseManager {
     private let supabaseURL = URL(string: "https://rfoqrrppblagcurghzhy.supabase.co")!
     private let supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmb3FycnBwYmxhZ2N1cmdoemh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4MTU0MDEsImV4cCI6MjA4MzM5MTQwMX0.PiPBEpJA5XZW2u1Nbqk4mva6p8eyP_iTcclpXEk-I9k"
     
-    // The main client instance
+
     let client: SupabaseClient
     let testUserID = UUID(uuidString: "801e5aff-c41e-45bf-904f-bd1bc6bbcd17")!
     
@@ -109,8 +109,7 @@ class SupabaseManager {
         return testUserID
     }
     
-    
-    //save what the user has selected in the onboarding and insert that into table
+  
     func savePreference(stepIndex: Int, selections: [String]) async {
         let data = OnboardingResponse(user_id: currentUserID, step_index: stepIndex, selection_tags: selections)
         do {
@@ -125,7 +124,7 @@ class SupabaseManager {
     }
     
     
-    //fetching the preferences from supabase to be used for generation by AI
+  
     func fetchAllPreferences() async -> [Int: [String]] {
         guard let userId = client.auth.currentUser?.id else { return [:] }
         
@@ -162,12 +161,11 @@ class SupabaseManager {
               
               return connections.map { $0.platform.lowercased() }
           } catch {
-              return [] // If it fails, just return an empty list
+              return []
           }
       }
       
-      // Save Social Handle for Scraping (Twitter/Instagram/LinkedIn)
-      // Add this inside SupabaseManager class
+      
     func saveSocialHandle(platform: String, handle: String) async {
         guard let userId = client.auth.currentSession?.user.id else { return }
         
@@ -180,19 +178,17 @@ class SupabaseManager {
         let params = SocialConnectionParams(user_id: userId, platform: platform, handle: handle)
         
         do {
-            // We use .upsert to update the handle if it already exists, or insert if new
+            
             try await client.from("social_connections")
                 .upsert(params, onConflict: "user_id, platform")
                 .execute()
-            print("✅ Saved \(platform) handle: \(handle)")
+            print("Saved \(platform) handle: \(handle)")
         } catch {
-            print("❌ Failed to save handle: \(error)")
+            print("Failed to save handle: \(error)")
         }
     }
       
-      // Trigger the Apify Scraper Edge Function
-    
-    // Trigger the Apify Scraper Edge Function
+     
     func runHandleScoreCalculation(handle: String) async -> Int {
             let params: [String: String] = ["handle": handle, "user_id": currentUserID.uuidString]
             do {
@@ -218,7 +214,7 @@ class SupabaseManager {
         }
     }
     
-    // MARK: - LinkedIn Scrape Logic
+ 
         func runLinkedInScoreCalculation(handle: String) async -> Int {
             guard let userId = client.auth.currentSession?.user.id else { return 0 }
             
@@ -227,7 +223,7 @@ class SupabaseManager {
                 let user_id: UUID
             }
             
-            // Define the expected response structure
+       
             struct Response: Codable {
                 let handle_score: Int
                 let post_count: Int
@@ -236,17 +232,17 @@ class SupabaseManager {
             let params = ScrapeParams(handle: handle, user_id: userId)
             
             do {
-                // FIX: Use 'options' for the body and remove .decode()
+                
                 let response: Response = try await client.functions
                     .invoke(
                         "process-linkedin-scrape",
                         options: FunctionInvokeOptions(body: params)
                     )
                 
-                print("✅ LinkedIn Scrape: Score \(response.handle_score), Posts \(response.post_count)")
+                print("LinkedIn Scrape: Score \(response.handle_score), Posts \(response.post_count)")
                 return response.handle_score
             } catch {
-                print("❌ LinkedIn Scrape Failed: \(error)")
+                print("LinkedIn Scrape Failed: \(error)")
                 return 0
             }
         }
@@ -267,17 +263,17 @@ class SupabaseManager {
         let params = ScrapeParams(handle: handle, user_id: userId)
         
         do {
-            // Call the new Twitter Edge Function
+       
             let response: Response = try await client.functions
                 .invoke(
                     "process-tweet-scrape",
                     options: FunctionInvokeOptions(body: params)
                 )
             
-            print("✅ Twitter Scrape: Score \(response.handle_score), Posts \(response.post_count)")
+            print("Twitter Scrape: Score \(response.handle_score), Posts \(response.post_count)")
             return response.handle_score
         } catch {
-            print("❌ Twitter Scrape Failed: \(error)")
+            print("Twitter Scrape Failed: \(error)")
             return 0
         }
     }
@@ -285,7 +281,7 @@ class SupabaseManager {
       
     func disconnectSocial(platform: String) async -> Bool {
         do {
-            // 1. Delete from social_connections
+           
             try await client.from("social_connections")
                 .delete()
                 .match(["user_id": currentUserID, "platform": platform])
@@ -306,7 +302,7 @@ class SupabaseManager {
                 .from("daily_analytics")
                 .select()
                 .eq("user_id", value: userId)
-                .order("date", ascending: true) // Database-level sort
+                .order("date", ascending: true)
                 .execute()
                 .value
             
@@ -322,25 +318,25 @@ class SupabaseManager {
                 )
             }
         } catch {
-            print("❌ Error fetching graph data: \(error)")
+            print("Error fetching graph data: \(error)")
             return []
         }
     }
     
     
       
-    // MARK: - Auth Helpers
+  
         func ensureAnonymousSession() async {
             if client.auth.currentSession != nil {
-                print("✅ User already has a session: \(client.auth.currentSession?.user.id.uuidString ?? "Unknown")")
+                print("User already has a session: \(client.auth.currentSession?.user.id.uuidString ?? "Unknown")")
                 return
             }
             
             do {
                 _ = try await client.auth.signInAnonymously()
-                print("✅ Created new Anonymous User: \(client.auth.currentSession?.user.id.uuidString ?? "Unknown")")
+                print("Created new Anonymous User: \(client.auth.currentSession?.user.id.uuidString ?? "Unknown")")
             } catch {
-                print("❌ Anonymous Auth Failed: \(error)")
+                print("Anonymous Auth Failed: \(error)")
             }
         }
     
@@ -348,7 +344,7 @@ class SupabaseManager {
         guard let userId = client.auth.currentSession?.user.id else { return }
         
         do {
-            // 1. Fetch current status
+         
             let analytics: UserAnalytics = try await client
                 .from("user_analytics")
                 .select()
@@ -357,7 +353,7 @@ class SupabaseManager {
                 .execute()
                 .value
             
-            // 2. Check Time Diff (24 Hours)
+    
             if let lastDateStr = analytics.last_updated,
                let lastDate = ISO8601DateFormatter().date(from: lastDateStr) {
                 let hoursSince = Date().timeIntervalSince(lastDate) / 3600
@@ -367,9 +363,9 @@ class SupabaseManager {
                 }
             }
             
-            print("🔄 Data is stale. Starting auto-scrape...")
+            print("Data is stale. Starting auto-scrape...")
             
-            // 3. Fetch connected handles
+       
             let connections: [SocialConnection] = try await client
                 .from("social_connections")
                 .select()
@@ -377,7 +373,7 @@ class SupabaseManager {
                 .execute()
                 .value
             
-            // 4. Run Scrapers in Parallel
+           
             for conn in connections {
                 if let handle = conn.handle {
                     if conn.platform == "twitter" { _ = await runTwitterScoreCalculation(handle: handle) }
@@ -385,7 +381,7 @@ class SupabaseManager {
                     if conn.platform == "linkedin" { _ = await runLinkedInScoreCalculation(handle: handle) }
                 }
             }
-            print("✅ Auto-scrape completed.")
+            print("Auto-scrape completed.")
             
         } catch {
             print("Auto-update failed or no analytics row yet.")
@@ -408,13 +404,13 @@ extension SupabaseManager {
                 .execute()
                 .value
             
-            //organize acc to index
+         
             var answers: [Int: [String]] = [:]
             for resp in responses {
                 answers[resp.step_index] = resp.selection_tags
             }
             
-            // mapping data to correct indices
+            
             return UserProfile(
                 professionalIdentity: answers[0] ?? [], // Step 0: Identity
                 currentFocus: answers[1] ?? [],         // Step 1: Working on
@@ -431,12 +427,11 @@ extension SupabaseManager {
         }
     }
     
-    
-    // In SupabaseManager.swift
+  
 
     func fetchUserPosts() async -> [Post] {
             do {
-                // ✅ Use the smart 'currentUserID'
+                // Use the smart 'currentUserID'
                 let targetID = self.currentUserID
                 print("DEBUG: Fetching posts for User: \(targetID)")
 
@@ -456,7 +451,7 @@ extension SupabaseManager {
         }
     
 //    func createPost(post: Post) async throws {
-//            // ✅ Use the smart 'currentUserID'
+//            // Use the smart 'currentUserID'
 //            let targetID = self.currentUserID
 //            
 //            let postPayload = Post(
@@ -485,7 +480,7 @@ extension SupabaseManager {
 //            print("DEBUG: Post inserted successfully!")
 //        }
 
-    // 3. Update an existing post
+
         func updatePostStatus(postId: UUID, status: Post.PostStatus, date: Date? = nil) async throws {
             var updateData: [String: AnyJSON] = ["status": .string(status.rawValue)]
             
@@ -507,11 +502,11 @@ extension SupabaseManager {
             try await client
                 .from("posts")
                 .delete()
-                .eq("id", value: id.uuidString) // Use .uuidString to be safe
+                .eq("id", value: id.uuidString)
                 .execute()
-            print("✅ Post deleted successfully")
+            print("Post deleted successfully")
         } catch {
-            print("❌ Delete error: \(error)")
+            print("Delete error: \(error)")
         }
     }
     
@@ -532,47 +527,39 @@ extension SupabaseManager {
 //            .execute()
 //    }
     
-    //load the multiple type of post idea and formats
+
     func loadPostsIdeas() async throws -> DiscoverIdeaResponse {
         
         print("Fetching discovery data from Supabase...")
         
-        // 1. Fetch Trending Topics (The Parent Table)
+
         async let trendingQuery: [TrendingTopic] = client
             .from("trending_topics")
             .select()
             .execute()
             .value
 
-        // 2. Fetch ALL Actions (Linked via topic_id)
-        // Ensure your TopicAction struct CodingKeys map "topic_id" correctly if that's your DB column name
+
         async let actionsQuery: [TopicAction] = client
             .from("topic_actions")
             .select()
             .execute()
             .value
-
-        // 3. Await results (Removed postsQuery because we generate posts on-device now)
+        
+        
         let (trending, allActions) = try await (
             trendingQuery,
             actionsQuery
         )
         
-        // MARK: - Process & Group Data
-
-        // Group actions by the Topic ID they belong to
-        // Note: Ensure 'topicDetailId' matches the variable name in your TopicAction struct
         let groupedActions = Dictionary(grouping: allActions, by: { $0.topicDetailId })
         
-        // Map Actions into Topics
+
         let populatedTopics = trending.map { topic -> TrendingTopic in
             var newTopic = topic
             
-            // Inject the actions (e.g., "Read Article", "Watch Video")
             newTopic.actions = groupedActions[topic.id] ?? []
             
-            // Initialize posts as empty.
-            // These will be populated by 'OnDevicePostEngine' in the ViewController.
             newTopic.relevantPosts = []
             
             return newTopic
@@ -580,8 +567,6 @@ extension SupabaseManager {
         
         print("Data fetched and grouped successfully!")
         
-        // 4. Return the response
-        // publishReadyPosts is empty here because the database no longer stores them.
         return DiscoverIdeaResponse(
             trendingTopics: populatedTopics
         )

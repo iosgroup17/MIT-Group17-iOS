@@ -15,6 +15,8 @@ class TopicIdeaViewController: UIViewController {
     var generatedPosts: [PublishReadyPost] = []
     var pageTitle: String = "Topic Ideas"
     
+    var isGeneratingPosts: Bool = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -48,61 +50,65 @@ class TopicIdeaViewController: UIViewController {
             withReuseIdentifier: "HeaderCollectionReusableView"
         )
         
+        collectionView.register(
+                    UICollectionViewCell.self,
+                    forCellWithReuseIdentifier: "LoadingCell"
+        )
+        
         collectionView.dataSource = self
         collectionView.delegate = self
         
         collectionView.collectionViewLayout = generateLayout()
         generateContentForTopic()
         
+        
     }
     
     func generateContentForTopic() {
-            guard let currentTopic = topic else { return }
-            
-            // Construct a clear string for the AI to understand the trend
-            let trendContextString = "\(currentTopic.topicName): \(currentTopic.shortDescription). Context: \(currentTopic.trendingContext ?? "")"
-            
-            self.showLoading() // Reuse your existing loading indicator
-            
-            Task {
-                // 1. Fetch User Context (needed for the engine)
-                let userProfile = await SupabaseManager.shared.fetchUserProfile() ?? UserProfile(
-                    professionalIdentity: ["Content Creator"],
-                    currentFocus: ["Growth"],
-                    industry: ["General"],
-                    primaryGoals: ["Engagement"],
-                    contentFormats: ["Tips"],
-                    platforms: ["LinkedIn"],
-                    targetAudience: ["Professionals"],
-                    
-                )
+        guard let currentTopic = topic else { return }
                 
-                do {
-                    // 2. Call the Foundation Model Engine
-                    print("Generating posts for topic: \(currentTopic.topicName)")
-                    let aiPosts = try await OnDevicePostEngine.shared.generateTrendingTopicPosts(
-                                        topic: currentTopic,
-                                        context: userProfile
+       // let trendContextString = "\(currentTopic.topicName): \(currentTopic.shortDescription). Context: \(currentTopic.trendingContext)"
+    
+                self.isGeneratingPosts = true
+                self.collectionView.reloadSections(IndexSet(integer: 2))
+                
+                Task {
+                    let userProfile = await SupabaseManager.shared.fetchUserProfile() ?? UserProfile(
+                        professionalIdentity: ["Content Creator"],
+                        currentFocus: ["Growth"],
+                        industry: ["General"],
+                        primaryGoals: ["Engagement"],
+                        contentFormats: ["Tips"],
+                        platforms: ["LinkedIn"],
+                        targetAudience: ["Professionals"]
                     )
-                    // 3. Update UI
-                    await MainActor.run {
-                        self.generatedPosts = aiPosts
-                        // Reload only the "Posts" section (Section 2)
-                        self.collectionView.reloadSections(IndexSet(integer: 2))
-                        self.hideLoading()
-                    }
                     
-                } catch {
-                    print("Error generating topic posts: \(error)")
-                    await MainActor.run {
-                        self.hideLoading()
+                    do {
+                        print("Generating posts for topic: \(currentTopic.topicName)")
+                        let aiPosts = try await OnDevicePostEngine.shared.generateTrendingTopicPosts(
+                            topic: currentTopic,
+                            context: userProfile
+                        )
+                        
+                        await MainActor.run {
+         
+                            self.generatedPosts = aiPosts
+                            self.isGeneratingPosts = false
+                            self.collectionView.reloadSections(IndexSet(integer: 2))
+                        }
+                        
+                    } catch {
+                        print("Error generating topic posts: \(error)")
+                        await MainActor.run {
+                            self.isGeneratingPosts = false
+                            self.collectionView.reloadSections(IndexSet(integer: 2))
+                        }
                     }
                 }
-            }
         }
     
-    func showLoading() {
-            let alert = UIAlertController(title: nil, message: "Generating posts...", preferredStyle: .alert)
+    func showRefinementLoading() {
+            let alert = UIAlertController(title: nil, message: "Preparing Editor...", preferredStyle: .alert)
             let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 20, width: 50, height: 50))
             loadingIndicator.hidesWhenStopped = true
             loadingIndicator.style = .medium
@@ -110,11 +116,11 @@ class TopicIdeaViewController: UIViewController {
             alert.view.addSubview(loadingIndicator)
             present(alert, animated: true, completion: nil)
         }
-    
-
-    func hideLoading() {
+        
+    func hideRefinementLoading() {
         dismiss(animated: true, completion: nil)
     }
+    
     
     func generateLayout() -> UICollectionViewLayout {
         return UICollectionViewCompositionalLayout { (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
@@ -163,13 +169,13 @@ class TopicIdeaViewController: UIViewController {
                 
                 let itemSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .absolute(96)
+                    heightDimension: .absolute(106)
                 )
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 
                 let groupSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .absolute(96)
+                    heightDimension: .absolute(106)
                 )
                 
                 let group = NSCollectionLayoutGroup.vertical(
@@ -238,14 +244,14 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        guard let data = topic else { return 0 }
+        guard topic != nil else { return 0 }
         
         if section == 0 {
             return 1 
         } else if section == 1 {
             return 1
         } else {
-            return generatedPosts.count
+            return isGeneratingPosts ? 1 : generatedPosts.count
         }
     }
     
@@ -281,27 +287,43 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
         }
         
         if indexPath.section == 2 {
-            // [CHANGED] Use generatedPosts array
-            guard indexPath.row < generatedPosts.count else { return UICollectionViewCell() }
-            let post = generatedPosts[indexPath.row]
-            
-            // Logic to choose Image vs Text cell
-            if let images = post.postImage, !images.isEmpty {
-                let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: "PublishReadyImageCollectionViewCell",
-                    for: indexPath
-                ) as! PublishReadyImageCollectionViewCell
-                
-                cell.configure(with: post)
-                return cell
-            } else {
-                let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: "PublishReadyTextCollectionViewCell",
-                    for: indexPath
-                ) as! PublishReadyTextCollectionViewCell
-                
-                cell.configure(with: post)
-                return cell
+            if isGeneratingPosts {
+                            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "LoadingCell", for: indexPath)
+                            
+                            // Clear out any old views just in case cells are reused
+                            cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+                            
+                            let spinner = UIActivityIndicatorView(style: .medium)
+                            spinner.translatesAutoresizingMaskIntoConstraints = false
+                            spinner.startAnimating()
+                            
+                            cell.contentView.addSubview(spinner)
+                            NSLayoutConstraint.activate([
+                                spinner.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor),
+                                spinner.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
+                            ])
+                            
+                            return cell
+                        }
+                        
+                    // SHOW ACTUAL POSTS
+                    guard indexPath.row < generatedPosts.count else { return UICollectionViewCell() }
+                    let post = generatedPosts[indexPath.row]
+                    
+                    if let images = post.postImage, !images.isEmpty {
+                        let cell = collectionView.dequeueReusableCell(
+                            withReuseIdentifier: "PublishReadyImageCollectionViewCell",
+                            for: indexPath
+                        ) as! PublishReadyImageCollectionViewCell
+                        cell.configure(with: post)
+                        return cell
+                    } else {
+                        let cell = collectionView.dequeueReusableCell(
+                            withReuseIdentifier: "PublishReadyTextCollectionViewCell",
+                            for: indexPath
+                        ) as! PublishReadyTextCollectionViewCell
+                        cell.configure(with: post)
+                        return cell
             }
         }
         
@@ -335,7 +357,7 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
             let storyboard = UIStoryboard(name: "Discover", bundle: nil)
             if let chatVC = storyboard.instantiateViewController(withIdentifier: "ChatViewController") as? UserIdeaViewController {
                 
-                // Pass the topic details over to the chat view controller
+                
                 if let currentTopic = self.topic {
                     chatVC.prefilledTopicName = currentTopic.topicName
                     chatVC.prefilledTopicContext = "\(currentTopic.shortDescription). \(currentTopic.trendingContext)"
@@ -348,13 +370,13 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
             guard indexPath.row < generatedPosts.count else { return }
             let previewPost = generatedPosts[indexPath.row] // Get from local array
 
-            self.showLoading()
+            self.showRefinementLoading()
 
             Task {
                 do {
   
                     guard let profile = await SupabaseManager.shared.fetchUserProfile() else {
-                        await MainActor.run { self.hideLoading() }
+                        await MainActor.run { self.hideRefinementLoading() }
                         return
                     }
          
@@ -364,7 +386,7 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
                     )
 
                     await MainActor.run {
-                        self.hideLoading()
+                        self.hideRefinementLoading()
                         let storyboard = UIStoryboard(name: "Discover", bundle: nil)
                         if let editorVC = storyboard.instantiateViewController(withIdentifier: "EditorModalEntry") as? EditorSuiteViewController {
                             editorVC.draft = finalDraft
@@ -373,7 +395,7 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
                     }
                 } catch {
                     await MainActor.run {
-                        self.hideLoading()
+                        self.hideRefinementLoading()
                         print("Error generating draft: \(error)")
                     }
                 }

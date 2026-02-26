@@ -35,28 +35,17 @@ class UserIdeaViewController: UIViewController {
         
         
         if let topicName = prefilledTopicName {
-                currentStep = .waitingForTone
-                userIdea = "Focusing on the trend: \(topicName)" // Set idea automatically
-                
+
+                currentStep = .waitingForIdea
+
                 messages.append(Message(
-                    text: "I see you want to write a post about the trending topic: '\(topicName)'. What tone should the post have?",
+                    text: "I see you want to write about the trending topic: '\(topicName)'. What specific angle or idea do you have in mind for this post?",
                     isUser: false,
                     type: .text)
                 )
                 
-                // Push the tone options automatically
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
-                    self?.addBotResponse(
-                        text: "Select a tone below:",
-                        options: [
-                            "Professional", "Educational", "Casual", "Direct",
-                            "Analytical", "Contrarian", "Conversational",
-                            "Inspirational", "Storytelling"
-                        ]
-                    )
-                }
             } else {
-                // Original standard flow
+
                 messages.append(Message(
                     text: "Hello! I'm here to help turn your thoughts into viral posts. What's on your mind and on which platform do you plan to post on?",
                     isUser: false,
@@ -261,13 +250,11 @@ extension UserIdeaViewController {
 
             Task {
                 do {
-                    // 1. Fetch the REAL profile from Supabase & Local JSON
-                    // This now includes professionalIdentity, goals, and acceptedSuggestions
+ 
                     guard let profileContext = await SupabaseManager.shared.fetchUserProfile() else {
                         throw NSError(domain: "AppError", code: 404, userInfo: [NSLocalizedDescriptionKey: "Could not load user profile."])
                     }
 
-                    // 2. Prepare the request
                     let request = GenerationRequest(
                         idea: self.userIdea,
                         tone: self.selectedTone,
@@ -277,7 +264,6 @@ extension UserIdeaViewController {
                 
                     let draft: EditorDraftData
                                 
-                    // Check if we are running a Topic-based generation or standard generation
                     if let topicCtx = self.prefilledTopicContext {
                         draft = try await PostGenerationModel.shared.generateTopicBasedPost(
                             profile: profileContext,
@@ -350,7 +336,7 @@ extension UserIdeaViewController {
         
         func handleError(error: Error) {
             print("AI Error: \(error.localizedDescription)")
-            let errorMessage = Message(text: "⚠️ Couldn't generate a draft right now. Please check your connection.", isUser: false, type: .text)
+            let errorMessage = Message(text: "Couldn't generate a draft right now. Please check your connection.", isUser: false, type: .text)
             self.messages.append(errorMessage)
             self.insertNewMessage()
         }

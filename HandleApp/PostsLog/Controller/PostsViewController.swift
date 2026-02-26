@@ -105,11 +105,9 @@ class PostsViewController: UIViewController {
                 }
                 
                 await MainActor.run {
-                    // A. Reload the list below
                     self.postsTableView.reloadData()
                     self.updateTableViewHeight()
                     
-                    // B. THIS IS THE MISSING LINE: Refresh the calendar dots
                     // We pass 'currentWeekStartDate' so it doesn't reset the scroll position
                     self.setupCustomCalendar(for: self.currentWeekStartDate)
                 }
@@ -264,7 +262,6 @@ class PostsViewController: UIViewController {
             return post.status == .published
         }
 
-        // --- LOGIC FIX BELOW ---
         
         // Priority 1: If there is ANYTHING scheduled, show Yellow (Work Remaining)
         if hasScheduledPost {
@@ -334,18 +331,12 @@ class PostsViewController: UIViewController {
     }
             
     func updateTableViewHeight() {
-        // 1. Force the TableView to calculate its layout immediately
-            //    so that 'contentSize' is accurate.
             postsTableView.layoutIfNeeded()
-            
-            // 2. Get the actual total height of all cells
-            //    (This value is calculated automatically by iOS based on your Auto Layout constraints)
+
             let requiredHeight = postsTableView.contentSize.height
-            
-            // 3. Update the constraint
+
             tableViewHeightConstraint.constant = requiredHeight
             
-            // 4. Animate the change (optional, but looks smoother)
             UIView.animate(withDuration: 0.3) {
                 self.view.layoutIfNeeded()
             }
@@ -364,7 +355,6 @@ extension PostsViewController: UITableViewDataSource, UITableViewDelegate {
         let post = todayScheduledPosts[indexPath.row]
         let hasImages = post.imageNames?.isEmpty == false
 
-        // 3. Dequeue and configure
         if hasImages {
             let cell = tableView.dequeueReusableCell(withIdentifier: "SchForTodayImageTableViewCell", for: indexPath) as! SchForTodayImageTableViewCell
             cell.configure(with: post)

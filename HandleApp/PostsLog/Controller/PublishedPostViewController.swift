@@ -186,7 +186,7 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
             return UITableView.automaticDimension
         }
         
-        // Optional: Provide an estimated height for performance
+        // Provide an estimated height for performance
         func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
             return 150
         }
