@@ -26,6 +26,16 @@ class LoginAuthViewController: UIViewController {
         updateUI()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        // Replace "WelcomeViewController" with the actual ID of your first screen
+        if let welcomeVC = storyboard?.instantiateViewController(withIdentifier: "WelcomeViewController") {
+            welcomeVC.modalPresentationStyle = .pageSheet // Standard modal look
+            self.present(welcomeVC, animated: true, completion: nil)
+        }
+    }
+    
     // MARK: - UI Configuration
     func updateUI() {
         // Toggle texts based on the mode
