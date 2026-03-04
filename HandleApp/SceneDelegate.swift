@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Supabase
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -14,28 +15,30 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
-        
-        let window = UIWindow(windowScene: windowScene)
-        self.window = window
-        
-        let alwaysShowOnboarding = false
-        
-        let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
-        
-        if alwaysShowOnboarding || !hasCompletedOnboarding {
-            showOnboarding(window: window)
-        } else {
-            showMainApp(window: window)
-        }
-        
-        window.makeKeyAndVisible()
+            let window = UIWindow(windowScene: windowScene)
+            self.window = window
+
+            // 1. Check if Supabase has a logged-in user
+            let currentUser = SupabaseManager.shared.client.auth.currentUser
+            // 2. Check your local flag
+            let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+
+            if currentUser != nil && hasCompletedOnboarding {
+                // User is logged in AND finished onboarding -> Go to Main
+                showMainApp(window: window)
+            } else {
+                // Either not logged in OR hasn't finished onboarding -> Go to Login
+                showOnboarding(window: window)
+            }
+
+            window.makeKeyAndVisible()
     }
     
     func showOnboarding(window: UIWindow) {
         let storyboard = UIStoryboard(name: "Profile", bundle: nil) // Check your file name!
         
         // Instantiate the Quiz Parent VC
-        let onboardingVC = storyboard.instantiateViewController(withIdentifier: "OnboardingParentVC")
+        let onboardingVC = storyboard.instantiateViewController(withIdentifier: "LoginAuthVC")
  
         window.rootViewController = onboardingVC
     }

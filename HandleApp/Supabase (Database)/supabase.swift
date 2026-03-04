@@ -511,9 +511,18 @@ extension SupabaseManager {
     }
     
     func upsertPost(post: Post) async throws {
+
+        var postToSave = post
+
+        postToSave.userId = self.currentUserID
+
+        if postToSave.id == nil {
+            postToSave.id = UUID()
+        }
+        
         try await client
             .from("posts")
-            .upsert(post)
+            .upsert(postToSave)
             .execute()
     }
     

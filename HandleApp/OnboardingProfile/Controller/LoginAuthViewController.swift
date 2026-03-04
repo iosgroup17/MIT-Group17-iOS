@@ -30,10 +30,15 @@ class LoginAuthViewController: UIViewController {
         super.viewDidAppear(animated)
         
         // Replace "WelcomeViewController" with the actual ID of your first screen
-        if let welcomeVC = storyboard?.instantiateViewController(withIdentifier: "WelcomeViewController") {
-            welcomeVC.modalPresentationStyle = .pageSheet // Standard modal look
-            self.present(welcomeVC, animated: true, completion: nil)
-        }
+        let hasSeenWelcome = UserDefaults.standard.bool(forKey: "hasSeenWelcome")
+            if !hasSeenWelcome {
+                if let welcomeVC = storyboard?.instantiateViewController(withIdentifier: "WelcomeViewController") {
+                    welcomeVC.modalPresentationStyle = .pageSheet
+                    self.present(welcomeVC, animated: true) {
+                        UserDefaults.standard.set(true, forKey: "hasSeenWelcome")
+                    }
+                }
+            }
     }
     
     // MARK: - UI Configuration
@@ -98,6 +103,7 @@ class LoginAuthViewController: UIViewController {
                     try await SupabaseManager.shared.client.auth.signInWithIdToken(
                         credentials: .init(provider: .google, idToken: idToken)
                     )
+                    
                     await self?.navigateToHome()
                 } catch {
                     await self?.showAlert(message: "Supabase Error: \(error.localizedDescription)")
@@ -111,14 +117,24 @@ class LoginAuthViewController: UIViewController {
     // MARK: - Navigation Helper
     func navigateToHome() {
         DispatchQueue.main.async {
-            // Replace "MainAppVC" with your actual Home Screen Identifier
-            if let window = self.view.window {
-                let storyboard = UIStoryboard(name: "Profile", bundle: nil)
-                let homeVC = storyboard.instantiateViewController(withIdentifier: "OnboardingParentVC")
-                window.rootViewController = homeVC
-                UIView.transition(with: window, duration: 0.5, options: .transitionFlipFromRight, animations: nil)
+                if let window = self.view.window {
+                    let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+                    
+                    if hasCompletedOnboarding {
+                        // If they are just logging back in, skip onboarding
+                        if let sceneDelegate = window.windowScene?.delegate as? SceneDelegate {
+                            sceneDelegate.showMainApp(window: window)
+                        }
+                    } else {
+                        // If they are new, go to Onboarding
+                        let storyboard = UIStoryboard(name: "Profile", bundle: nil)
+                        let homeVC = storyboard.instantiateViewController(withIdentifier: "OnboardingParentVC")
+                        window.rootViewController = homeVC
+                    }
+                    
+                    UIView.transition(with: window, duration: 0.5, options: .transitionFlipFromRight, animations: nil)
+                }
             }
-        }
     }
     
     func showAlert(message: String) {

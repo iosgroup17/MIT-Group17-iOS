@@ -3,8 +3,8 @@ import UIKit
 import Supabase
 
 struct Post: Codable, Identifiable {
-    let id: UUID?
-    let userId: UUID        // Links to profiles.id
+    var id: UUID?
+    var userId: UUID        // Links to profiles.id
     let topicId: UUID?      // Link to the trend (optional)
     
     // STRICT ENUM (Matches DB)

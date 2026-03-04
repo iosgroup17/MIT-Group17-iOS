@@ -42,4 +42,8 @@ struct UserProfile: Sendable {
     }
 }
 
+extension Notification.Name {
+    static let userProfileDidChange = Notification.Name("userProfileDidChange")
+}
+
 

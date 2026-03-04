@@ -38,11 +38,11 @@ actor OnDevicePostEngine {
                     {
                       "posts": [
                         {
-                          "post_heading": "String (Max 20 chars)",
+                          "post_heading": "String (Max 15 chars) ",
                           "platform_icon": "Enum ('icon-linkedin', 'icon-x', 'icon-instagram')",
-                          "caption": "String (80-100 chars teaser)",
+                          "caption": "String (80-100 characters teaser)",
                           "hashtags": "Array (Exactly 3)",
-                          "prediction_text": "String (Max 40 chars)",
+                          "prediction_text": "String (Max 25 characters)",
                           "post_image": "Array/Null (Insta: ['img_01'-'img_34'], others: null)"
                         }
                       ]
@@ -126,10 +126,10 @@ extension OnDevicePostEngine {
          ### MANDATORY GUIDELINES
          1. Voice: Human, authoritative, experience-led. NO AI-isms (Unleash, Delve, Tapestry, Revolutionize).
          2. Legal (India 2026): No false claims, unverified stats, or medical/financial advice.
-         3. Content: Expand draft to 150-180 words. High "Alpha" with line breaks.
+         3. Content: Expand draft to 80-120 words. High "Alpha" with line breaks. NO Hashtags.
 
          ### UI CONSTRAINTS (Strict)
-         - Caption: 100-120 words. ZERO hashtags. Max 3 emojis.
+         - Caption: 80-120 words. ZERO hashtags. Max 3 emojis.
          - Images: 2-3 IDs from [img_01 to img_34].
          - Hashtags: 4 compound tags (e.g. #TechTips), ≤12 chars each.
          - Times: 2 specific "[Day] at [Time]" optimized for \(platformName).
@@ -139,10 +139,10 @@ extension OnDevicePostEngine {
            "post_heading": "\(post.postHeading)",
            "platformName": "\(platformName)",
            "platformIconName": "\(post.platformIcon)",
-           "caption": "String (100-120 words)",
+           "caption": "String (80-120 words)",
            "images": ["img_XX", "img_XX"],
            "hashtags": "Array (Exactly 4)",
-           "postingTimes": ["Day at Time", "Day at Time"]
+           "postingTimes": ["String (E.g., 'Monday at 9:00 AM') (Day at Time)"]
          }
         """
     
@@ -182,7 +182,7 @@ extension OnDevicePostEngine {
      Mix: 1x LinkedIn, 1x X, 1x Instagram, 1x Wildcard.
 
      ### RULES
-     1. post_heading: Max 25 chars. Must include "\(topic.topicName)".
+     1. post_heading: Max 10 chars. Must include "\(topic.topicName)".
      2. Caption: 80-100 chars teaser. 0 hashtags. Mention \(topic.topicName).
      3. post_image: Insta: ["img_01"-"img_34"]. Others: null.
      4. Tags: Exactly 3 from the TOPIC DATA TAGS above.
@@ -191,12 +191,12 @@ extension OnDevicePostEngine {
      {
        "posts": [
          {
-           "post_heading": "String",
-           "platform_icon": "Enum('icon-linkedin', 'icon-x', 'icon-instagram')",
-           "post_image": ["img_XX"],
-           "caption": "80-100 chars teaser",
-           "hashtags": ["#Tag1", "#Tag2", "#Tag3"],
-           "prediction_text": "1 sentence (Max 100 chars) why this works"
+             "post_heading": "String (Max 15 chars) ",
+             "platform_icon": "Enum ('icon-linkedin', 'icon-x', 'icon-instagram')",
+             "caption": "String (80-100 characters teaser)",
+             "hashtags": "Array (Exactly 3)",
+             "prediction_text": "String (Max 25 characters)",
+             "post_image": "Array/Null (Insta: ['img_01'-'img_34'], others: null)"
          }
        ]
      }

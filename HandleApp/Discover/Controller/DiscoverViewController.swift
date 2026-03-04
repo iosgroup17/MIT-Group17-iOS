@@ -70,8 +70,26 @@ class DiscoverViewController: UIViewController {
         
         
         Task {
+                await loadSupabaseData()
+            }
+          
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(handleProfileChange),
+                name: .userProfileDidChange,
+                object: nil
+            )
+    }
+    
+    @objc func handleProfileChange() {
+        print("Profile changed notification received. Reloading discover data...")
+        Task {
             await loadSupabaseData()
         }
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
 //    func loadSupabaseData() async {
@@ -199,14 +217,14 @@ class DiscoverViewController: UIViewController {
                 
                 let itemSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .absolute(175)
+                    heightDimension: .absolute(160)
                 )
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 
                 
                 let groupSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .absolute(180)
+                    heightDimension: .absolute(165)
                 )
                 
                 // Use .horizontal for horizontal flow ( L - R )

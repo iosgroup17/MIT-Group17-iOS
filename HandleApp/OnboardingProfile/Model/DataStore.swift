@@ -30,7 +30,7 @@ class OnboardingDataStore {
             options: [
                 OnboardingOption(title: "Building a startup or product"),
                 OnboardingOption(title: "Working in a full-time role"),
-                OnboardingOption(title: "Growing a side project or personal brand"),
+                OnboardingOption(title: "Growing a side project"),
                 OnboardingOption(title: "Juggling multiple things")
             ]
         ),

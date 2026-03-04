@@ -67,13 +67,16 @@ class OnboardingViewController: UIViewController {
         Task {
             print("Syncing Step \(currentStepIndex) to Supabase...")
             
-            //test id call
+            // test id call
             await SupabaseManager.shared.savePreference(
                 stepIndex: currentStepIndex,
                 selections: selectedOptions
             )
             
             DispatchQueue.main.async {
+                // NEW: Broadcast that the profile has changed!
+                NotificationCenter.default.post(name: .userProfileDidChange, object: nil)
+                
                 if self.isEditMode {
                     self.onDismiss?()
                     self.dismiss(animated: true, completion: nil)

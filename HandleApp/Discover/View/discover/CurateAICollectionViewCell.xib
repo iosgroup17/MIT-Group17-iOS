@@ -33,19 +33,19 @@
                                         </constraints>
                                     </imageView>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillProportionally" alignment="top" spacing="14" translatesAutoresizingMaskIntoConstraints="NO" id="qz0-9V-59S">
-                                        <rect key="frame" x="82" y="22" width="288" height="122"/>
+                                        <rect key="frame" x="82" y="18" width="288" height="126"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="ZEn-N8-gw0">
-                                                <rect key="frame" x="0.0" y="0.0" width="266.66666666666669" height="76"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="266.66666666666669" height="80"/>
                                                 <subviews>
-                                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Curate With AI Assistant" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" sizingRule="oversize" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I4v-eg-r8k">
-                                                        <rect key="frame" x="0.0" y="0.0" width="230.33333333333334" height="29.666666666666668"/>
+                                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" text="Curate With AI Assistant" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" sizingRule="oversize" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I4v-eg-r8k">
+                                                        <rect key="frame" x="0.0" y="0.0" width="230.33333333333334" height="33.666666666666664"/>
                                                         <fontDescription key="fontDescription" style="UICTFontTextStyleTitle2"/>
                                                         <nil key="textColor"/>
                                                         <nil key="highlightedColor"/>
                                                     </label>
-                                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Tell us what’s on your mind — we’ll turn it into the perfect post." lineBreakMode="wordWrap" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qpb-gI-yBS">
-                                                        <rect key="frame" x="0.0" y="33.666666666666657" width="266.66666666666669" height="42.333333333333343"/>
+                                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tell us what’s on your mind — we’ll turn it into the perfect post." lineBreakMode="wordWrap" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qpb-gI-yBS">
+                                                        <rect key="frame" x="0.0" y="37.666666666666657" width="266.66666666666669" height="42.333333333333343"/>
                                                         <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                         <nil key="highlightedColor"/>
@@ -53,10 +53,11 @@
                                                 </subviews>
                                             </stackView>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zv2-Bs-9b9">
-                                                <rect key="frame" x="0.0" y="90" width="137.66666666666666" height="32"/>
+                                                <rect key="frame" x="0.0" y="94" width="200" height="32"/>
                                                 <color key="backgroundColor" systemColor="systemTealColor"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="32" id="m5z-L4-ViN"/>
+                                                    <constraint firstAttribute="width" constant="200" id="mf3-jg-rrx"/>
                                                 </constraints>
                                                 <color key="tintColor" systemColor="systemTealColor"/>
                                                 <state key="normal" title="Button"/>
@@ -72,7 +73,7 @@
                                 </subviews>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
-                                    <constraint firstItem="qz0-9V-59S" firstAttribute="top" secondItem="eqp-HR-RCl" secondAttribute="top" constant="22" id="Mi9-vv-ZbX"/>
+                                    <constraint firstItem="qz0-9V-59S" firstAttribute="top" secondItem="eqp-HR-RCl" secondAttribute="top" constant="18" id="Mi9-vv-ZbX"/>
                                     <constraint firstAttribute="trailing" secondItem="qz0-9V-59S" secondAttribute="trailing" id="R2K-cj-5s9"/>
                                     <constraint firstItem="T6l-oM-yH3" firstAttribute="leading" secondItem="eqp-HR-RCl" secondAttribute="leading" constant="16" id="YsW-f6-sYO"/>
                                     <constraint firstItem="qz0-9V-59S" firstAttribute="leading" secondItem="T6l-oM-yH3" secondAttribute="trailing" constant="12" id="cde-oO-93i"/>
