@@ -42,11 +42,14 @@ class AnalyticsViewController: UIViewController {
 
     private var currentBestPost: BestPost?
     
+    @IBOutlet var suggestionCards: [UIView]!
+    @IBOutlet var suggestionTitles: [UILabel]!
+    @IBOutlet var suggestionBodies: [UILabel]!
     
     @IBOutlet weak var bestPostDateLabel: UILabel!
     @IBOutlet weak var bestPostCard: UIView!
     
-    
+    private var activeSuggestions: [Suggestion] = []
     
     // Loader
     let activityIndicator = UIActivityIndicatorView(style: .large)
@@ -62,7 +65,8 @@ class AnalyticsViewController: UIViewController {
             // Refresh everything
             setupData()
             setupGraph()
-            fetchBestPost() 
+            setupSuggestions()
+            fetchBestPost()
             
             Task {
                 await SupabaseManager.shared.autoUpdateAnalytics()
@@ -86,6 +90,39 @@ class AnalyticsViewController: UIViewController {
             return
         }
         UIApplication.shared.open(url)
+    }
+    
+    func updateSuggestionsUI() {
+        // Hide all first, then show only what we have
+        suggestionCards.forEach { $0.isHidden = true }
+        
+        for (index, item) in activeSuggestions.enumerated() {
+            guard index < suggestionCards.count else { break }
+            
+            let card = suggestionCards[index]
+            card.isHidden = false
+            card.alpha = 1.0
+            card.tag = index // Store index for the tap action
+            
+            suggestionTitles[index].text = item.title
+            suggestionBodies[index].text = item.body
+            
+            // Minimalist style: light border, no gradients
+            card.layer.borderColor = UIColor.systemGray5.cgColor
+            card.layer.borderWidth = 1.0
+            card.layer.cornerRadius = 12
+        }
+    }
+    
+    func loadSmartSuggestions() {
+        Task {
+            let items = await SupabaseManager.shared.fetchPendingSuggestions()
+            self.activeSuggestions = items
+            
+            DispatchQueue.main.async {
+                self.updateSuggestionsUI()
+            }
+        }
     }
 
     // MARK: - Setup UI
@@ -432,19 +469,62 @@ class AnalyticsViewController: UIViewController {
             return container
         }
     
-    
+    func setupSuggestions() {
+        Task {
+            let items = await SupabaseManager.shared.fetchPendingSuggestions()
+            
+            DispatchQueue.main.async {
+                // If you have 3 @IBOutlets for cards, hide them all first
+                self.suggestionCards.forEach { $0.isHidden = true }
+                
+                for (index, item) in items.enumerated() {
+                    guard index < self.suggestionCards.count else { break }
+                    
+                    let card = self.suggestionCards[index]
+                    card.isHidden = false
+                    card.alpha = 1.0
+                    card.tag = index // Needed for the 'Accept' tap gesture
+                    
+                    // Assuming you have title and body labels linked
+                    self.suggestionTitles[index].text = item.title
+                    self.suggestionBodies[index].text = item.body
+                    
+                    // Minimalist UI: No gradients, just a clean border
+                    card.layer.borderColor = UIColor.systemGray5.cgColor
+                    card.layer.borderWidth = 1.0
+                    card.layer.cornerRadius = 12
+                }
+            }
+        }
+    }
     
     // Suggestions Logic
     @IBAction func didTapDismissSuggestion(_ sender: UIButton) {
         guard let cardView = sender.superview else { return }
-        UIView.animate(withDuration: 0.3) { cardView.isHidden = true; cardView.alpha = 0 }
-        showToast(message: "Suggestion Removed", isSuccess: false)
+        let suggestion = activeSuggestions[cardView.tag]
+        
+        Task {
+            await SupabaseManager.shared.updateSuggestionStatus(id: suggestion.id, status: "declined")
+            DispatchQueue.main.async {
+                UIView.animate(withDuration: 0.3) { cardView.isHidden = true; cardView.alpha = 0 }
+                self.showToast(message: "Suggestion Removed", isSuccess: false)
+            }
+        }
     }
+
     @IBAction func didTapApplySuggestion(_ sender: UITapGestureRecognizer) {
         guard let cardView = sender.view else { return }
-        UIView.animate(withDuration: 0.3) { cardView.isHidden = true; cardView.alpha = 0 }
-        showToast(message: "Applying Suggestion...", isSuccess: true)
+        let suggestion = activeSuggestions[cardView.tag]
+        
+        Task {
+            await SupabaseManager.shared.updateSuggestionStatus(id: suggestion.id, status: "accepted")
+            DispatchQueue.main.async {
+                UIView.animate(withDuration: 0.3) { cardView.isHidden = true; cardView.alpha = 0 }
+                self.showToast(message: "Strategy Applied!", isSuccess: true)
+            }
+        }
     }
+    
     func showToast(message: String, isSuccess: Bool) {
         let toastView = UIView()
         toastView.backgroundColor = isSuccess ? .systemGreen : .systemRed
@@ -468,3 +548,4 @@ class AnalyticsViewController: UIViewController {
         }
     }
 }
+

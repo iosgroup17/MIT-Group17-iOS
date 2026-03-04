@@ -80,7 +80,8 @@ class TopicIdeaViewController: UIViewController {
                         primaryGoals: ["Engagement"],
                         contentFormats: ["Tips"],
                         platforms: ["LinkedIn"],
-                        targetAudience: ["Professionals"]
+                        targetAudience: ["Professionals"],
+                        acceptedRules: []
                     )
                     
                     do {

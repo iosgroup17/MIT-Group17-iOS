@@ -101,11 +101,11 @@ class SupabaseManager {
     }
     
     var currentUserID: UUID {
-        // Priority 1: Real Authenticated User
-//        if let authID = client.auth.currentSession?.user.id {
-//            return authID
-//        }
-        // Priority 2: Fallback for Simulator/Testing
+        // Priority 1: Use the real authenticated session if it exists (Required for scrapers)
+        if let authID = client.auth.currentSession?.user.id {
+            return authID
+        }
+        // Priority 2: Fallback for test data fetching only
         return testUserID
     }
     
@@ -323,22 +323,21 @@ class SupabaseManager {
         }
     }
     
-    
-      
-  
-        func ensureAnonymousSession() async {
-            if client.auth.currentSession != nil {
-                print("User already has a session: \(client.auth.currentSession?.user.id.uuidString ?? "Unknown")")
-                return
-            }
-            
-            do {
-                _ = try await client.auth.signInAnonymously()
-                print("Created new Anonymous User: \(client.auth.currentSession?.user.id.uuidString ?? "Unknown")")
-            } catch {
-                print("Anonymous Auth Failed: \(error)")
-            }
+    func ensureAnonymousSession() async {
+        // If a session exists, we don't create a new one to avoid ID churn
+        if client.auth.currentSession != nil {
+            print("✅ Session active for scrapers: \(client.auth.currentSession?.user.id.uuidString ?? "")")
+            return
         }
+        
+        do {
+            // Required so the 'process-scrape' functions have a valid JWT
+            _ = try await client.auth.signInAnonymously()
+            print("✅ Anonymous session established.")
+        } catch {
+            print("❌ Auth Failed: \(error)")
+        }
+    }
     
     func autoUpdateAnalytics() async {
         guard let userId = client.auth.currentSession?.user.id else { return }
@@ -419,6 +418,7 @@ extension SupabaseManager {
                 contentFormats: answers[4] ?? [],       // Step 4: Formats
                 platforms: answers[5] ?? [],            // Step 5: Platforms (LinkedIn, etc.)
                 targetAudience: answers[6] ?? [],
+                acceptedRules: []
             )
             
         } catch {
@@ -453,7 +453,7 @@ extension SupabaseManager {
 //    func createPost(post: Post) async throws {
 //            // Use the smart 'currentUserID'
 //            let targetID = self.currentUserID
-//            
+//
 //            let postPayload = Post(
 //                id: post.id ?? UUID(),
 //                userId: targetID, // Attach to whichever user is active (Real or Test)
@@ -476,7 +476,7 @@ extension SupabaseManager {
 //                .from("posts")
 //                .insert(postPayload)
 //                .execute()
-//            
+//
 //            print("DEBUG: Post inserted successfully!")
 //        }
 
@@ -519,7 +519,7 @@ extension SupabaseManager {
     
 //    func updateScheduledPost(post: Post) async throws {
 //        guard let id = post.id else { return }
-//        
+//
 //        try await client
 //            .from("posts") // Make sure this matches your DB table name
 //            .update(post)  // Update the row with the new object
@@ -570,5 +570,64 @@ extension SupabaseManager {
         return DiscoverIdeaResponse(
             trendingTopics: populatedTopics
         )
+    }
+}
+
+struct Suggestion: Codable, Identifiable {
+    let id: UUID
+    let title: String
+    let body: String
+    let ai_rule: String
+    let status: String
+}
+
+extension SupabaseManager {
+    // Fetch pending cards for the Analytics UI
+    func fetchPendingSuggestions() async -> [Suggestion] {
+        do {
+            // Query BOTH the real session ID and the hardcoded test ID
+            let results: [Suggestion] = try await client.from("user_suggestions")
+                .select("*")
+                .or("user_id.eq.\(currentUserID.uuidString),user_id.eq.\(testUserID.uuidString)")
+                .eq("status", value: "pending")
+                .order("created_at", ascending: false)
+                .limit(3)
+                .execute()
+                .value
+            
+            print("✅ Fetched \(results.count) suggestions (including Test ID)")
+            return results
+        } catch {
+            print("❌ UI Fetch Error: \(error)")
+            return []
+        }
+    }
+    // Update status (Accept/Decline)
+    func updateSuggestionStatus(id: UUID, status: String) async {
+        do {
+            try await client.from("user_suggestions")
+                .update(["status": status])
+                .eq("id", value: id)
+                .execute()
+        } catch {
+            print("Status Update Error: \(error)")
+        }
+    }
+
+    func fetchTopAcceptedRules() async -> [String] {
+        do {
+            struct RuleRow: Codable { let ai_rule: String }
+            let rows: [RuleRow] = try await client.from("user_suggestions")
+                .select("ai_rule")
+                .eq("status", value: "accepted")
+                .eq("user_id", value: currentUserID)
+                .order("created_at", ascending: false)
+                .limit(5)
+                .execute()
+                .value
+            return rows.map { $0.ai_rule }
+        } catch {
+            return []
+        }
     }
 }

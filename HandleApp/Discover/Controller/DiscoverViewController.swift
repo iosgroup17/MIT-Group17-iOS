@@ -125,6 +125,7 @@ class DiscoverViewController: UIViewController {
                         contentFormats: ["Growth"],
                         platforms: [" engaging"],
                         targetAudience: ["LinkedIn"],
+                        acceptedRules: []
                     )
                 }
 

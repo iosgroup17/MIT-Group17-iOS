@@ -22,7 +22,7 @@
                                 <rect key="frame" x="0.0" y="178" width="402" height="696"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cDN-so-8Bx">
-                                        <rect key="frame" x="0.0" y="0.0" width="402" height="1644.3333333333333"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="402" height="1532.3333333333333"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="Cg3-2Y-Rvh" userLabel="HandleScoreStack">
                                                 <rect key="frame" x="20" y="0.0" width="362" height="239"/>
@@ -544,7 +544,7 @@
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="0mY-yh-JdM" userLabel="SuggestionsStack">
-                                                <rect key="frame" x="20" y="936.33333333333326" width="362" height="324"/>
+                                                <rect key="frame" x="20" y="936.33333333333326" width="362" height="212"/>
                                                 <subviews>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kU7-ED-kUi" userLabel="Suggestion" customClass="AnalyticsCardView" customModule="HandleApp" customModuleProvider="target">
                                                         <rect key="frame" x="0.0" y="0.0" width="362" height="100"/>
@@ -664,66 +664,10 @@
                                                             <outletCollection property="gestureRecognizers" destination="1FQ-MM-e6o" appends="YES" id="AZa-WC-cK6"/>
                                                         </connections>
                                                     </view>
-                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="NrZ-do-NZu" userLabel="Suggestion" customClass="AnalyticsCardView" customModule="HandleApp" customModuleProvider="target">
-                                                        <rect key="frame" x="0.0" y="224" width="362" height="100"/>
-                                                        <subviews>
-                                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2Df-Ez-h0n">
-                                                                <rect key="frame" x="329" y="4" width="25" height="25"/>
-                                                                <color key="backgroundColor" systemColor="systemGray6Color"/>
-                                                                <constraints>
-                                                                    <constraint firstAttribute="height" constant="25" id="gn8-5u-ToZ"/>
-                                                                    <constraint firstAttribute="width" constant="25" id="snX-8D-r1f"/>
-                                                                </constraints>
-                                                                <color key="tintColor" systemColor="systemGray2Color"/>
-                                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                                                <state key="normal" image="xmark.circle" catalog="system"/>
-                                                                <buttonConfiguration key="configuration" style="plain">
-                                                                    <imageReference key="image" image="xmark" catalog="system" symbolScale="small"/>
-                                                                    <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" weight="semibold"/>
-                                                                </buttonConfiguration>
-                                                                <connections>
-                                                                    <action selector="didTapDismissSuggestion:" destination="vSe-a6-cVM" eventType="touchUpInside" id="VH4-lA-03g"/>
-                                                                </connections>
-                                                            </button>
-                                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" translatesAutoresizingMaskIntoConstraints="NO" id="j4f-vX-1A8">
-                                                                <rect key="frame" x="16" y="16" width="316" height="68"/>
-                                                                <subviews>
-                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Boost Visibility by Engaging Early" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fv5-FB-3pj">
-                                                                        <rect key="frame" x="0.0" y="0.0" width="227" height="18"/>
-                                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleSubhead"/>
-                                                                        <nil key="textColor"/>
-                                                                        <nil key="highlightedColor"/>
-                                                                    </label>
-                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7Hv-EC-6re">
-                                                                        <rect key="frame" x="0.0" y="18" width="287.33333333333331" height="50"/>
-                                                                        <string key="text">Tweets with relevant tags see higher engagement. 
-(use #Productivity, #TechTalk)</string>
-                                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
-                                                                        <color key="textColor" systemColor="systemGrayColor"/>
-                                                                        <nil key="highlightedColor"/>
-                                                                    </label>
-                                                                </subviews>
-                                                            </stackView>
-                                                        </subviews>
-                                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                                        <gestureRecognizers/>
-                                                        <constraints>
-                                                            <constraint firstAttribute="height" constant="100" id="OLb-Ll-siB"/>
-                                                            <constraint firstItem="j4f-vX-1A8" firstAttribute="leading" secondItem="NrZ-do-NZu" secondAttribute="leading" constant="16" id="SKX-Ob-FCf"/>
-                                                            <constraint firstAttribute="trailing" secondItem="2Df-Ez-h0n" secondAttribute="trailing" constant="8" id="XBa-2F-KHI"/>
-                                                            <constraint firstAttribute="bottom" secondItem="j4f-vX-1A8" secondAttribute="bottom" constant="16" id="YK5-uq-9Gj"/>
-                                                            <constraint firstItem="2Df-Ez-h0n" firstAttribute="top" secondItem="NrZ-do-NZu" secondAttribute="top" constant="4" id="YcA-OB-qL3"/>
-                                                            <constraint firstItem="j4f-vX-1A8" firstAttribute="top" secondItem="NrZ-do-NZu" secondAttribute="top" constant="16" id="fb0-4A-64S"/>
-                                                            <constraint firstAttribute="trailing" secondItem="j4f-vX-1A8" secondAttribute="trailing" constant="30" id="tiI-GW-lAD"/>
-                                                        </constraints>
-                                                        <connections>
-                                                            <outletCollection property="gestureRecognizers" destination="SXX-0N-eT5" appends="YES" id="9zS-3a-1N7"/>
-                                                        </connections>
-                                                    </view>
                                                 </subviews>
                                             </stackView>
                                             <view contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="9jl-Vh-tq2" customClass="AnalyticsCardView" customModule="HandleApp" customModuleProvider="target">
-                                                <rect key="frame" x="20" y="1284.3333333333333" width="362" height="310"/>
+                                                <rect key="frame" x="20" y="1172.3333333333333" width="362" height="310"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Engagement Trends across Platforms" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jVI-Ma-SAf">
                                                         <rect key="frame" x="16" y="15.999999999999998" width="297.66666666666669" height="20.333333333333329"/>
@@ -821,6 +765,12 @@
                         <outlet property="totalEngagementLabel" destination="HfK-JH-oUZ" id="28y-X7-U3e"/>
                         <outlet property="weeksStreakLabel" destination="uiH-Yd-SVL" id="10C-kf-uXc"/>
                         <outlet property="xPostsLabel" destination="wxA-gr-yWe" id="8XR-D9-dos"/>
+                        <outletCollection property="suggestionCards" destination="kU7-ED-kUi" collectionClass="NSMutableArray" id="sRm-2C-QFG"/>
+                        <outletCollection property="suggestionCards" destination="uR7-nt-4yW" collectionClass="NSMutableArray" id="wEK-9c-mAe"/>
+                        <outletCollection property="suggestionTitles" destination="bUg-1c-Txf" collectionClass="NSMutableArray" id="ffh-7W-Htm"/>
+                        <outletCollection property="suggestionTitles" destination="xZq-9R-E4U" collectionClass="NSMutableArray" id="OEl-qU-451"/>
+                        <outletCollection property="suggestionBodies" destination="vy4-g6-ai5" collectionClass="NSMutableArray" id="2wV-wX-UEp"/>
+                        <outletCollection property="suggestionBodies" destination="2x9-CE-ggB" collectionClass="NSMutableArray" id="hKO-kS-ClN"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="pOU-vU-82A" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -1098,10 +1048,9 @@
         <image name="icon-best post" width="24" height="27"/>
         <image name="icon-instagram" width="32" height="32"/>
         <image name="icon-linkedin" width="35" height="30"/>
-        <image name="icon-x" width="2400" height="2453"/>
+        <image name="icon-x" width="28" height="28"/>
         <image name="medal.star" catalog="system" width="92" height="128"/>
         <image name="xmark" catalog="system" width="128" height="113"/>
-        <image name="xmark.circle" catalog="system" width="128" height="123"/>
         <namedColor name="Color">
             <color red="0.0" green="0.76470588235294112" blue="0.81568627450980391" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
@@ -1109,25 +1058,25 @@
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="secondaryLabelColor">
-            <color red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemGray2Color">
-            <color red="0.68235294120000001" green="0.68235294120000001" blue="0.69803921570000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.68235294117647061" green="0.68235294117647061" blue="0.69803921568627447" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemGray6Color">
-            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemGrayColor">
-            <color red="0.5568627451" green="0.5568627451" blue="0.57647058819999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.55686274509803924" green="0.55686274509803924" blue="0.57647058823529407" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemGreenColor">
-            <color red="0.20392156859999999" green="0.78039215689999997" blue="0.34901960780000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20392156862745098" green="0.7803921568627451" blue="0.34901960784313724" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemTealColor">
-            <color red="0.18823529410000001" green="0.69019607839999997" blue="0.78039215689999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.76470588235294112" blue="0.81568627450980391" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

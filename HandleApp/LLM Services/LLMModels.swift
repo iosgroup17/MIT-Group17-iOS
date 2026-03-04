@@ -22,8 +22,11 @@ struct UserProfile: Sendable {
     let platforms: [String]
     
     let targetAudience: [String]
+    
+    let acceptedRules: [String]
 
     var promptContext: String {
+        let ruleString = acceptedRules.joined(separator: "; ")
 //        return """
 //        USER PROFILE CONTEXT:
 //                - Professional Role: \(professionalIdentity.first ?? "Professional")
@@ -35,7 +38,7 @@ struct UserProfile: Sendable {
 //                - Target Audience: \(targetAudience.joined(separator: ", "))
 //        """
         
-        return "ROLE:\(professionalIdentity.joined(separator: ",")) | FOCUS:\(currentFocus.joined(separator: ",")) | IND:\(industry.joined(separator: ",")) | GOAL:\(primaryGoals.joined(separator: ",")) | FMT:\(contentFormats.joined(separator: ",")) | PLT:\(platforms.joined(separator: ",")) | AUD:\(targetAudience.joined(separator: ","))"
+        return "ROLE:\(professionalIdentity.joined(separator: ",")) | FOCUS:\(currentFocus.joined(separator: ",")) | IND:\(industry.joined(separator: ",")) | GOAL:\(primaryGoals.joined(separator: ",")) | FMT:\(contentFormats.joined(separator: ",")) | PLT:\(platforms.joined(separator: ",")) | AUD:\(targetAudience.joined(separator: ",")) | RULES:\(ruleString.isEmpty ? "Standard" : ruleString)"
     }
 }
 
