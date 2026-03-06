@@ -614,7 +614,7 @@ struct Suggestion: Codable{
     let title: String
     let body: String
     let ai_rule: String
-    let status: String
+    var status: String
 }
 
 extension SupabaseManager {

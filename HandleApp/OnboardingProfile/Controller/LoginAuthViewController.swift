@@ -127,36 +127,46 @@ class LoginAuthViewController: UIViewController {
     
     
     
-    // MARK: - Navigation Helper
-    func navigateToHome() {
-        Task {
-            let remoteData = await SupabaseManager.shared.fetchUserOnboardingData()
-            
-            OnboardingDataStore.shared.syncWithRemoteData(remoteData)
-            
-            if !remoteData.isEmpty {
-                UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
-            }
 
-            DispatchQueue.main.async {
-                if let window = self.view.window {
-                    let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
-                    
-                    if hasCompletedOnboarding {
-                        if let sceneDelegate = window.windowScene?.delegate as? SceneDelegate {
+    // MARK: - Navigation Helper
+        func navigateToHome() {
+            Task {
+                // 1. Fetch remote data & sync
+                let remoteData = await SupabaseManager.shared.fetchUserOnboardingData()
+                OnboardingDataStore.shared.syncWithRemoteData(remoteData)
+                
+                // 2. Get the current user ID safely
+                guard let userId = SupabaseManager.shared.client.auth.currentUser?.id.uuidString else {
+                    await self.showAlert(message: "Auth Error: Could not get user ID.")
+                    return
+                }
+                
+                let userKey = "hasCompletedOnboarding_\(userId)"
+                
+                // 3. Set local flag if they already have remote data
+                if !remoteData.isEmpty {
+                    UserDefaults.standard.set(true, forKey: userKey)
+                }
+
+                // 4. Route on the main thread
+                DispatchQueue.main.async {
+                    if let window = self.view.window,
+                       let sceneDelegate = window.windowScene?.delegate as? SceneDelegate {
+                        
+                        let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: userKey)
+                        
+                        // Route using the Scene Delegate methods for consistency
+                        if hasCompletedOnboarding {
                             sceneDelegate.showMainApp(window: window)
+                        } else {
+                            sceneDelegate.showOnboardingQuiz(window: window)
                         }
-                    } else {
-                        let storyboard = UIStoryboard(name: "Profile", bundle: nil)
-                        let homeVC = storyboard.instantiateViewController(withIdentifier: "OnboardingParentVC")
-                        window.rootViewController = homeVC
+                        
+                        UIView.transition(with: window, duration: 0.5, options: .transitionFlipFromRight, animations: nil)
                     }
-                    
-                    UIView.transition(with: window, duration: 0.5, options: .transitionFlipFromRight, animations: nil)
                 }
             }
         }
-    }
     
     func showAlert(message: String) {
         let alert = UIAlertController(title: "Alert", message: message, preferredStyle: .alert)

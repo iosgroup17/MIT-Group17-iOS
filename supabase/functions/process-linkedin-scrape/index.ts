@@ -19,11 +19,25 @@ serve(async (req) => {
     await supabase.from('best_posts').delete().eq('user_id', user_id).eq('platform', 'linkedin');
 
     const cleanHandle = handle.replace('@', '').split('/').filter(Boolean).pop()
-    const postsResp = await fetch(`https://fresh-linkedin-scraper-api.p.rapidapi.com/api/v1/user/posts?username=${cleanHandle}`, {
+    
+    // 🛑 STEP 1: Get User Profile to extract the URN
+    const profileResp = await fetch(`https://fresh-linkedin-scraper-api.p.rapidapi.com/api/v1/user/profile?username=${cleanHandle}`, {
       headers: { 'x-rapidapi-key': RAPID_KEY!, 'x-rapidapi-host': 'fresh-linkedin-scraper-api.p.rapidapi.com' }
     })
-    const result = await postsResp.json()
-    const posts = result.data || []
+    const profileResult = await profileResp.json()
+    
+    if (!profileResult.success || !profileResult.data?.urn) {
+        throw new Error("Could not find LinkedIn profile URN")
+    }
+    
+    const userUrn = profileResult.data.urn;
+
+    // 🛑 STEP 2: Use the URN to fetch the posts
+    const postsResp = await fetch(`https://fresh-linkedin-scraper-api.p.rapidapi.com/api/v1/user/posts?urn=${userUrn}&page=1`, {
+      headers: { 'x-rapidapi-key': RAPID_KEY!, 'x-rapidapi-host': 'fresh-linkedin-scraper-api.p.rapidapi.com' }
+    })
+    const postsResult = await postsResp.json()
+    const posts = postsResult.data || []
 
     const now = new Date()
     const startOfWeek = new Date(now)
@@ -38,7 +52,8 @@ serve(async (req) => {
     let maxPowerScore = -1
 
     posts.forEach((p: any) => {
-        if (p.is_repost || p.reshared || p.text?.includes("RT @") || p.author?.id !== result.data?.id) return;
+        // 🛑 ORIGINALITY FILTER: If the post's author URN doesn't match the user's URN, it's a repost!
+        if (p.author?.urn !== userUrn) return;
 
         const act = p.activity || {}
         const likes = Number(act.num_likes || 0)
@@ -46,15 +61,13 @@ serve(async (req) => {
         const shares = Number(act.num_shares || 0)
         const eng = likes + comments
         
-        let postDate = p.created_at ? new Date(p.created_at) : null
-        if (!postDate && p.postedAtTimestamp) {
-             const ts = p.postedAtTimestamp > 10000000000 ? p.postedAtTimestamp : p.postedAtTimestamp * 1000
-             postDate = new Date(ts)
-        }
+        if (!p.created_at) return;
+        const postDate = new Date(p.created_at) // Parses "2026-02-06T19:59:44.972Z" perfectly
 
-        if (postDate && postDate >= startOfWeek) {
+        if (postDate >= startOfWeek) {
             postsThisWeek++
             totalRawEngagement += eng
+            
             const powerScore = likes + (comments * 2) + (shares * 3)
             if (powerScore > maxPowerScore) {
                 maxPowerScore = powerScore
@@ -62,11 +75,11 @@ serve(async (req) => {
                     text: p.text || "No Text", 
                     likes, comments, shares, 
                     date: postDate.toISOString().split('T')[0],
-                    url: p.url || p.post_url 
+                    url: p.url 
                 }
             }
+            
             const dateKey = postDate.toISOString().split('T')[0]
-            // 🛑 NEW HABIT TRACKER LOGIC
             dailyMap[dateKey] = (dailyMap[dateKey] || 0) + 1
         }
     })

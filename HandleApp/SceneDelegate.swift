@@ -14,25 +14,56 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        guard let windowScene = (scene as? UIWindowScene) else { return }
+            guard let windowScene = (scene as? UIWindowScene) else { return }
             let window = UIWindow(windowScene: windowScene)
             self.window = window
 
             // 1. Check if Supabase has a logged-in user
-            let currentUser = SupabaseManager.shared.client.auth.currentUser
-            // 2. Check your local flag
-            let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+            if let currentUser = SupabaseManager.shared.client.auth.currentUser {
+                
+                // 2. Check the local flag for THIS specific user ID
+                let userId = currentUser.id.uuidString
+                let userKey = "hasCompletedOnboarding_\(userId)"
+                let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: userKey)
 
-            if currentUser != nil && hasCompletedOnboarding {
-                // User is logged in AND finished onboarding -> Go to Main
-                showMainApp(window: window)
+                if hasCompletedOnboarding {
+                    // Logged in AND this specific ID finished onboarding
+                    showMainApp(window: window)
+                } else {
+                    // Logged in but new account (or hasn't finished onboarding)
+                    showOnboardingQuiz(window: window)
+                }
             } else {
-                // Either not logged in OR hasn't finished onboarding -> Go to Login
-                showOnboarding(window: window)
+                // No user logged in at all
+                showLogin(window: window)
             }
 
             window.makeKeyAndVisible()
-    }
+        }
+        
+        // MARK: - Routing Methods
+
+        func showLogin(window: UIWindow) {
+            let storyboard = UIStoryboard(name: "Profile", bundle: nil)
+            let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginAuthVC")
+            window.rootViewController = loginVC
+        }
+
+        func showOnboardingQuiz(window: UIWindow) {
+            let storyboard = UIStoryboard(name: "Profile", bundle: nil)
+            // Make sure this matches the Storyboard ID of your Onboarding Parent/Controller
+            let onboardingVC = storyboard.instantiateViewController(withIdentifier: "OnboardingParentVC")
+            window.rootViewController = onboardingVC
+        }
+
+        
+
+        // Call this from wherever your logout button is
+        func handleLogout() {
+            guard let window = self.window else { return }
+            showLogin(window: window)
+            UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: nil, completion: nil)
+        }
     
     func showOnboarding(window: UIWindow) {
         let storyboard = UIStoryboard(name: "Profile", bundle: nil) // Check your file name!
@@ -50,7 +81,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
      
         window.rootViewController = tabBarVC
     }
-
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.
         // This occurs shortly after the scene enters the background, or when its session is discarded.

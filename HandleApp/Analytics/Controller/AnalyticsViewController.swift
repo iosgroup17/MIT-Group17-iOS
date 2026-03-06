@@ -1,6 +1,5 @@
 import UIKit
 import Supabase
-import PostgREST
 import SwiftUI // Required for the Graph
 
 // MARK: - Animation Helper
@@ -35,514 +34,547 @@ class AnalyticsViewController: UIViewController {
     @IBOutlet weak var graphContainerView: UIView!
     
     // Best Post Card Outlets
+    @IBOutlet weak var bestPostCard: UIView!
     @IBOutlet weak var bestPostPlatformImage: UIImageView!
     @IBOutlet weak var bestPostTextLabel: UILabel!
-    @IBOutlet weak var bestPostMetricsStack: UIStackView! //dynamic metrics
-    private var currentBestPostURL: String?  // Stores Supabase URL
-
-    private var currentBestPost: BestPost?
-    
-    @IBOutlet var suggestionCards: [UIView]!
-    @IBOutlet var suggestionTitles: [UILabel]!
-    @IBOutlet var suggestionBodies: [UILabel]!
-    
+    @IBOutlet weak var bestPostMetricsStack: UIStackView!
     @IBOutlet weak var bestPostDateLabel: UILabel!
-    @IBOutlet weak var bestPostCard: UIView!
     
-    private var activeSuggestions: [Suggestion] = []
+    // Suggestions
+    @IBOutlet weak var suggestionStack: UIStackView!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    // Info Button
+    @IBOutlet weak var infoButton: UIButton!
+    // MARK: - Variables
+    private var connectedPlatforms: Set<String> = []
+    private var currentBestPostURL: String?
     
-    // Loader
-    let activityIndicator = UIActivityIndicatorView(style: .large)
+    // Uses your struct defined in supabase.swift
+    var activeSuggestions: [Suggestion] = []
 
     // MARK: - Lifecycle
-    override func viewWillAppear(_ animated: Bool) {
+    // MARK: - Lifecycle
+        override func viewDidLoad() {
+            super.viewDidLoad()
+            self.navigationItem.hidesBackButton = true
+            
+            // 1. RESTORE HEADING & NAVIGATION BAR
+            self.title = "Analytics"
+            self.navigationController?.setNavigationBarHidden(false, animated: true)
+            
+            // 2. RESTORE LINK BAR BUTTON ITEM
+            let linkIcon = UIImage(systemName: "link")
+            let linkButton = UIBarButtonItem(image: linkIcon, style: .plain, target: self, action: #selector(openLinkPlatforms))
+            self.navigationItem.rightBarButtonItem = linkButton
+            
+            let tap = UITapGestureRecognizer(target: self, action: #selector(openBestPostURL))
+            bestPostCard?.addGestureRecognizer(tap)
+            bestPostCard?.isUserInteractionEnabled = true
+        }
+        
+        override func viewWillAppear(_ animated: Bool) {
             super.viewWillAppear(animated)
-            navigationController?.setNavigationBarHidden(false, animated: true)
             
-            setupDesign()
-            setupLinkButton()
+            // Ensure nav bar stays visible when returning from AuthVC
+            self.navigationController?.setNavigationBarHidden(false, animated: true)
             
-            // Refresh everything
             setupData()
-            setupGraph()
-            setupSuggestions()
-            fetchBestPost()
             
             Task {
-                await SupabaseManager.shared.autoUpdateAnalytics()
-            }
-        }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        self.navigationItem.hidesBackButton = true
-        // Setup Tap Gesture for the Best Post Card
-        let tap = UITapGestureRecognizer(target: self, action: #selector(openBestPostURL))
-        bestPostCard.addGestureRecognizer(tap)
-        bestPostCard.isUserInteractionEnabled = true
-    }
-    
-//    Best post on tap
-    @objc func openBestPostURL() {
-        // check saved object
-        guard let urlStr = currentBestPost?.post_url, let url = URL(string: urlStr) else {
-            showToast(message: "Post link unavailable", isSuccess: false)
-            return
-        }
-        UIApplication.shared.open(url)
-    }
-    
-    func updateSuggestionsUI() {
-        // Hide all first, then show only what we have
-        suggestionCards.forEach { $0.isHidden = true }
-        
-        for (index, item) in activeSuggestions.enumerated() {
-            guard index < suggestionCards.count else { break }
-            
-            let card = suggestionCards[index]
-            card.isHidden = false
-            card.alpha = 1.0
-            card.tag = index // Store index for the tap action
-            
-            suggestionTitles[index].text = item.title
-            suggestionBodies[index].text = item.body
-            
-            // Minimalist style: light border, no gradients
-            card.layer.borderColor = UIColor.systemGray5.cgColor
-            card.layer.borderWidth = 1.0
-            card.layer.cornerRadius = 12
-        }
-    }
-    
-    func loadSmartSuggestions() {
-        Task {
-            let items = await SupabaseManager.shared.fetchPendingSuggestions()
-            self.activeSuggestions = items
-            
-            DispatchQueue.main.async {
-                self.updateSuggestionsUI()
-            }
-        }
-    }
-
-    // MARK: - Setup UI
-    func setupDesign() {
-        if activityIndicator.superview == nil {
-            activityIndicator.center = view.center
-            activityIndicator.hidesWhenStopped = true
-            view.addSubview(activityIndicator)
-        }
-        self.view.tintColor = UIColor.systemTeal
-    }
-    
-    func setupLinkButton() {
-        Task {
-            let connected = await SupabaseManager.shared.fetchConnectedPlatforms()
-            DispatchQueue.main.async {
-                let linkButton = UIBarButtonItem(
-                    image: UIImage(systemName: "link"),
-                    style: .plain,
-                    target: self,
-                    action: #selector(self.didTapLinkButton)
-                )
-                // Greyed out if all connected, but keep tappable to disconnect
-                linkButton.tintColor = (connected.count >= 3) ? .systemGray : self.view.tintColor
-                self.navigationItem.rightBarButtonItem = linkButton
-            }
-        }
-    }
-    
-    // MARK: - Data Fetching
-    func setupData() {
-        guard let userId = SupabaseManager.shared.client.auth.currentSession?.user.id else { return }
-        
-        if handleScoreLabel.text == "---" { activityIndicator.startAnimating() }
-
-        Task {
-            // 1. Fetch Analytics Data
-            async let analyticsTask: UserAnalytics = SupabaseManager.shared.client
-                .from("user_analytics").select().eq("user_id", value: userId).single().execute().value
-            
-            // 2. Fetch Active Connections (To avoid stale data)
-            async let connectionsTask: [SocialConnection] = SupabaseManager.shared.client
-                .from("social_connections").select().eq("user_id", value: userId).execute().value
-            
-            do {
-                let (analytics, connections) = try await (analyticsTask, connectionsTask)
-                let connectedPlatforms = Set(connections.map { $0.platform })
-                
                 DispatchQueue.main.async {
-                    self.activityIndicator.stopAnimating()
-                    // Pass BOTH to the update function
-                    self.updateLabels(with: analytics, connected: connectedPlatforms)
+                    self.setupGraph()
+                    self.fetchBestPost()
                 }
-            } catch {
-                print("Error loading analytics: \(error)")
-                DispatchQueue.main.async { self.activityIndicator.stopAnimating() }
             }
         }
-    }
-    
-    // MARK: - Smart Graph Setup
-    func setupGraph() {
-        guard let container = self.graphContainerView else { return }
 
-        Task {
-            let metrics = await SupabaseManager.shared.fetchDailyAnalytics()
+    // MARK: - Data Fetching
+        func setupData() {
+            guard let userId = SupabaseManager.shared.client.auth.currentSession?.user.id else { return }
             
-            DispatchQueue.main.async {
-                // 1. Clear previous attempts
-                container.subviews.forEach { $0.removeFromSuperview() }
-                self.children.forEach { if $0 is UIHostingController<EngagementChartView> { $0.removeFromParent() } }
-                
-                if metrics.isEmpty { return }
-                
-                // 2. Setup Hosting Controller
-                let chartView = EngagementChartView(metrics: metrics)
-                let hostingController = UIHostingController(rootView: chartView)
-                
-                self.addChild(hostingController)
-                hostingController.view.translatesAutoresizingMaskIntoConstraints = false // 🛑 CRITICAL
-                hostingController.view.backgroundColor = .clear
-                
-                container.addSubview(hostingController.view)
-                
-                // force constraints to avoid overflow
-                NSLayoutConstraint.activate([
-                    hostingController.view.topAnchor.constraint(equalTo: container.topAnchor),
-                    hostingController.view.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-                    hostingController.view.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-                    hostingController.view.bottomAnchor.constraint(equalTo: container.bottomAnchor)
-                ])
-                
-                hostingController.didMove(toParent: self)
-                container.layoutIfNeeded()
+            if handleScoreLabel?.text == "---" { self.activityIndicator?.startAnimating() }
+            
+            // 🛑 NEW: Completely clear the Best Post UI to a default loading state
+            self.bestPostTextLabel?.text = "Loading content..."
+            self.bestPostDateLabel?.text = "--"
+            self.bestPostPlatformImage?.image = UIImage(named: "placeholder") ?? UIImage(systemName: "photo")
+            self.bestPostPlatformImage?.tintColor = .systemGray4
+            self.bestPostMetricsStack?.arrangedSubviews.forEach { $0.removeFromSuperview() }
+            
+            Task {
+                do {
+                    async let analyticsArrayTask: [UserAnalytics] = SupabaseManager.shared.client
+                        .from("user_analytics").select().eq("user_id", value: userId).execute().value
+                    
+                    async let connectionsTask: [SocialConnection] = SupabaseManager.shared.client
+                        .from("social_connections").select().eq("user_id", value: userId).execute().value
+                    
+                    let (analyticsArray, connections) = try await (analyticsArrayTask, connectionsTask)
+                    
+                    let analytics = analyticsArray.first ?? UserAnalytics(handle_score: nil, consistency_weeks: 0, last_updated: nil, insta_score: nil, insta_post_count: nil, insta_engagement: nil, insta_avg_engagement: nil, linkedin_score: nil, linkedin_post_count: nil, linkedin_engagement: nil, linkedin_avg_engagement: nil, x_score: nil, x_post_count: nil, x_engagement: nil, x_avg_engagement: nil, previous_handle_score: nil)
+                    
+                    let connectedSet = Set(connections.map { $0.platform })
+                    
+                    DispatchQueue.main.async {
+                        self.activityIndicator?.stopAnimating()
+                        self.updateLabels(with: analytics, connected: connectedSet)
+                        self.setupGraph()
+                        self.fetchBestPost()
+                        self.updateSuggestionsUI()
+                    }
+                } catch {
+                    print("Error loading analytics: \(error)")
+                    DispatchQueue.main.async { self.activityIndicator?.stopAnimating() }
+                }
             }
         }
-    }
+    
+    
+    
 
-    // MARK: - UI Updates
+    // MARK: - UI Updaters
     func updateLabels(with data: UserAnalytics, connected: Set<String>) {
+        self.connectedPlatforms = connected
+        
         var totalScore = 0
         var platformCount = 0
-        var totalInteractions = 0
         
-        var maxEng = -1
-        var topPlatformName = "-"
-        var topPlatformIcon = UIImage(systemName: "questionmark.circle")
-        
-        var totalAvg = 0
-        var avgCount = 0
-        
-        // Only count if connected! ---
-        
-        // Instagram
-        if connected.contains("instagram") {
-            if let iScore = data.insta_score { totalScore += iScore; platformCount += 1 }
-            let eng = data.insta_engagement ?? 0
-            totalInteractions += eng
-            
-            if eng > maxEng { maxEng = eng; topPlatformName = "Instagram"; topPlatformIcon = UIImage(named: "icon-instagram") }
-            if let iAvg = data.insta_avg_engagement, iAvg > 0 { totalAvg += iAvg; avgCount += 1 }
-            
+        if connected.contains("instagram"), let s = data.insta_score {
+            totalScore += s; platformCount += 1
             instaPostsLabel.text = "\(data.insta_post_count ?? 0)"
         } else {
-            // Clear stale data if disconnected
-            instaPostsLabel.text = "-"
+            instaPostsLabel.text = "--"
         }
         
-        // LinkedIn
-        if connected.contains("linkedin") {
-            if let lScore = data.linkedin_score { totalScore += lScore; platformCount += 1 }
-            let eng = data.linkedin_engagement ?? 0
-            totalInteractions += eng
-            
-            if eng > maxEng { maxEng = eng; topPlatformName = "LinkedIn"; topPlatformIcon = UIImage(named: "icon-linkedin") }
-            if let lAvg = data.linkedin_avg_engagement, lAvg > 0 { totalAvg += lAvg; avgCount += 1 }
-            
-            linkedinPostsLabel.text = "\(data.linkedin_post_count ?? 0)"
-        } else {
-            linkedinPostsLabel.text = "-"
-        }
-        
-        // Twitter
-        if connected.contains("twitter") {
-            if let xScore = data.x_score { totalScore += xScore; platformCount += 1 }
-            let eng = data.x_engagement ?? 0
-            totalInteractions += eng
-            
-            if eng > maxEng { maxEng = eng; topPlatformName = "X (Twitter)"; topPlatformIcon = UIImage(named: "icon-x") }
-            if let xAvg = data.x_avg_engagement, xAvg > 0 { totalAvg += xAvg; avgCount += 1 }
-            
+        if connected.contains("twitter"), let s = data.x_score {
+            totalScore += s; platformCount += 1
             xPostsLabel.text = "\(data.x_post_count ?? 0)"
         } else {
-            xPostsLabel.text = "-"
+            xPostsLabel.text = "--"
         }
         
-        // Handle Score
-        let finalScore = platformCount > 0 ? (totalScore / platformCount) : 0
-        animateScore(to: finalScore)
-        
-        // Change arrow logic
-        let prevScore = data.previous_handle_score ?? 0
-        let diff = finalScore - prevScore
-        
-        if diff > 0 {
-            scoreDifferenceLabel.text = "\(diff)"
-            scoreDifferenceLabel.textColor = .systemGreen
-            scoreArrowImage.image = UIImage(systemName: "arrow.up")
-            scoreArrowImage.tintColor = .systemGreen
-        } else if diff < 0 {
-            scoreDifferenceLabel.text = "\(abs(diff))"
-            scoreDifferenceLabel.textColor = .systemRed
-            scoreArrowImage.image = UIImage(systemName: "arrow.down")
-            scoreArrowImage.tintColor = .systemRed
+        if connected.contains("linkedin"), let s = data.linkedin_score {
+            totalScore += s; platformCount += 1
+            linkedinPostsLabel.text = "\(data.linkedin_post_count ?? 0)"
         } else {
-            scoreDifferenceLabel.text = "-"
-            scoreDifferenceLabel.textColor = .systemGray
-            scoreArrowImage.image = UIImage(systemName: "minus")
-            scoreArrowImage.tintColor = .systemGray
+            linkedinPostsLabel.text = "--"
         }
         
-        // stat cards
-
-        
-        if let label = totalEngagementLabel { label.text = formatNumber(totalInteractions) }
-        if let label = topPlatformLabel { label.text = topPlatformName }
-        if let img = topPlatformImageView { img.image = topPlatformIcon }
-        
-        let finalAvg = avgCount > 0 ? (totalAvg / avgCount) : 0
-        if let label = avgImpactLabel { label.text = formatNumber(finalAvg) }
-        
-        // streak cards
+        let finalScore = platformCount > 0 ? (totalScore / platformCount) : 0
+        handleScoreLabel.text = platformCount > 0 ? "\(finalScore)" : "---"
         weeksStreakLabel.text = "\(data.consistency_weeks)"
-    }
-    
-    func formatNumber(_ n: Int) -> String {
-        if n >= 1000 { return String(format: "%.1fk", Double(n)/1000.0) }
-        return "\(n)"
-    }
-    
-    // MARK: - Actions & Animations
-    @objc func didTapLinkButton() {
-        let storyboard = UIStoryboard(name: "Analytics", bundle: nil)
-        if let authVC = storyboard.instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController {
-            authVC.isManageMode = true
-            authVC.modalPresentationStyle = .pageSheet
-            if let sheet = authVC.sheetPresentationController { sheet.detents = [.large()] }
-            self.present(authVC, animated: true, completion: nil)
+        
+        let prev = data.previous_handle_score ?? 0
+        let diff = finalScore - prev
+        scoreDifferenceLabel.text = "\(abs(diff))"
+        scoreDifferenceLabel.textColor = diff >= 0 ? .systemGreen : .systemRed
+        scoreArrowImage.image = UIImage(systemName: diff >= 0 ? "arrow.up.right" : "arrow.down.right")
+        scoreArrowImage.tintColor = diff >= 0 ? .systemGreen : .systemRed
+        
+        let totalEng = (connected.contains("instagram") ? (data.insta_engagement ?? 0) : 0) +
+                       (connected.contains("twitter") ? (data.x_engagement ?? 0) : 0) +
+                       (connected.contains("linkedin") ? (data.linkedin_engagement ?? 0) : 0)
+        
+        totalEngagementLabel.text = formatEngagement(totalEng)
+        
+        let scores = [
+            ("instagram", data.insta_score ?? 0),
+            ("twitter", data.x_score ?? 0),
+            ("linkedin", data.linkedin_score ?? 0)
+        ].filter { connected.contains($0.0) }.sorted { $0.1 > $1.1 }
+        
+        if let top = scores.first {
+            topPlatformLabel.text = top.0.capitalized
+            topPlatformImageView.image = UIImage(named: "icon-\(top.0)")
+        } else {
+            topPlatformLabel.text = "None"
+            topPlatformImageView.image = nil
         }
+        
+        let totalAvg = (connected.contains("instagram") ? (data.insta_avg_engagement ?? 0) : 0) +
+                       (connected.contains("twitter") ? (data.x_avg_engagement ?? 0) : 0) +
+                       (connected.contains("linkedin") ? (data.linkedin_avg_engagement ?? 0) : 0)
+        let finalAvg = platformCount > 0 ? totalAvg / platformCount : 0
+        avgImpactLabel.text = formatEngagement(finalAvg)
     }
-    
-    @IBAction func didTapHandleScoreInfo(_ sender: Any) {
-        let alert = UIAlertController(title: "Handle Score", message: "Your score is a weighted engagement metric:\n\nScore = ((Likes + 2×Comments + 3×Reposts) / Impressions) × 100", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Got it", style: .default))
-        self.present(alert, animated: true)
-    }
-    
-    func animateScore(to score: Int) {
-        let duration: Double = 1.5
-        let startValue = 0
-        let endValue = score
-        let steps = 50
-        let stepDuration = duration / Double(steps)
-        var currentStep = 0
-        Timer.scheduledTimer(withTimeInterval: stepDuration, repeats: true) { timer in
-            currentStep += 1
-            let value = Int(Double(startValue) + (Double(endValue - startValue) * (Double(currentStep) / Double(steps))))
-            self.handleScoreLabel.text = "\(value)"
-            if currentStep >= steps {
-                timer.invalidate()
-                self.handleScoreLabel.text = "\(endValue)"
-            }
-        }
-    }
-    
-    
-    func fetchBestPost() {
+
+    // MARK: - Graph Rendering
+    func setupGraph() {
         guard let userId = SupabaseManager.shared.client.auth.currentSession?.user.id else { return }
         
         Task {
             do {
-                let post: BestPost = try await SupabaseManager.shared.client
-                    .from("best_posts")
-                    .select()
-                    .eq("user_id", value: userId)
-                    .single()
-                    .execute()
-                    .value
+                let rows: [DailyAnalyticsRow] = try await SupabaseManager.shared.client
+                    .from("daily_analytics").select().eq("user_id", value: userId).execute().value
                 
-                // save full object
-                self.currentBestPost = post
+                let metrics = rows.map { row in
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "yyyy-MM-dd"
+                    let date = formatter.date(from: row.date) ?? Date()
+                    return DailyMetric(date: date, engagement: row.engagement, platform: row.platform)
+                }
                 
                 DispatchQueue.main.async {
-                    self.updateBestPostUI(with: post)
+                    let chartView = EngagementChartView(metrics: metrics, connectedPlatforms: self.connectedPlatforms)
+                    let hostingController = UIHostingController(rootView: chartView)
+                    
+                    self.addChild(hostingController)
+                    hostingController.view.frame = self.graphContainerView.bounds
+                    hostingController.view.backgroundColor = .clear
+                    
+                    self.graphContainerView.subviews.forEach { $0.removeFromSuperview() }
+                    self.graphContainerView.addSubview(hostingController.view)
+                    hostingController.didMove(toParent: self)
                 }
             } catch {
-                print("No best post found.")
+                print("Graph Error: \(error)")
             }
         }
     }
-    // MARK: - Best Post UI Logic
-        
-    func updateBestPostUI(with post: BestPost) {
-            // 1. Icon & Text
-            bestPostPlatformImage.image = UIImage(named: "icon-\(post.platform.lowercased())")
-            bestPostTextLabel.text = post.post_text ?? "View this week's highlight..."
+
+    // MARK: - Best Post Logic
+        func fetchBestPost() {
+            guard let userId = SupabaseManager.shared.client.auth.currentSession?.user.id else { return }
+            Task {
+                do {
+                    let posts: [BestPost] = try await SupabaseManager.shared.client
+                        .from("best_posts").select().eq("user_id", value: userId).execute().value
+                    
+                    DispatchQueue.main.async {
+                        if let post = posts.first {
+                            self.currentBestPostURL = post.post_url
+                            self.updateBestPostUI(with: post)
+                        } else {
+                            // 🛑 NEW: EMPTY STATE (No posts or no platform connected)
+                            self.bestPostTextLabel?.text = "No top post found for this week."
+                            self.bestPostDateLabel?.text = "--"
+                            
+                            // Looks for an image named "placeholder" in your Assets.xcassets
+                            // Falls back to a system photo icon if "placeholder" isn't found
+                            self.bestPostPlatformImage?.image = UIImage(named: "placeholder") ?? UIImage(systemName: "photo")
+                            self.bestPostPlatformImage?.tintColor = .systemGray4
+                        }
+                    }
+                } catch {
+                    print("Best post error: \(error)")
+                    DispatchQueue.main.async {
+                        // 🛑 NEW: ERROR STATE
+                        self.bestPostTextLabel?.text = "No top post found for this week."
+                        self.bestPostDateLabel?.text = "--"
+                        self.bestPostPlatformImage?.image = UIImage(named: "placeholder") ?? UIImage(systemName: "photo")
+                        self.bestPostPlatformImage?.tintColor = .systemGray4
+                    }
+                }
+            }
+        }
+
+        func updateBestPostUI(with post: BestPost) {
+            // 🛑 NEW: Remove the gray tint so original platform colors (Twitter/LinkedIn/Insta) show properly
+            bestPostPlatformImage?.tintColor = nil
+            bestPostPlatformImage?.image = UIImage(named: "icon-\(post.platform.lowercased())")
             
-            // dynamic date formatting for best post
+            bestPostTextLabel?.text = post.post_text ?? "View this week's highlight..."
+            
             if let dateStr = post.post_date {
                 let dbFormatter = DateFormatter()
                 dbFormatter.dateFormat = "yyyy-MM-dd"
                 if let date = dbFormatter.date(from: dateStr) {
                     let displayFormatter = DateFormatter()
-                    displayFormatter.dateStyle = .medium // e.g., "Feb 18, 2026"
-                    bestPostDateLabel.text = displayFormatter.string(from: date)
+                    displayFormatter.dateStyle = .medium
+                    bestPostDateLabel?.text = displayFormatter.string(from: date)
                 }
             } else {
-                bestPostDateLabel.text = "This Week"
+                bestPostDateLabel?.text = "--"
             }
             
-            // best post metric stac
-            bestPostMetricsStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+            bestPostMetricsStack?.arrangedSubviews.forEach { $0.removeFromSuperview() }
             
             var stats: [(String, Int)] = [
-                ("Likes", post.likes),
-                ("Comments", post.comments)
-            ]
-            
-            if post.platform.lowercased() == "twitter" {
-                stats.append(("Reposts", post.shares_reposts ?? 0))
-                // only show views if provided by api
-                if let v = post.extra_metric, v > 0 {
-                    stats.append(("Views", v))
-                }
-            } else if post.platform.lowercased() == "linkedin" {
-                stats.append(("Shares", post.shares_reposts ?? 0))
-            }
-            
-            // 4. Populate Stack
-            for (label, value) in stats {
-                let metricView = createVerticalMetricStack(title: label, count: value)
-                bestPostMetricsStack.addArrangedSubview(metricView)
-            }
+                        ("Likes", post.likes),
+                        ("Comments", post.comments)
+                    ]
+                    
+                    if post.platform.lowercased() == "twitter" {
+                        stats.append(("Reposts", post.shares_reposts ?? 0))
+                        if let v = post.extra_metric, v > 0 { stats.append(("Views", v)) }
+                    } else if post.platform.lowercased() == "linkedin" {
+                        stats.append(("Shares", post.shares_reposts ?? 0))
+                    } else if post.platform.lowercased() == "instagram" {
+                        // 🛑 NEW: Added support to show extra metrics (Plays/Views) for Instagram!
+                        if let v = post.extra_metric, v > 0 { stats.append(("Plays", v)) }
+                    }
+                    
+                    for (label, value) in stats {
+                        let metricView = createVerticalMetricStack(title: label, count: value)
+                        bestPostMetricsStack?.addArrangedSubview(metricView)
+                    }
         }
 
-        // Helper to build the Value over Title look
-    private func createVerticalMetricStack(title: String, count: Int) -> UIView {
-            let container = UIStackView()
-            container.axis = .vertical
-            container.alignment = .center
-            container.spacing = 2
-            
-            let countLabel = UILabel()
-            countLabel.text = formatNumber(count)
-            countLabel.font = .systemFont(ofSize: 16, weight: .bold)
-            
-            let titleLabel = UILabel()
-            titleLabel.text = title
-            titleLabel.font = .systemFont(ofSize: 10, weight: .medium)
-            titleLabel.textColor = .secondaryLabel
-            
-            container.addArrangedSubview(countLabel)
-            container.addArrangedSubview(titleLabel)
-            return container
-        }
 
-        // Helper to create small metric labels dynamically
-        func createMetricView(label: String, value: Int) -> UIView {
-            let container = UIStackView()
-            container.axis = .vertical
-            container.alignment = .center
-            
-            let valueLabel = UILabel()
-            valueLabel.text = formatNumber(value)
-            valueLabel.font = .systemFont(ofSize: 14, weight: .bold)
-            
-            let titleLabel = UILabel()
-            titleLabel.text = label
-            titleLabel.font = .systemFont(ofSize: 10)
-            titleLabel.textColor = .secondaryLabel
-            
-            container.addArrangedSubview(valueLabel)
-            container.addArrangedSubview(titleLabel)
-            return container
+
+    @objc func openBestPostURL() {
+        guard let urlStr = currentBestPostURL, let url = URL(string: urlStr) else {
+            showToast(message: "Post link unavailable", isSuccess: false)
+            return
         }
+        UIApplication.shared.open(url)
+    }
+
+    func createVerticalMetricStack(title: String, count: Int) -> UIStackView {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.alignment = .center
+        stack.spacing = 2
+        
+        let countLabel = UILabel()
+        countLabel.text = formatEngagement(count)
+        countLabel.font = .boldSystemFont(ofSize: 14)
+        
+        let titleLabel = UILabel()
+        titleLabel.text = title
+        titleLabel.font = .systemFont(ofSize: 10)
+        titleLabel.textColor = .secondaryLabel
+        
+        stack.addArrangedSubview(countLabel)
+        stack.addArrangedSubview(titleLabel)
+        return stack
+    }
     
-    func setupSuggestions() {
-        Task {
-            let items = await SupabaseManager.shared.fetchPendingSuggestions()
-            
-            self.activeSuggestions = items
-            
-            DispatchQueue.main.async {
-                // If you have 3 @IBOutlets for cards, hide them all first
-                self.suggestionCards.forEach { $0.isHidden = true }
+    // MARK: - Programmatic Suggestions UI
+    func updateSuggestionsUI() {
+        suggestionStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        
+        let actedCount = activeSuggestions.filter { $0.status != "pending" }.count
+        if actedCount >= 2 {
+            showWeeklyCompletionState()
+            return
+        }
+        
+        let pendingOnes = activeSuggestions.filter { $0.status == "pending" }
+        if pendingOnes.isEmpty {
+            showWeeklyCompletionState()
+        } else {
+            for suggestion in pendingOnes {
+                guard let originalIndex = activeSuggestions.firstIndex(where: { $0.suggestion_id == suggestion.suggestion_id }) else { continue }
                 
-                for (index, item) in items.enumerated() {
-                    guard index < self.suggestionCards.count else { break }
-                    
-                    let card = self.suggestionCards[index]
-                    card.isHidden = false
-                    card.alpha = 1.0
-                    card.tag = index // Needed for the 'Accept' tap gesture
-                    
-                    card.isUserInteractionEnabled = true
-                    // Assuming you have title and body labels linked
-                    self.suggestionTitles[index].text = item.title
-                    self.suggestionBodies[index].text = item.body
-                    
-                    // Minimalist UI: No gradients, just a clean border
-                    card.layer.borderColor = UIColor.systemGray5.cgColor
-                    card.layer.borderWidth = 1.0
-                    card.layer.cornerRadius = 12
-                }
+                // Build the card programmatically using YOUR AnalyticsCardView
+                let cardView = AnalyticsCardView()
+                
+                let vStack = UIStackView()
+                vStack.axis = .vertical
+                vStack.spacing = 8
+                vStack.translatesAutoresizingMaskIntoConstraints = false
+                
+                let titleLabel = UILabel()
+                titleLabel.text = suggestion.title ?? "Smart Suggestion"
+                titleLabel.font = .systemFont(ofSize: 16, weight: .bold)
+                
+                let descLabel = UILabel()
+                descLabel.text = suggestion.ai_rule ?? "No description available"
+                descLabel.font = .systemFont(ofSize: 14)
+                descLabel.textColor = .secondaryLabel
+                descLabel.numberOfLines = 0
+                
+                let hStack = UIStackView()
+                hStack.axis = .horizontal
+                hStack.spacing = 12
+                hStack.distribution = .fillEqually
+                
+                let applyBtn = UIButton(type: .system)
+                applyBtn.setTitle("Apply", for: .normal)
+                applyBtn.backgroundColor = .systemBlue
+                applyBtn.setTitleColor(.white, for: .normal)
+                applyBtn.layer.cornerRadius = 8
+                applyBtn.titleLabel?.font = .systemFont(ofSize: 14, weight: .semibold)
+                applyBtn.heightAnchor.constraint(equalToConstant: 36).isActive = true
+                applyBtn.tag = originalIndex
+                // Notice this now uses UIButton target instead of gesture
+                applyBtn.addTarget(self, action: #selector(didTapApplySuggestion(_:)), for: .touchUpInside)
+                
+                let removeBtn = UIButton(type: .system)
+                removeBtn.setTitle("Dismiss", for: .normal)
+                removeBtn.backgroundColor = .systemGray5
+                removeBtn.setTitleColor(.systemRed, for: .normal)
+                removeBtn.layer.cornerRadius = 8
+                removeBtn.titleLabel?.font = .systemFont(ofSize: 14, weight: .semibold)
+                removeBtn.heightAnchor.constraint(equalToConstant: 36).isActive = true
+                removeBtn.tag = originalIndex
+                removeBtn.addTarget(self, action: #selector(didTapRemoveSuggestion(_:)), for: .touchUpInside)
+                
+                hStack.addArrangedSubview(removeBtn)
+                hStack.addArrangedSubview(applyBtn)
+                
+                vStack.addArrangedSubview(titleLabel)
+                vStack.addArrangedSubview(descLabel)
+                vStack.addArrangedSubview(hStack)
+                
+                cardView.addSubview(vStack)
+                
+                // Pin inner stack to the AnalyticsCardView
+                NSLayoutConstraint.activate([
+                    vStack.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 16),
+                    vStack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 16),
+                    vStack.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -16),
+                    vStack.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -16)
+                ])
+                
+                suggestionStack.addArrangedSubview(cardView)
             }
         }
     }
     
-    // Suggestions Logic
-    @IBAction func didTapDismissSuggestion(_ sender: UIButton) {
-        guard let cardView = sender.superview else { return }
-        let suggestion = activeSuggestions[cardView.tag]
+    private func showWeeklyCompletionState() {
+        let container = UIView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+        container.heightAnchor.constraint(equalToConstant: 120).isActive = true
+        
+        let label = UILabel()
+        label.text = "Good going! 🔥\nNew suggestions will load next week."
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 15, weight: .semibold)
+        label.textColor = .secondaryLabel
+        
+        label.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(label)
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: container.centerYAnchor)
+        ])
+        
+        suggestionStack.addArrangedSubview(container)
+    }
+
+    // MARK: - Actions
+    
+    // MARK: - Navigation Actions
+    // MARK: - Navigation Actions
+        @objc func openLinkPlatforms() {
+            // 🛑 FIX: Use 'self.storyboard' to automatically search the current storyboard
+            // (This prevents the crash if your storyboard is named "Analytics" instead of "Main")
+            guard let currentStoryboard = self.storyboard else { return }
+            
+            if let authVC = currentStoryboard.instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController {
+                
+                // Set your specific manage mode flag
+                authVC.isManageMode = true
+                
+                // When AuthVC finishes, reload the analytics data!
+                authVC.onCompletion = { [weak self] success in
+                    if success {
+                        self?.setupData()
+                    }
+                }
+                
+                // Present it nicely
+                let navController = UINavigationController(rootViewController: authVC)
+                if let sheet = navController.sheetPresentationController {
+                    sheet.detents = [.medium(), .large()] // Gives it that modern half-screen swipe up look
+                }
+                self.present(navController, animated: true)
+                
+            } else {
+                // Safe fallback just in case
+                print("ERROR: Could not find a View Controller with the Storyboard ID 'AuthViewController'.")
+            }
+        }
+    
+    
+    @objc func didTapRemoveSuggestion(_ sender: UIButton) {
+        let index = sender.tag
+        guard index < activeSuggestions.count else { return }
+        let suggestion = activeSuggestions[index]
+        
+        // Find the parent card view to hide it
+        var parentView: UIView? = sender
+        while parentView != nil && !(parentView is AnalyticsCardView) {
+            parentView = parentView?.superview
+        }
+        let cardView = parentView
         
         Task {
-            await SupabaseManager.shared.updateSuggestionStatus(id: suggestion.suggestion_id, status: "declined")
+            // Uncomment the line below to actually update the DB
+            // await SupabaseManager.shared.updateSuggestionStatus(id: suggestion.suggestion_id, status: "rejected")
             DispatchQueue.main.async {
-                UIView.animate(withDuration: 0.3) { cardView.isHidden = true; cardView.alpha = 0 }
-                self.showToast(message: "Suggestion Removed", isSuccess: false)
+                UIView.animate(withDuration: 0.3, animations: {
+                    cardView?.isHidden = true
+                    cardView?.alpha = 0
+                }) { _ in
+                    cardView?.removeFromSuperview()
+                    self.activeSuggestions[index].status = "rejected"
+                    self.updateSuggestionsUI() // Refresh state
+                }
+                self.showToast(message: "Suggestion Dismissed", isSuccess: false)
             }
         }
     }
-
-    @IBAction func didTapApplySuggestion(_ sender: UITapGestureRecognizer) {
-        guard let cardView = sender.view else { return }
-        let suggestion = activeSuggestions[cardView.tag]
+    
+    @objc func didTapApplySuggestion(_ sender: UIButton) {
+        let index = sender.tag
+        guard index < activeSuggestions.count else { return }
+        let suggestion = activeSuggestions[index]
+        
+        var parentView: UIView? = sender
+        while parentView != nil && !(parentView is AnalyticsCardView) {
+            parentView = parentView?.superview
+        }
+        let cardView = parentView
         
         Task {
-            await SupabaseManager.shared.updateSuggestionStatus(id: suggestion.suggestion_id, status: "accepted")
+            // Uncomment the line below to actually update the DB
+            // await SupabaseManager.shared.updateSuggestionStatus(id: suggestion.suggestion_id, status: "accepted")
             DispatchQueue.main.async {
-                UIView.animate(withDuration: 0.3) { cardView.isHidden = true; cardView.alpha = 0 }
+                UIView.animate(withDuration: 0.3, animations: {
+                    cardView?.isHidden = true
+                    cardView?.alpha = 0
+                }) { _ in
+                    cardView?.removeFromSuperview()
+                    self.activeSuggestions[index].status = "accepted"
+                    self.updateSuggestionsUI() // Refresh state
+                }
                 self.showToast(message: "Strategy Applied!", isSuccess: true)
             }
         }
     }
+
+    // MARK: - Helpers
+    private func formatEngagement(_ value: Int) -> String {
+        let num = Double(value)
+        if num >= 1_000_000 { return String(format: "%.1fM", num / 1_000_000) }
+        if num >= 1_000 { return String(format: "%.1fK", num / 1_000) }
+        return "\(value)"
+    }
     
+    // MARK: - Info Button Action
+        @IBAction func infoButtonTapped(_ sender: UIButton) {
+            let alert = UIAlertController(
+                title: "Handle Score",
+                message: "Your Handle Score is a master metric calculated based on your posting consistency and average engagement across all your connected platforms. The more you post, the higher it goes!",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "Got it!", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+        }
+
     func showToast(message: String, isSuccess: Bool) {
         let toastView = UIView()
         toastView.backgroundColor = isSuccess ? .systemGreen : .systemRed
         toastView.alpha = 0.0
         toastView.layer.cornerRadius = 20
+        
         let label = UILabel()
         label.text = (isSuccess ? "✓ " : "✕ ") + message
         label.textColor = .white
         label.font = .boldSystemFont(ofSize: 14)
         label.textAlignment = .center
+        
         toastView.addSubview(label)
         self.view.addSubview(toastView)
+        
         let screenWidth = self.view.frame.width
         toastView.frame = CGRect(x: (screenWidth - 200)/2, y: 60, width: 200, height: 40)
         label.frame = toastView.bounds
+        
         Task {
             _ = await UIView.animateAsync(duration: 0.3) { toastView.alpha = 1.0; toastView.frame.origin.y = 100 }
             try? await Task.sleep(nanoseconds: 1_500_000_000)
@@ -551,4 +583,3 @@ class AnalyticsViewController: UIViewController {
         }
     }
 }
-

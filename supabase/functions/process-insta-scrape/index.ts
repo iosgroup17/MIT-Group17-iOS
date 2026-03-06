@@ -40,6 +40,7 @@ serve(async (req) => {
     posts.forEach((p: any) => {
         const likes = p.like_count || 0
         const comments = p.comment_count || 0
+        const plays = p.play_count || p.view_count || 0 // 🛑 NEW: Fetching Plays/Views
         const eng = likes + comments
         
         if (p.taken_at) {
@@ -51,16 +52,21 @@ serve(async (req) => {
                 const powerScore = likes + (comments * 2)
                 if (powerScore > maxPowerScore) {
                     maxPowerScore = powerScore
+                    
+                    // 🛑 FIX: Safely parsing caption text and the shortcode
+                    const textStr = p.caption?.text || p.caption_text || "No Caption"
+                    const codeStr = p.code || p.shortcode
+                    
                     bestPost = { 
-                        text: p.caption_text || "No Caption", 
+                        text: textStr, 
                         likes, comments, 
+                        views: plays, // 🛑 Adding to best post object
                         date: postDate.toISOString().split('T')[0],
-                        url: p.permalink || `https://instagram.com/p/${p.shortcode}/` 
+                        url: p.permalink || (codeStr ? `https://instagram.com/p/${codeStr}/` : "") 
                     }
                 }
 
                 const dateKey = postDate.toISOString().split('T')[0]
-                // 🛑 NEW HABIT TRACKER LOGIC
                 dailyMap[dateKey] = (dailyMap[dateKey] || 0) + 1
             }
         }
@@ -75,7 +81,9 @@ serve(async (req) => {
     if (bestPost) {
         await supabase.from('best_posts').upsert({
             user_id, platform: 'instagram', post_text: bestPost.text,
-            likes: bestPost.likes, comments: bestPost.comments, post_url: bestPost.url, post_date: bestPost.date
+            likes: bestPost.likes, comments: bestPost.comments, 
+            extra_metric: bestPost.views, // 🛑 NEW: Passing plays into extra_metric
+            post_url: bestPost.url, post_date: bestPost.date
         })
     }
 

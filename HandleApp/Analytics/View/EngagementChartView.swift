@@ -3,15 +3,14 @@ import Charts
 
 struct EngagementChartView: View {
     let metrics: [DailyMetric]
+    let connectedPlatforms: Set<String>
     
-    //strictly this week
     private var filteredAndSortedMetrics: [DailyMetric] {
-        let monday = currentWeekRange.lowerBound
-        let nextMonday = currentWeekRange.upperBound
+        let range = currentWeekRange
         return metrics
             .filter {
-                let dayStart = Calendar.current.startOfDay(for: $0.date)
-                return dayStart >= monday && dayStart < nextMonday
+                range.contains(Calendar.current.startOfDay(for: $0.date)) &&
+                connectedPlatforms.contains($0.platform.lowercased())
             }
             .sorted { $0.date < $1.date }
     }
@@ -26,7 +25,6 @@ struct EngagementChartView: View {
         "linkedin": .blue
     ]
     
-    //24x7 for 1 week
     var currentWeekRange: ClosedRange<Date> {
         var calendar = Calendar.current
         calendar.firstWeekday = 2 // Monday
@@ -34,22 +32,45 @@ struct EngagementChartView: View {
         let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)
         guard let monday = calendar.date(from: components) else { return now...now }
         
-    // end exactly at the start of next monday so sunday gets 24 hours
-        let nextMonday = calendar.date(byAdding: .day, value: 7, to: monday)!
+        let sunday = calendar.date(byAdding: .day, value: 6, to: monday)!
+        let endOfSunday = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: sunday)!
         
-        return monday...nextMonday
+        return monday...endOfSunday
+    }
+    
+    var currentWeekDays: [Date] {
+        var calendar = Calendar.current
+        calendar.firstWeekday = 2
+        let now = calendar.startOfDay(for: Date())
+        let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)
+        guard let monday = calendar.date(from: components) else { return [] }
+        return (0...6).compactMap { calendar.date(byAdding: .day, value: $0, to: monday) }
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             
-            if filteredAndSortedMetrics.isEmpty {
+            if connectedPlatforms.isEmpty {
+                VStack(spacing: 12) {
+                    Spacer()
+                    Image(systemName: "link.badge.plus")
+                        .font(.system(size: 40))
+                        .foregroundColor(Color(uiColor: .systemGray4))
+                    Text("Connect a platform to track your consistency")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, minHeight: 200)
+                
+            } else if filteredAndSortedMetrics.isEmpty {
                 VStack(spacing: 8) {
                     Spacer()
                     Image(systemName: "chart.bar.xaxis")
                         .font(.system(size: 40))
-                        .foregroundColor(Color(UIColor.systemGray4))
-                    
+                        .foregroundColor(Color(uiColor: .systemGray4))
                     Text("No original posts this week")
                         .font(.caption)
                         .foregroundColor(.secondary)
@@ -65,7 +86,7 @@ struct EngagementChartView: View {
                         BarMark(
                             x: .value("Day", dayStart, unit: .day),
                             y: .value("Posts", item.engagement),
-                            width: .ratio(0.6) //bar thickness
+                            width: .ratio(0.6)
                         )
                         .foregroundStyle(by: .value("Platform", item.platform.lowercased()))
                         .cornerRadius(4)
@@ -76,14 +97,12 @@ struct EngagementChartView: View {
                     "twitter": .black,
                     "linkedin": .blue
                 ])
-                .chartXScale(domain: currentWeekRange)
+                .chartXScale(domain: currentWeekRange, range: .plotDimension(startPadding: 10, endPadding: 10))
                 .chartYScale(domain: .automatic(includesZero: true))
                 .chartLegend(.hidden)
                 .chartXAxis {
-                    // Alignment
-                    AxisMarks(values: .stride(by: .day, count: 1)) { value in
+                    AxisMarks(values: currentWeekDays) { value in
                         if let _ = value.as(Date.self) {
-                            AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 4]))
                             AxisValueLabel(format: .dateTime.weekday(.narrow), centered: true)
                                 .font(.caption2.bold())
                         }
@@ -99,7 +118,6 @@ struct EngagementChartView: View {
                 }
                 .frame(minHeight: 200)
                 
-                // legend for graph
                 HStack(spacing: 16) {
                     ForEach(activePlatforms, id: \.self) { platform in
                         HStack(spacing: 4) {
@@ -118,7 +136,7 @@ struct EngagementChartView: View {
         .padding(.horizontal, 15)
         .padding(.top, 20)
         .padding(.bottom, 10)
-        .background(Color(UIColor.systemBackground))
+        .background(Color(uiColor: .systemBackground))
         .clipped()
     }
 }
