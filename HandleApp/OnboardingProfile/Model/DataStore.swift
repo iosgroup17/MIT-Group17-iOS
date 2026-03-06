@@ -159,4 +159,10 @@ class OnboardingDataStore {
         guard index >= 0 && index < steps.count else { return nil }
         return steps[index]
     }
+    
+    func syncWithRemoteData(_ responses: [OnboardingResponse]) {
+        for response in responses {
+            self.userAnswers[response.step_index] = response.selection_tags
+        }
+    }
 }

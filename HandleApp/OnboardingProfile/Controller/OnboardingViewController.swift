@@ -43,45 +43,53 @@ class OnboardingViewController: UIViewController {
     }
     
     @IBAction func nextButtonTapped(_ sender: UIButton) {
-        //check if current step has an answer
-        let hasAnswer = OnboardingDataStore.shared.userAnswers[currentStepIndex] != nil
-        
-        //required steps
-        if currentStepIndex < 2 && !hasAnswer {
-            showAlert(message: "This step is required. Please select an option.")
-            return
-        }
-        
-        let rawAnswer = OnboardingDataStore.shared.userAnswers[currentStepIndex]
-        let selectedOptions: [String]
-        
-        if let singleValue = rawAnswer as? String {
-            selectedOptions = [singleValue]
-        } else if let multiValue = rawAnswer as? [String] {
-            selectedOptions = multiValue
-        } else {
-            selectedOptions = []
-        }
-        
-        //bg task to update supabase
-        Task {
-            print("Syncing Step \(currentStepIndex) to Supabase...")
+        Task { @MainActor in
+            //check if current step has an answer
+            let hasAnswer = OnboardingDataStore.shared.userAnswers[currentStepIndex] != nil
             
-            // test id call
-            await SupabaseManager.shared.savePreference(
-                stepIndex: currentStepIndex,
-                selections: selectedOptions
-            )
+            //required steps
+            if currentStepIndex < 2 && !hasAnswer {
+                showAlert(message: "This step is required. Please select an option.")
+                return
+            }
             
-            DispatchQueue.main.async {
-                // NEW: Broadcast that the profile has changed!
-                NotificationCenter.default.post(name: .userProfileDidChange, object: nil)
+            let rawAnswer = OnboardingDataStore.shared.userAnswers[currentStepIndex]
+            let selectedOptions: [String]
+            
+            if let singleValue = rawAnswer as? String {
+                selectedOptions = [singleValue]
+            } else if let multiValue = rawAnswer as? [String] {
+                selectedOptions = multiValue
+            } else {
+                selectedOptions = []
+            }
+            
+            if currentStepIndex == 6 {
+                // Get the industry from Step 2 (Index 2) or the current selection
+                let industry = selectedOptions.first ?? "Marketing, Branding & Growth"
+                await triggerInitialSuggestions(for: industry)
+            }
+            
+            //bg task to update supabase
+            Task {
+                print("Syncing Step \(currentStepIndex) to Supabase...")
                 
-                if self.isEditMode {
-                    self.onDismiss?()
-                    self.dismiss(animated: true, completion: nil)
-                } else {
-                    self.goToNextStep()
+                // test id call
+                await SupabaseManager.shared.savePreference(
+                    stepIndex: currentStepIndex,
+                    selections: selectedOptions
+                )
+                
+                DispatchQueue.main.async {
+                    // NEW: Broadcast that the profile has changed!
+                    NotificationCenter.default.post(name: .userProfileDidChange, object: nil)
+                    
+                    if self.isEditMode {
+                        self.onDismiss?()
+                        self.dismiss(animated: true, completion: nil)
+                    } else {
+                        self.goToNextStep()
+                    }
                 }
             }
         }
@@ -201,6 +209,30 @@ class OnboardingViewController: UIViewController {
             sceneDelegate.showMainApp(window: window)
             
             UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: nil, completion: nil)
+        }
+    }
+    
+    func triggerInitialSuggestions(for industry: String) async {
+        let params: [String: String] = [
+            "user_id": SupabaseManager.shared.currentUserID.uuidString,
+            "industry": industry
+        ]
+        
+        // Headers are required to bypass the 401 error
+        let headers: [String: String] = [
+            "Content-Type": "application/json",
+            "Authorization": "Bearer \(SupabaseManager.shared.publicAnonKey)",
+            "apikey": SupabaseManager.shared.publicAnonKey
+        ]
+        
+        do {
+            _ = try await SupabaseManager.shared.client.functions.invoke(
+                "dynamic-endpoint",
+                options: FunctionInvokeOptions(headers: headers, body: params)
+            )
+            print("🚀 Successfully triggered initial suggestions.")
+        } catch {
+            print("❌ Trigger failed: \(error)")
         }
     }
 }

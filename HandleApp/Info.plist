@@ -27,6 +27,8 @@
 	</array>
 	<key>GIDClientID</key>
 	<string>$(GOOGLE_CLIENT_ID)</string>
+	<key>WebGIDClientID</key>
+	<string>$(WEB_GOOGLE_CLIENT_ID)</string>
 	<key>GeminiAPIKey</key>
 	<string>$(GEMINI_API_KEY)</string>
 	<key>InstagramAppID</key>

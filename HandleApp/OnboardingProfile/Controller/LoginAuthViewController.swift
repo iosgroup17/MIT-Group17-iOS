@@ -88,45 +88,65 @@ class LoginAuthViewController: UIViewController {
     
     // MARK: - 3. Google Login
     @IBAction func googleTapped(_ sender: UIButton) {
-        GIDSignIn.sharedInstance.signIn(withPresenting: self) { [weak self] result, error in
-            if let error = error {
-                self?.showAlert(message: "Google Error: \(error.localizedDescription)")
+            
+            // 1. Safely read the keys from Info.plist
+            guard let iosClientID = Bundle.main.object(forInfoDictionaryKey: "GIDClientID") as? String,
+                  let webClientID = Bundle.main.object(forInfoDictionaryKey: "WebGIDClientID") as? String else {
+                showAlert(message: "Configuration Error: Missing Google Client IDs.")
                 return
             }
             
-            // Ensure you are getting the idToken string
-            guard let result = result,
-                  let idToken = result.user.idToken?.tokenString else { return }
+            // 2. Configure Google Sign-In to use BOTH keys
+            let config = GIDConfiguration(clientID: iosClientID, serverClientID: webClientID)
+            GIDSignIn.sharedInstance.configuration = config
             
-            Task {
-                do {
-                    try await SupabaseManager.shared.client.auth.signInWithIdToken(
-                        credentials: .init(provider: .google, idToken: idToken)
-                    )
-                    
-                    await self?.navigateToHome()
-                } catch {
-                    await self?.showAlert(message: "Supabase Error: \(error.localizedDescription)")
+            // 3. Present the Sign-In sheet
+            GIDSignIn.sharedInstance.signIn(withPresenting: self) { [weak self] result, error in
+                if let error = error {
+                    self?.showAlert(message: "Google Error: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let result = result,
+                      let idToken = result.user.idToken?.tokenString else { return }
+                
+                Task {
+                    do {
+                        // 4. Send the correct token to Supabase
+                        try await SupabaseManager.shared.client.auth.signInWithIdToken(
+                            credentials: .init(provider: .google, idToken: idToken)
+                        )
+                        
+                        await self?.navigateToHome()
+                    } catch {
+                        await self?.showAlert(message: "Supabase Error: \(error.localizedDescription)")
+                    }
                 }
             }
         }
-    }
     
     
     
     // MARK: - Navigation Helper
     func navigateToHome() {
-        DispatchQueue.main.async {
+        Task {
+            let remoteData = await SupabaseManager.shared.fetchUserOnboardingData()
+            
+            OnboardingDataStore.shared.syncWithRemoteData(remoteData)
+            
+            if !remoteData.isEmpty {
+                UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
+            }
+
+            DispatchQueue.main.async {
                 if let window = self.view.window {
                     let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
                     
                     if hasCompletedOnboarding {
-                        // If they are just logging back in, skip onboarding
                         if let sceneDelegate = window.windowScene?.delegate as? SceneDelegate {
                             sceneDelegate.showMainApp(window: window)
                         }
                     } else {
-                        // If they are new, go to Onboarding
                         let storyboard = UIStoryboard(name: "Profile", bundle: nil)
                         let homeVC = storyboard.instantiateViewController(withIdentifier: "OnboardingParentVC")
                         window.rootViewController = homeVC
@@ -135,6 +155,7 @@ class LoginAuthViewController: UIViewController {
                     UIView.transition(with: window, duration: 0.5, options: .transitionFlipFromRight, animations: nil)
                 }
             }
+        }
     }
     
     func showAlert(message: String) {

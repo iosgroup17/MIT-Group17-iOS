@@ -561,7 +561,7 @@ extension EditorSuiteViewController: UIImagePickerControllerDelegate, UINavigati
     
     func removeImage(at index: Int) {
     
-        guard index < displayedImages.count else { return }
+        guard index <= displayedImages.count else { return }
      
         displayedImages.remove(at: index)
        

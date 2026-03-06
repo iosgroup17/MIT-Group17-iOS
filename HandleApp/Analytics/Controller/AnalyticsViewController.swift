@@ -473,6 +473,8 @@ class AnalyticsViewController: UIViewController {
         Task {
             let items = await SupabaseManager.shared.fetchPendingSuggestions()
             
+            self.activeSuggestions = items
+            
             DispatchQueue.main.async {
                 // If you have 3 @IBOutlets for cards, hide them all first
                 self.suggestionCards.forEach { $0.isHidden = true }
@@ -485,6 +487,7 @@ class AnalyticsViewController: UIViewController {
                     card.alpha = 1.0
                     card.tag = index // Needed for the 'Accept' tap gesture
                     
+                    card.isUserInteractionEnabled = true
                     // Assuming you have title and body labels linked
                     self.suggestionTitles[index].text = item.title
                     self.suggestionBodies[index].text = item.body
@@ -504,7 +507,7 @@ class AnalyticsViewController: UIViewController {
         let suggestion = activeSuggestions[cardView.tag]
         
         Task {
-            await SupabaseManager.shared.updateSuggestionStatus(id: suggestion.id, status: "declined")
+            await SupabaseManager.shared.updateSuggestionStatus(id: suggestion.suggestion_id, status: "declined")
             DispatchQueue.main.async {
                 UIView.animate(withDuration: 0.3) { cardView.isHidden = true; cardView.alpha = 0 }
                 self.showToast(message: "Suggestion Removed", isSuccess: false)
@@ -517,7 +520,7 @@ class AnalyticsViewController: UIViewController {
         let suggestion = activeSuggestions[cardView.tag]
         
         Task {
-            await SupabaseManager.shared.updateSuggestionStatus(id: suggestion.id, status: "accepted")
+            await SupabaseManager.shared.updateSuggestionStatus(id: suggestion.suggestion_id, status: "accepted")
             DispatchQueue.main.async {
                 UIView.animate(withDuration: 0.3) { cardView.isHidden = true; cardView.alpha = 0 }
                 self.showToast(message: "Strategy Applied!", isSuccess: true)

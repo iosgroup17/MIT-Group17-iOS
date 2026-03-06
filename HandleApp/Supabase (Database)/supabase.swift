@@ -77,9 +77,9 @@ class SupabaseManager {
     
     private let supabaseURL = URL(string: "https://rfoqrrppblagcurghzhy.supabase.co")!
     private let supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmb3FycnBwYmxhZ2N1cmdoemh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4MTU0MDEsImV4cCI6MjA4MzM5MTQwMX0.PiPBEpJA5XZW2u1Nbqk4mva6p8eyP_iTcclpXEk-I9k"
-    
 
     let client: SupabaseClient
+    var publicAnonKey: String {return supabaseKey}
     let testUserID = UUID(uuidString: "801e5aff-c41e-45bf-904f-bd1bc6bbcd17")!
     
     private init() {
@@ -609,8 +609,8 @@ extension SupabaseManager {
     }
 }
 
-struct Suggestion: Codable, Identifiable {
-    let id: UUID
+struct Suggestion: Codable{
+    let suggestion_id: UUID
     let title: String
     let body: String
     let ai_rule: String
@@ -631,10 +631,10 @@ extension SupabaseManager {
                 .execute()
                 .value
             
-            print("✅ Fetched \(results.count) suggestions (including Test ID)")
+            print("Fetched \(results.count) suggestions (including Test ID)")
             return results
         } catch {
-            print("❌ UI Fetch Error: \(error)")
+            print("UI Fetch Error: \(error)")
             return []
         }
     }
@@ -643,7 +643,7 @@ extension SupabaseManager {
         do {
             try await client.from("user_suggestions")
                 .update(["status": status])
-                .eq("id", value: id)
+                .eq("suggestion_id", value: id)
                 .execute()
         } catch {
             print("Status Update Error: \(error)")
@@ -663,6 +663,22 @@ extension SupabaseManager {
                 .value
             return rows.map { $0.ai_rule }
         } catch {
+            return []
+        }
+    }
+    
+    func fetchUserOnboardingData() async -> [OnboardingResponse] {
+        do {
+            let currentUser = try await client.auth.session.user
+            let results: [OnboardingResponse] = try await client
+                .from("onboarding_responses") // Replace with your actual table name
+                .select("*")
+                .eq("user_id", value: currentUser.id)
+                .execute()
+                .value
+            return results
+        } catch {
+            print("Error fetching onboarding data: \(error)")
             return []
         }
     }
