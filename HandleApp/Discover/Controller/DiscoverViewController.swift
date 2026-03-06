@@ -48,12 +48,7 @@ class DiscoverViewController: UIViewController {
             UINib(nibName: "PublishReadyTextCollectionViewCell", bundle: nil),
             forCellWithReuseIdentifier: "PublishReadyTextCollectionViewCell"
         )
-        
-        
-        collectionView.register(
-            UINib(nibName: "FilterCellCollectionViewCell", bundle: nil),
-            forCellWithReuseIdentifier: "FilterCellCollectionViewCell"
-        )
+    
         
         collectionView.register(
             UINib(nibName: "HeaderCollectionReusableView", bundle: nil),
@@ -92,32 +87,8 @@ class DiscoverViewController: UIViewController {
         NotificationCenter.default.removeObserver(self)
     }
     
-//    func loadSupabaseData() async {
-//        print("Starting Supabase Fetch ")
-//        
-//        do {
-//            
-//            let fetchedData = try await SupabaseManager.shared.loadPostsIdeas()
-//            
-//            await MainActor.run {
-//                print("Data Received. Updating UI...")
-//                
-//                self.ideasResponse = fetchedData
-//                
-//                self.trendingTopics = fetchedData.trendingTopics
-//                self.topicDetails = fetchedData.topicDetails
-//                
-//                self.publishReadyPosts = fetchedData.publishReadyPosts
-//                
-//                self.collectionView.reloadData()
-//            }
-//            
-//        } catch {
-//            print("Error loading data: \(error.localizedDescription)")
-//        }
-//    }
+  
     
-    // In DiscoverViewController.swift
     func loadSupabaseData() async {
             print("Starting Industry-Specific Data Load...")
             

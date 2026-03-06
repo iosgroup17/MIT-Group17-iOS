@@ -124,8 +124,8 @@ class OnboardingViewController: UIViewController {
         
         // update question step and progress
         questionLabel.text = stepData.title
-        stepLabel.text = "Step \(index + 1) of 6"
-        progressView.setProgress(Float(index + 1) / 6.0, animated: true)
+        stepLabel.text = "Step \(index + 1) of 7"
+        progressView.setProgress(Float(index + 1) / 7.0, animated: true)
         
         // instantiate and display child VC based on layout type
         let storyboard = self.storyboard ?? UIStoryboard(name: "Profile", bundle: nil)

@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Handle needs camera access so you can take photos to attach to your social media posts.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

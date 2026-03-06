@@ -1,4 +1,5 @@
 import UIKit
+import Supabase
 
 class ProfileViewController: UIViewController {
     
@@ -12,7 +13,6 @@ class ProfileViewController: UIViewController {
     @IBOutlet weak var socialCardView: UIView!
     @IBOutlet weak var progressCardView: UIView!
     
-    //The Stack Views INSIDE the cards (Where we inject rows)
     @IBOutlet weak var accountStack: UIStackView!
     @IBOutlet weak var detailsStack: UIStackView!
     @IBOutlet weak var socialStack: UIStackView!
@@ -123,30 +123,29 @@ class ProfileViewController: UIViewController {
         addRow(to: detailsStack, title: "Audience", value: audience) {
             self.openEditor(forStep: 6)
         }
-
-        setupSocialRows()
+        
+        let logoutRow = ProfileRow()
+        let logoutIcon = UIImage(systemName: "rectangle.portrait.and.arrow.right")
+        addRow(to: socialStack,
+               title: "Logout",
+               value: "",
+               titleColor: .systemRed,
+               iconImage: logoutIcon) { [weak self] in
+            self?.showLogoutConfirmation()
+        }
 
         hideLastSeparator(in: socialStack)
         hideLastSeparator(in: detailsStack)
         hideLastSeparator(in: accountStack)
     }
     
-    func addRow(to stack: UIStackView, title: String, value: String, isToggle: Bool = false, isConnected: Bool = false, showIcon: Bool = true, action: @escaping () -> Void) {
-        
-        // create row
+    func addRow(to stack: UIStackView, title: String, value: String, showIcon: Bool = true, titleColor: UIColor = .label, iconImage: UIImage? = nil, action: @escaping () -> Void) {
         let row = ProfileRow()
-        
-        // configure row with data
-        row.configure(title: title, value: value, isToggle: isToggle, isConnected: isConnected, showIcon: showIcon)
-        
-        // assign action
+        row.configure(title: title, value: value, showIcon: showIcon, titleColor: titleColor, iconImage: iconImage)
         row.tapAction = action
         
-        // set height constraint
         row.translatesAutoresizingMaskIntoConstraints = false
         row.heightAnchor.constraint(equalToConstant: 50).isActive = true
-        
-        // add to stack
         stack.addArrangedSubview(row)
     }
     
@@ -206,72 +205,38 @@ class ProfileViewController: UIViewController {
         
         present(editorVC, animated: true)
     }
-
-    func setupSocialRows() {
-        socialStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        
-        for (platform, isConnected) in store.socialStatus {
-            
-            addRow(to: socialStack, title: platform, value: "", isToggle: true, isConnected: isConnected) { [weak self] in
-                
-                let currentStatus = self?.store.socialStatus[platform] ?? false
-                
-                if currentStatus == true {
-                    self?.store.socialStatus[platform] = false
-                    print("Disconnected")
-                    self?.setupSocialRows()
-                } else {
-                    self?.openConnectionScreen(platformName: platform)
-                }
-            }
-        }
-    }
     
-    func openConnectionScreen(platformName: String) {
-        let storyboard = UIStoryboard(name: "Analytics", bundle: nil)
+    func showLogoutConfirmation() {
+        let alert = UIAlertController(title: "Log Out", message: "Are you sure you want to log out of your account?", preferredStyle: .actionSheet)
         
-        guard let connectionVC = storyboard.instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController else {
-            return
+        let logoutAction = UIAlertAction(title: "Log Out", style: .destructive) { _ in
+            self.handleLogout()
         }
         
-        connectionVC.onCompletion = { [weak self] isSuccess in
-            guard let self = self else { return }
-            
-            if isSuccess {
-                print("Success! Connecting \(platformName)")
-                store.socialStatus[platformName] = true
-                
-            } else {
-                print("User skipped. Reverting switch.")
-            }
-
-            self.reloadSocialSection()
-        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
         
-        connectionVC.modalPresentationStyle = .pageSheet
-        if let sheet = connectionVC.sheetPresentationController {
-            sheet.detents = [.large()]
-        }
-        present(connectionVC, animated: true)
+        alert.addAction(logoutAction)
+        alert.addAction(cancelAction)
+        
+        present(alert, animated: true)
     }
 
-    func reloadSocialSection() {
-        socialStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        
-        for (platform, isConnected) in store.socialStatus {
-                
-                addRow(to: socialStack, title: platform, value: "", isToggle: true, isConnected: isConnected) { [weak self] in
-                    
-                    let currentStatus = self?.store.socialStatus[platform] ?? false
-                    
-                    if currentStatus == true {
-                        self?.store.socialStatus[platform] = false
-                        print("Disconnected")
-                        self?.setupSocialRows()
-                    } else {
-                        self?.openConnectionScreen(platformName: platform)
-                    }
+    func handleLogout() {
+        Task {
+            // 1. Sign out from Supabase
+            try? await SupabaseManager.shared.client.auth.signOut()
+            
+            // 2. Clear your local data store if necessary
+            // OnboardingDataStore.shared.clear()
+
+            DispatchQueue.main.async {
+                // 3. Navigate back to the Login/Welcome screen
+                let storyboard = UIStoryboard(name: "Profile", bundle: nil)
+                if let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginAuthVC") as? LoginAuthViewController {
+                    loginVC.modalPresentationStyle = .fullScreen
+                    self.present(loginVC, animated: true)
                 }
             }
         }
+    }
 }

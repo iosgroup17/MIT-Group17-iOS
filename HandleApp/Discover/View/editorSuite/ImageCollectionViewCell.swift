@@ -19,10 +19,11 @@ class ImageCollectionViewCell: UICollectionViewCell {
     }
 
     func configure(with image: UIImage) {
-            imageView.image = image
-            imageView.backgroundColor = .clear
-            imageView.tintColor = .clear 
-        }
+        imageView.image = image
+        imageView.backgroundColor = .clear
+        imageView.tintColor = .clear
+        imageView.contentMode = .scaleAspectFill
+    }
         
     func configureAsAddButton() {
         let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .semibold)

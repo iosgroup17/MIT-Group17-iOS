@@ -82,29 +82,51 @@ class EditorSuiteViewController: UIViewController {
         
 
     func populateData() {
-            guard let data = draft else {
-                return
-            }
-            
-
-            platformNameLabel.text = data.platformName
-            platformIconImageView.image = UIImage(named: data.platformIconName ?? "")
-            captionTextView.text = data.caption
-            
+        guard let data = draft else { return }
+        
+        platformNameLabel.text = data.platformName
+        platformIconImageView.image = UIImage(named: data.platformIconName ?? "")
+        captionTextView.text = data.caption
+        
         displayedImages.removeAll()
+        
+        // Loop through the new PostImageRef objects
+        for imageRef in data.images ?? [] {
             
-            for imageName in data.images ?? []{
-                if let img = UIImage(named: imageName) {
+            if imageRef.type == "stock" {
+                // 1. It's a stock image! Load it from Xcode Assets just like before.
+                if let img = UIImage(named: imageRef.path) {
                     displayedImages.append(img)
                 }
+                
+            } else if imageRef.type == "custom" {
+                // 2. It's a custom image! We need to download it from the Supabase URL.
+                // Note: Make sure you added the 'getPublicURL' helper to SupabaseManager!
+                if let url = SupabaseManager.shared.getPublicURL(for: imageRef.path) {
+                    
+                    // Fetch the image from the internet asynchronously
+                    Task {
+                        do {
+                            let (imageData, _) = try await URLSession.shared.data(from: url)
+                            if let downloadedImage = UIImage(data: imageData) {
+                                await MainActor.run {
+                                    // Add it to the array and refresh the UI once it downloads
+                                    self.displayedImages.append(downloadedImage)
+                                    self.imagesCollectionView.reloadData()
+                                }
+                            }
+                        } catch {
+                            print("Failed to load custom image from URL: \(error)")
+                        }
+                    }
+                }
             }
-           
-
-        imagesCollectionView.reloadData()
-
-            hashtagCollectionView.reloadData()
-            timeCollectionView.reloadData()
         }
+        
+        imagesCollectionView.reloadData()
+        hashtagCollectionView.reloadData()
+        timeCollectionView.reloadData()
+    }
     
     
     
@@ -142,67 +164,69 @@ class EditorSuiteViewController: UIViewController {
 
     @IBAction func saveButtonTapped(_ sender: Any) {
 
-                let loadingAlert = UIAlertController(title: "Saving...", message: nil, preferredStyle: .alert)
-                let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 20, width: 50, height: 50))
-                loadingIndicator.hidesWhenStopped = true
-                loadingIndicator.style = .medium
-                loadingIndicator.startAnimating()
-                loadingAlert.view.addSubview(loadingIndicator)
-                
-                present(loadingAlert, animated: true)
-                
-        let savedPost = Post(
-                id: draft?.id ?? UUID(),
-                userId: SupabaseManager.shared.currentUserID,
-                topicId: nil,
-
-                status: .saved,
-
-                postHeading: draft?.postHeading ?? "",
-                fullCaption: draft?.caption,
-
-                imageNames: draft?.images,
-                
-                platformName: draft?.platformName ?? "General",
-                platformIconName: draft?.platformIconName,
-
-                hashtags: draft?.hashtags,
-                optimalPostingTimes: draft?.postingTimes,
-
-                scheduledAt: nil,
-                publishedAt: nil,
-
-                likes: 0,
-                engagementScore: 0.0,
-
-            )
+        let loadingAlert = UIAlertController(title: "Saving...", message: nil, preferredStyle: .alert)
+        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 20, width: 50, height: 50))
+        loadingIndicator.hidesWhenStopped = true
+        loadingIndicator.style = .medium
+        loadingIndicator.startAnimating()
+        loadingAlert.view.addSubview(loadingIndicator)
         
-        print(SupabaseManager.shared.currentUserID)
-       
-                        Task {
-                            do {
-                                try await SupabaseManager.shared.upsertPost(post: savedPost)
+        present(loadingAlert, animated: true)
+        
+        Task {
+                // 1. Upload custom images to storage
+                let uploadedNames = await SupabaseManager.shared.uploadImagesToStorage(images: displayedImages)
                 
-                                await MainActor.run {
-                                    loadingAlert.dismiss(animated: true) {
-                                        self.dismiss(animated: true) {
-                                            print("Post saved successfully.")
-                                        }
-                                    }
-                                }
-                            } catch {
+                // 2. Format them into the new JSON structure
+                var finalImageRefs: [PostImageRef] = []
+                for name in uploadedNames {
+                    // Since these were uploaded from the gallery, mark them as 'custom'
+                    finalImageRefs.append(PostImageRef(type: "custom", path: name))
+                }
 
-                                await MainActor.run {
-                                    NotificationManager.shared.scheduleDraftReminder(for: savedPost)
-                                    loadingAlert.dismiss(animated: true) {
-                                        let errAlert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
-                                        print(error.localizedDescription)
-                                        errAlert.addAction(UIAlertAction(title: "OK", style: .default))
-                                        self.present(errAlert, animated: true)
-                                    }
-                                }
+                // 3. Create the Post object
+                let savedPost = Post(
+                    id: draft?.id ?? UUID(),
+                    userId: SupabaseManager.shared.currentUserID,
+                    topicId: nil,
+                    status: .saved,
+                    postHeading: draft?.postHeading ?? "",
+                    fullCaption: captionTextView.text,
+                    
+                    // USE THE NEW ARRAY HERE
+                    imageNames: finalImageRefs.isEmpty ? nil : finalImageRefs,
+                    
+                    platformName: draft?.platformName ?? "General",
+                    platformIconName: draft?.platformIconName,
+                    hashtags: draft?.hashtags,
+                    optimalPostingTimes: draft?.postingTimes
+                )
+            
+            print(SupabaseManager.shared.currentUserID)
+
+                // 4. Save to Database
+                do {
+                    try await SupabaseManager.shared.upsertPost(post: savedPost)
+                    await MainActor.run {
+                        loadingAlert.dismiss(animated: true) {
+                            self.dismiss(animated: true) {
+                                print("Post saved successfully.")
                             }
                         }
+                    }
+                } catch {
+                    await MainActor.run {
+                        NotificationManager.shared.scheduleDraftReminder(for: savedPost)
+                        loadingAlert.dismiss(animated: true) {
+                            let errAlert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+                            print(error.localizedDescription)
+                            errAlert.addAction(UIAlertAction(title: "OK", style: .default))
+                            self.present(errAlert, animated: true)
+                        }
+                    }
+
+                }
+            }
     }
     
     
@@ -233,10 +257,7 @@ class EditorSuiteViewController: UIViewController {
             hashtags: draft?.hashtags,
             optimalPostingTimes: draft?.postingTimes,
             scheduledAt: nil,
-            publishedAt: Date(),
-            likes: 0,
-            engagementScore: 0.0,
-
+            publishedAt: Date()
         )
         
         Task {
@@ -484,7 +505,13 @@ extension EditorSuiteViewController: UIImagePickerControllerDelegate, UINavigati
             alertController.addAction(libraryAction)
         }
         
-
+        if let indexToRemove = selectedImageIndex {
+            let deleteAction = UIAlertAction(title: "Remove Image", style: .destructive) { [weak self] _ in
+                self?.removeImage(at: indexToRemove)
+            }
+            alertController.addAction(deleteAction)
+        }
+        
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         alertController.addAction(cancelAction)
         
@@ -505,8 +532,7 @@ extension EditorSuiteViewController: UIImagePickerControllerDelegate, UINavigati
         picker.allowsEditing = false
         self.present(picker, animated: true, completion: nil)
     }
-    
-    
+
 
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
        
@@ -528,8 +554,23 @@ extension EditorSuiteViewController: UIImagePickerControllerDelegate, UINavigati
         picker.dismiss(animated: true, completion: nil)
     }
     
+    
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
+    }
+    
+    func removeImage(at index: Int) {
+    
+        guard index < displayedImages.count else { return }
+     
+        displayedImages.remove(at: index)
+       
+        selectedImageIndex = nil
+        
+        let indexPath = IndexPath(row: index, section: 0)
+        imagesCollectionView.performBatchUpdates({
+            imagesCollectionView.deleteItems(at: [indexPath])
+        }, completion: nil)
     }
 }
 

@@ -49,9 +49,37 @@ class PublishReadyImageCollectionViewCell: UICollectionViewCell {
         predictionLabel.text = post.predictionText
         platformIcon.image = UIImage(named: post.platformIcon)
 
-        if let imageName = post.postImage, let firstImage = imageName.first{
-            imageView.image = UIImage(named: firstImage)
-        }
+        if let images = post.postImage, let firstImage = images.first {
+                    
+                    if firstImage.type == "stock" {
+                        // 1. It's a stock image. Load from local assets using the 'path'
+                        imageView.image = UIImage(named: firstImage.path)
+                        
+                    } else if firstImage.type == "custom" {
+                        // 2. It's a custom image! Fetch from Supabase URL
+                        
+                        // Optional: Set a temporary placeholder while it downloads
+                        imageView.image = UIImage(systemName: "photo")
+                        
+                        if let url = SupabaseManager.shared.getPublicURL(for: firstImage.path) {
+                            Task {
+                                do {
+                                    let (data, _) = try await URLSession.shared.data(from: url)
+                                    if let downloadedImage = UIImage(data: data) {
+                                        await MainActor.run {
+                                            // Update the cell's image on the main thread
+                                            self.imageView.image = downloadedImage
+                                        }
+                                    }
+                                } catch {
+                                    print("Failed to load image from URL: \(error)")
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    imageView.image = nil // Handle cases where there is no image
+                }
         
         self.hashtags = post.hashtags
         hashtagCollectionView.reloadData()

@@ -19,25 +19,16 @@ struct GenerationRequest {
 actor PostGenerationModel {
 
     static let shared = PostGenerationModel()
-
-    private var session: LanguageModelSession?
     
     private init() {}
     
-    private func ensureSession() async throws -> LanguageModelSession {
-        if let existingSession = session {
-            return existingSession
+    private func createFreshSession() -> LanguageModelSession {
+            return LanguageModelSession(model: SystemLanguageModel.default)
         }
-        
-        let model = SystemLanguageModel.default
-        let newSession = LanguageModelSession(model: model)
-        self.session = newSession
-        return newSession
-    }
 
     func generatePost(profile: UserProfile, request: GenerationRequest) async throws -> EditorDraftData {
         
-        let session = try await ensureSession()
+        let session = createFreshSession()
         
 
         let prompt = """
@@ -63,9 +54,9 @@ actor PostGenerationModel {
             {
               "platformName": "\(request.platform)",
               "platformIconName": "Enum ('icon-linkedin', 'icon-x', 'icon-instagram')",
-              "caption": "String (Post body. Use \\n for line breaks. No hashtags in body)",
-              "images": ["img_XX", "img_XX"],
-              "hashtags": ["String (Exactly 4)"],
+              "caption": "String (40-60 words teaser. Use \\n\\n for line breaks. INCLUDE 3-4 hashtags at the bottom)",
+              "images": [{"type": "stock", "path": "img_XX"}],
+              "hashtags": ["#String1, #String2 (Exactly 4)"],
               "postingTimes": ["String (E.g., 'Monday at 9:00 AM') (Day at Time)"]
             }
             """
@@ -109,8 +100,7 @@ extension PostGenerationModel {
    
     func generateTopicBasedPost(profile: UserProfile, topicContext: String, request: GenerationRequest) async throws -> EditorDraftData {
         
-        let model = SystemLanguageModel.default
-        let newSession = LanguageModelSession(model: model)
+        let session = createFreshSession()
         
         let prompt = """
             ### SYSTEM
@@ -137,14 +127,14 @@ extension PostGenerationModel {
             {
                 "platformName": "\(request.platform)",
                 "platformIconName": "Enum ('icon-linkedin', 'icon-x', 'icon-instagram')",
-                "caption": "String (Post body. Use \\n for line breaks. No hashtags in body)",
-                "images": ["img_XX", "img_XX"],
-                "hashtags": ["String (Exactly 4)"],
+                "caption": "String (Post body). Short paragraphs ONLY (1-2 sentences max). Use \n\n for double spacing between points.",
+                "images": [{"type": "stock", "path": "img_XX"}],
+                "hashtags": ["#String1, #String2 (Exactly 4)"],
                 "postingTimes": ["String (E.g., 'Mon 9:00 AM') (Day at Time)"]
             }
             """
         
-        let response = try await newSession.respond(to: prompt)
+        let response = try await session.respond(to: prompt)
         let cleanJSON = stripMarkdown(from: response.content)
         
         guard let data = cleanJSON.data(using: .utf8) else {

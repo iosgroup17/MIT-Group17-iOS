@@ -11,7 +11,6 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="ProfileRow" customModule="HandleApp" customModuleProvider="target">
             <connections>
-                <outlet property="actionSwitch" destination="1we-qF-Qg5" id="1cM-Vn-Uk9"/>
                 <outlet property="arrowIcon" destination="J5z-Os-N5e" id="LbA-CF-nca"/>
                 <outlet property="contentView" destination="iN0-l3-epB" id="hQc-Wt-qA8"/>
                 <outlet property="separatorLine" destination="CIY-rz-1iq" id="k4I-xh-t6J"/>
@@ -38,10 +37,6 @@
                             <color key="textColor" systemColor="systemGrayColor"/>
                             <nil key="highlightedColor"/>
                         </label>
-                        <switch hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1we-qF-Qg5">
-                            <rect key="frame" x="347" y="13.666666666666664" width="2" height="28"/>
-                            <color key="onTintColor" name="Color"/>
-                        </switch>
                         <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="pencil" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="J5z-Os-N5e">
                             <rect key="frame" x="351" y="21.666666666666664" width="17" height="12"/>
                             <color key="tintColor" name="Color"/>
@@ -51,10 +46,6 @@
                             </constraints>
                         </imageView>
                     </subviews>
-                    <constraints>
-                        <constraint firstItem="Nxm-Zw-JTc" firstAttribute="leading" secondItem="9uk-za-IZb" secondAttribute="trailing" constant="30" id="PLu-Z7-e3A"/>
-                        <constraint firstItem="Nxm-Zw-JTc" firstAttribute="leading" secondItem="9uk-za-IZb" secondAttribute="trailing" constant="30" id="cCY-5y-8EV"/>
-                    </constraints>
                 </stackView>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="CIY-rz-1iq">
                     <rect key="frame" x="10" y="54" width="390" height="1"/>

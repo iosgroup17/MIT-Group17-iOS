@@ -56,7 +56,8 @@ struct TrendingTopic: Codable {
     let category: String
 
     enum CodingKeys: String, CodingKey {
-        case id, hashtags, category
+        case hashtags, category
+        case id = "trending_topic_id"
         case topicName = "topic_name"
         case shortDescription = "short_description"
         case platformIcon = "platform_icon"
@@ -74,7 +75,7 @@ struct PublishReadyPost: Codable, Identifiable {
     let postHeading: String
     let platformIcon: String
     let caption: String
-    let postImage: [String]?
+    let postImage: [PostImageRef]?
     let hashtags: [String]
     let predictionText: String
     
@@ -102,7 +103,7 @@ struct PublishReadyPost: Codable, Identifiable {
         self.caption = try container.decodeIfPresent(String.self, forKey: .caption) ?? ""
         
   
-        self.postImage = try container.decodeIfPresent([String].self, forKey: .postImage)
+        self.postImage = try container.decodeIfPresent([PostImageRef].self, forKey: .postImage)
         self.hashtags = try container.decodeIfPresent([String].self, forKey: .hashtags) ?? []
         
    
@@ -146,7 +147,7 @@ struct EditorDraftData: Codable {
     let platformName: String
     let platformIconName: String?
     let caption: String?
-    let images: [String]?
+    let images: [PostImageRef]?
     let hashtags: [String]?
     let postingTimes: [String]?
     
@@ -154,4 +155,9 @@ struct EditorDraftData: Codable {
         case postHeading = "post_heading" 
         case platformName, platformIconName, caption, images, hashtags, postingTimes, id
     }
+}
+
+struct PostImageRef: Codable {
+    let type: String
+    let path: String
 }

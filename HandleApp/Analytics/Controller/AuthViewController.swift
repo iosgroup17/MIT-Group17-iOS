@@ -60,21 +60,34 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
         }
     }
     
+//    func finishAuthFlow(success: Bool) {
+//            // if navigated already do nothing -> this prevents double nav
+//            if hasNavigated { return }
+//            hasNavigated = true
+//            
+//            onCompletion?(success)
+//            
+//            if let presentingVC = self.presentingViewController {
+//                self.dismiss(animated: true) {
+//                    (presentingVC as? AnalyticsViewController)?.viewWillAppear(true)
+//                }
+//            } else {
+//                self.performSegue(withIdentifier: "goToAnalytics", sender: self)
+//            }
+//        }
+    
     func finishAuthFlow(success: Bool) {
-            // if navigated already do nothing -> this prevents double nav
-            if hasNavigated { return }
-            hasNavigated = true
-            
-            onCompletion?(success)
-            
-            if let presentingVC = self.presentingViewController {
-                self.dismiss(animated: true) {
-                    (presentingVC as? AnalyticsViewController)?.viewWillAppear(true)
-                }
-            } else {
-                self.performSegue(withIdentifier: "goToAnalytics", sender: self)
-            }
+        if hasNavigated { return }
+        hasNavigated = true
+        
+        onCompletion?(success)
+        
+        if let presentingVC = self.presentingViewController {
+            self.dismiss(animated: true)
+        } else {
+            self.performSegue(withIdentifier: "goToAnalytics", sender: self)
         }
+    }
 
     // MARK: - Actions
     @IBAction func didTapInstagram(_ sender: UIButton) { handlePlatformToggle(platform: "instagram", button: sender) }
@@ -189,15 +202,25 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
             if platform == "linkedin" { score = await SupabaseManager.shared.runLinkedInScoreCalculation(handle: handle) }
             
             self.connectedPlatforms.insert(platform)
-            DispatchQueue.main.async {
-                self.toggleButtonLoading(button: button, isLoading: false)
-                self.updateButtonVisuals(platform: platform, button: button)
-                self.checkConnections()
-            }
+                    
+                DispatchQueue.main.async {
+                    self.toggleButtonLoading(button: button, isLoading: false)
+                    self.updateButtonVisuals(platform: platform, button: button)
+                    self.checkConnections()
+                    
+                    // FIX: Notify the ProfileViewController immediately
+                    // that a connection was successful.
+                    self.onCompletion?(true)
+                }
         }
     }
     
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
         return self.view.window!
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        onCompletion?(true)
     }
 }

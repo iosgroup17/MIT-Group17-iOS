@@ -12,7 +12,6 @@ class ProfileRow: UIView {
     @IBOutlet var contentView: UIView!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var valueLabel: UILabel!
-    @IBOutlet weak var actionSwitch: UISwitch!
     @IBOutlet weak var arrowIcon: UIImageView!
     @IBOutlet weak var separatorLine: UIView!
     
@@ -38,42 +37,36 @@ class ProfileRow: UIView {
         addGestureRecognizer(tap)
     }
     
-    func configure(title: String, value: String, isToggle: Bool = false, isConnected: Bool = false, showIcon: Bool = true){
-        titleLabel.text = title
-        
-        if isToggle {
-            valueLabel.isHidden = true
-            actionSwitch.isHidden = false
-            arrowIcon.isHidden = true
-            actionSwitch.addTarget(self, action: #selector(handleSwitchChange), for: .valueChanged)
-            actionSwitch.isOn = isConnected
+    func configure(title: String, value: String, showIcon: Bool = true, titleColor: UIColor = .label, iconImage: UIImage? = nil) {
+            titleLabel.text = title
+            titleLabel.textColor = titleColor
             
-            self.isUserInteractionEnabled = true
-        } else {
-            if value.isEmpty {
-                valueLabel.text = "Add"
-                valueLabel.textColor = .systemTeal
+        if let customIcon = iconImage {
+                // Setup for Logout Style
+                valueLabel.isHidden = true
+                arrowIcon.isHidden = false
+                arrowIcon.image = customIcon
+                arrowIcon.tintColor = titleColor
             } else {
-                valueLabel.text = value
-                valueLabel.textColor = .systemGray
+                // Setup for Standard Row
+                if value.isEmpty {
+                    valueLabel.text = "Add"
+                    valueLabel.textColor = .systemTeal
+                } else {
+                    valueLabel.text = value
+                    valueLabel.textColor = .systemGray
+                }
+                valueLabel.isHidden = false
+                arrowIcon.isHidden = !showIcon
+                arrowIcon.image = UIImage(systemName: "chevron.right")
+                arrowIcon.tintColor = .systemGray3
             }
             
-            valueLabel.isHidden = false
-            arrowIcon.isHidden = !showIcon
-            actionSwitch.isHidden = true
-            
             self.isUserInteractionEnabled = true
         }
-    }
-    
-    @objc func handleSwitchChange() {
-        tapAction?()
-    }
     
     @objc func handleTap(){
-        if actionSwitch.isHidden{
-            tapAction?()
-        }
+        tapAction?()
     }
 
 }

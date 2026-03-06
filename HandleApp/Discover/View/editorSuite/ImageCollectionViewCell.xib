@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24412" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24405"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -21,30 +21,27 @@
                         <rect key="frame" x="0.0" y="0.0" width="170" height="170"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="455-0Q-Tbh">
-                                <rect key="frame" x="0.0" y="0.0" width="150" height="150"/>
+                                <rect key="frame" x="10" y="10" width="150" height="150"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="150" id="9NZ-5h-vk1"/>
-                                    <constraint firstAttribute="width" constant="150" id="Bgm-L6-6gm"/>
+                                    <constraint firstAttribute="height" constant="150" id="VEH-Ir-5L0"/>
+                                    <constraint firstAttribute="width" constant="150" id="nOc-kM-lQ3"/>
                                 </constraints>
                             </imageView>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstAttribute="bottom" secondItem="455-0Q-Tbh" secondAttribute="bottom" id="NEI-Sm-LN2"/>
-                            <constraint firstItem="455-0Q-Tbh" firstAttribute="centerY" secondItem="OLZ-Yr-vpr" secondAttribute="centerY" id="ZLz-UR-7hj"/>
-                            <constraint firstAttribute="trailing" secondItem="455-0Q-Tbh" secondAttribute="trailing" id="gDD-au-n6u"/>
-                            <constraint firstItem="455-0Q-Tbh" firstAttribute="top" secondItem="OLZ-Yr-vpr" secondAttribute="top" id="hQz-MQ-i54"/>
-                            <constraint firstItem="455-0Q-Tbh" firstAttribute="leading" secondItem="OLZ-Yr-vpr" secondAttribute="leading" id="yRV-IP-6ug"/>
+                            <constraint firstItem="455-0Q-Tbh" firstAttribute="centerX" secondItem="OLZ-Yr-vpr" secondAttribute="centerX" id="K1P-8v-SFK"/>
+                            <constraint firstItem="455-0Q-Tbh" firstAttribute="centerY" secondItem="OLZ-Yr-vpr" secondAttribute="centerY" id="bRd-go-jfS"/>
                         </constraints>
                     </view>
                 </subviews>
             </view>
             <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
             <constraints>
-                <constraint firstItem="OLZ-Yr-vpr" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="FKZ-Vx-aTi"/>
-                <constraint firstItem="OLZ-Yr-vpr" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="JTh-zJ-eLR"/>
-                <constraint firstAttribute="trailing" secondItem="OLZ-Yr-vpr" secondAttribute="trailing" id="mun-YU-nkR"/>
-                <constraint firstAttribute="bottom" secondItem="OLZ-Yr-vpr" secondAttribute="bottom" id="vcZ-UI-EGt"/>
+                <constraint firstItem="OLZ-Yr-vpr" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="QRj-Cm-Kgh"/>
+                <constraint firstAttribute="bottom" secondItem="OLZ-Yr-vpr" secondAttribute="bottom" id="R3M-Az-u3Y"/>
+                <constraint firstItem="OLZ-Yr-vpr" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="a7O-qI-uU4"/>
+                <constraint firstAttribute="trailing" secondItem="OLZ-Yr-vpr" secondAttribute="trailing" id="oz4-sF-POZ"/>
             </constraints>
             <connections>
                 <outlet property="imageView" destination="455-0Q-Tbh" id="PA3-nA-Imc"/>

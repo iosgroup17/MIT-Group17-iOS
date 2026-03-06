@@ -34,7 +34,7 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
     var captionText: String?
     var platformText: String?
     var hashtags: [String]?
-    var imageNames: [String]?
+    var imageNames: [PostImageRef]?
     var postHeading: String?
     var optimalPostingTimes: [String]?
     
@@ -207,9 +207,7 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
                     hashtags: postData?.hashtags,
                     optimalPostingTimes: self.optimalPostingTimes,
                     scheduledAt: finalDate,
-                    publishedAt: nil,
-                    likes: 0,
-                    engagementScore: 0,
+                    publishedAt: nil
                )
                
 

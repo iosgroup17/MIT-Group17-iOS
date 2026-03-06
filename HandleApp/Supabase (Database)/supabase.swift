@@ -7,6 +7,7 @@
 
 import Supabase
 import Foundation
+import PhotosUI
 
 struct UserAnalytics: Codable{
     let handle_score: Int?
@@ -526,15 +527,41 @@ extension SupabaseManager {
             .execute()
     }
     
-//    func updateScheduledPost(post: Post) async throws {
-//        guard let id = post.id else { return }
-//
-//        try await client
-//            .from("posts") // Make sure this matches your DB table name
-//            .update(post)  // Update the row with the new object
-//            .eq("id", value: id) // Find the row with this ID
-//            .execute()
-//    }
+    func uploadImagesToStorage(images: [UIImage]) async -> [String] {
+        var uploadedFileNames: [String] = []
+        
+        for (index, image) in images.enumerated() {
+            // 1. Convert image to data
+            guard let imageData = image.jpegData(compressionQuality: 0.5) else { continue }
+            
+            // 2. Create a unique name (e.g., "user123_time_0.jpg")
+            let fileName = "\(currentUserID)_\(Int(Date().timeIntervalSince1970))_\(index).jpg"
+            
+            do {
+                // 3. Upload to a bucket named "posts"
+                try await client.storage
+                    .from("posts")
+                    .upload(fileName, data: imageData)
+                
+                uploadedFileNames.append(fileName)
+                print("Successfully uploaded: \(fileName)")
+            } catch {
+                print("Upload failed for image \(index): \(error)")
+            }
+        }
+        return uploadedFileNames
+    }
+    
+    func getPublicURL(for fileName: String) -> URL? {
+        do {
+            return try client.storage
+                .from("posts")
+                .getPublicURL(path: fileName)
+        } catch {
+            print("Error generating public URL: \(error)")
+            return nil
+        }
+    }
     
 
     func loadPostsIdeas() async throws -> DiscoverIdeaResponse {

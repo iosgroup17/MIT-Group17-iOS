@@ -13,7 +13,7 @@ struct Post: Codable, Identifiable {
     // Content
     var postHeading: String
     var fullCaption: String?
-    var imageNames: [String]? 
+    var imageNames: [PostImageRef]?
     var platformName: String
     var platformIconName: String?
     let hashtags: [String]?
@@ -22,10 +22,6 @@ struct Post: Codable, Identifiable {
     // Scheduling
     var scheduledAt: Date?
     var publishedAt: Date?
-    
-    // Analytics & Meta
-    var likes: Int?
-    var engagementScore: Double?
 
     enum PostStatus: String, Codable {
         case saved = "SAVED"
@@ -34,7 +30,8 @@ struct Post: Codable, Identifiable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case id, status, likes, hashtags
+        case status, hashtags
+        case id = "post_id"
         case userId = "user_id"
         case topicId = "topic_id"
         case postHeading = "post_heading"
@@ -44,7 +41,6 @@ struct Post: Codable, Identifiable {
         case platformIconName = "platform_icon_name"
         case scheduledAt = "scheduled_at"
         case publishedAt = "published_at"
-        case engagementScore = "engagement_score"
         case optimalPostingTimes = "optimal_posting_times"
     }
 }
