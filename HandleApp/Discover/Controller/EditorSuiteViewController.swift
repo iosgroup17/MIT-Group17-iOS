@@ -90,27 +90,25 @@ class EditorSuiteViewController: UIViewController {
         
         displayedImages.removeAll()
         
-        // Loop through the new PostImageRef objects
+        // loop through PostImageRef objects
         for imageRef in data.images ?? [] {
             
             if imageRef.type == "stock" {
-                // 1. It's a stock image! Load it from Xcode Assets just like before.
+                // if stock image then load from assets
                 if let img = UIImage(named: imageRef.path) {
                     displayedImages.append(img)
                 }
                 
             } else if imageRef.type == "custom" {
-                // 2. It's a custom image! We need to download it from the Supabase URL.
-                // Note: Make sure you added the 'getPublicURL' helper to SupabaseManager!
+                // custom image - download from supabase url
                 if let url = SupabaseManager.shared.getPublicURL(for: imageRef.path) {
                     
-                    // Fetch the image from the internet asynchronously
+                    // fetch the image from the internet asynchronously
                     Task {
                         do {
                             let (imageData, _) = try await URLSession.shared.data(from: url)
                             if let downloadedImage = UIImage(data: imageData) {
                                 await MainActor.run {
-                                    // Add it to the array and refresh the UI once it downloads
                                     self.displayedImages.append(downloadedImage)
                                     self.imagesCollectionView.reloadData()
                                 }
@@ -174,26 +172,25 @@ class EditorSuiteViewController: UIViewController {
         present(loadingAlert, animated: true)
         
         Task {
-                // 1. Upload custom images to storage
+                // upload the custom images to storage
                 let uploadedNames = await SupabaseManager.shared.uploadImagesToStorage(images: displayedImages)
                 
-                // 2. Format them into the new JSON structure
+                // format to jsonb structure 
                 var finalImageRefs: [PostImageRef] = []
                 for name in uploadedNames {
-                    // Since these were uploaded from the gallery, mark them as 'custom'
                     finalImageRefs.append(PostImageRef(type: "custom", path: name))
                 }
 
-                // 3. Create the Post object
+
                 let savedPost = Post(
                     id: draft?.id ?? UUID(),
                     userId: SupabaseManager.shared.currentUserID,
                     topicId: nil,
+
                     status: .saved,
+
                     postHeading: draft?.postHeading ?? "",
                     fullCaption: captionTextView.text,
-                    
-                    // USE THE NEW ARRAY HERE
                     imageNames: finalImageRefs.isEmpty ? nil : finalImageRefs,
                     
                     platformName: draft?.platformName ?? "General",
@@ -204,7 +201,7 @@ class EditorSuiteViewController: UIViewController {
             
             print(SupabaseManager.shared.currentUserID)
 
-                // 4. Save to Database
+
                 do {
                     try await SupabaseManager.shared.upsertPost(post: savedPost)
                     await MainActor.run {
@@ -241,6 +238,7 @@ class EditorSuiteViewController: UIViewController {
         }
         return urls
     }
+
     func markPostAsPublished() {
         guard let draftID = draft?.id else { return }
 
@@ -449,7 +447,6 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
                 if let navVC = segue.destination as? UINavigationController,
                    let destinationVC = navVC.topViewController as? SchedulerViewController {
                     
-                    // 1. Gather Data (Keep your existing logic)
                     let finalCaption = self.captionTextView.text ?? ""
                     let finalImages = self.displayedImages.isEmpty ? nil : self.displayedImages
                     let platform = self.draft?.platformName ?? "Post"

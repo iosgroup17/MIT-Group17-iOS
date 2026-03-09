@@ -52,13 +52,12 @@ class PublishReadyImageCollectionViewCell: UICollectionViewCell {
         if let images = post.postImage, let firstImage = images.first {
                     
                     if firstImage.type == "stock" {
-                        // 1. It's a stock image. Load from local assets using the 'path'
+                        //load from assets using path
                         imageView.image = UIImage(named: firstImage.path)
                         
                     } else if firstImage.type == "custom" {
-                        // 2. It's a custom image! Fetch from Supabase URL
+                        // fetch custom/user uplaoded images from supabase url
                         
-                        // Optional: Set a temporary placeholder while it downloads
                         imageView.image = UIImage(systemName: "photo")
                         
                         if let url = SupabaseManager.shared.getPublicURL(for: firstImage.path) {
@@ -67,7 +66,6 @@ class PublishReadyImageCollectionViewCell: UICollectionViewCell {
                                     let (data, _) = try await URLSession.shared.data(from: url)
                                     if let downloadedImage = UIImage(data: data) {
                                         await MainActor.run {
-                                            // Update the cell's image on the main thread
                                             self.imageView.image = downloadedImage
                                         }
                                     }
@@ -78,7 +76,7 @@ class PublishReadyImageCollectionViewCell: UICollectionViewCell {
                         }
                     }
                 } else {
-                    imageView.image = nil // Handle cases where there is no image
+                    imageView.image = nil 
                 }
         
         self.hashtags = post.hashtags

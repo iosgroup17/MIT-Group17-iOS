@@ -432,7 +432,7 @@ extension SupabaseManager {
 
     func fetchUserPosts() async -> [Post] {
             do {
-                // Use the smart 'currentUserID'
+                
                 let targetID = self.currentUserID
                 print("DEBUG: Fetching posts for User: \(targetID)")
 
@@ -531,14 +531,14 @@ extension SupabaseManager {
         var uploadedFileNames: [String] = []
         
         for (index, image) in images.enumerated() {
-            // 1. Convert image to data
+            //convert img to data
             guard let imageData = image.jpegData(compressionQuality: 0.5) else { continue }
             
-            // 2. Create a unique name (e.g., "user123_time_0.jpg")
+            // create a name
             let fileName = "\(currentUserID)_\(Int(Date().timeIntervalSince1970))_\(index).jpg"
             
             do {
-                // 3. Upload to a bucket named "posts"
+                // uplaod to supabase bucket
                 try await client.storage
                     .from("posts")
                     .upload(fileName, data: imageData)
@@ -642,7 +642,7 @@ extension SupabaseManager {
         do {
             try await client.from("user_suggestions")
                 .update(["status": status])
-                .eq("suggestion_id", value: id.uuidString) // 🛑 Use 'suggestion_id' column
+                .eq("suggestion_id", value: id.uuidString) 
                 .execute()
         } catch {
             print("❌ Status Update Error: \(error)")

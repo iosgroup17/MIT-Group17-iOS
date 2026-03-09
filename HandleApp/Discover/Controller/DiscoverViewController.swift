@@ -357,7 +357,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
                 if isGeneratingPosts {
                     let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "LoadingCell", for: indexPath)
                     
-                    // Clear out any old views just in case cells are reused
+                    // clear out old views when cells are reused
                     cell.contentView.subviews.forEach { $0.removeFromSuperview() }
                     
                     let spinner = UIActivityIndicatorView(style: .medium)

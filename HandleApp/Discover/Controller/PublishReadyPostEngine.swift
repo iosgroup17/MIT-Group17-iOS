@@ -224,7 +224,7 @@ extension OnDevicePostEngine {
             throw NSError(domain: "TrendPostGen", code: 1, userInfo: [NSLocalizedDescriptionKey: "Data conversion failed"])
         }
         
-        print("📈 TRENDING POSTS JSON:\n\(jsonString)")
+        print("TRENDING POSTS JSON:\n\(jsonString)")
         
         struct PostWrapper: Codable {
             let posts: [PublishReadyPost]

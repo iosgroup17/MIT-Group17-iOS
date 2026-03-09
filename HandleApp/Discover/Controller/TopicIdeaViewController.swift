@@ -289,42 +289,41 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
         
         if indexPath.section == 2 {
             if isGeneratingPosts {
-                            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "LoadingCell", for: indexPath)
-                            
-                            // Clear out any old views just in case cells are reused
-                            cell.contentView.subviews.forEach { $0.removeFromSuperview() }
-                            
-                            let spinner = UIActivityIndicatorView(style: .medium)
-                            spinner.translatesAutoresizingMaskIntoConstraints = false
-                            spinner.startAnimating()
-                            
-                            cell.contentView.addSubview(spinner)
-                            NSLayoutConstraint.activate([
-                                spinner.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor),
-                                spinner.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
-                            ])
-                            
-                            return cell
-                        }
+                        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "LoadingCell", for: indexPath)
                         
-                    // SHOW ACTUAL POSTS
-                    guard indexPath.row < generatedPosts.count else { return UICollectionViewCell() }
-                    let post = generatedPosts[indexPath.row]
-                    
-                    if let images = post.postImage, !images.isEmpty {
-                        let cell = collectionView.dequeueReusableCell(
-                            withReuseIdentifier: "PublishReadyImageCollectionViewCell",
-                            for: indexPath
-                        ) as! PublishReadyImageCollectionViewCell
-                        cell.configure(with: post)
+                        // Clear out any old views just in case cells are reused
+                        cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+                        
+                        let spinner = UIActivityIndicatorView(style: .medium)
+                        spinner.translatesAutoresizingMaskIntoConstraints = false
+                        spinner.startAnimating()
+                        
+                        cell.contentView.addSubview(spinner)
+                        NSLayoutConstraint.activate([
+                            spinner.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor),
+                            spinner.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
+                        ])
+                        
                         return cell
-                    } else {
-                        let cell = collectionView.dequeueReusableCell(
-                            withReuseIdentifier: "PublishReadyTextCollectionViewCell",
-                            for: indexPath
-                        ) as! PublishReadyTextCollectionViewCell
-                        cell.configure(with: post)
-                        return cell
+                    }
+                        
+                guard indexPath.row < generatedPosts.count else { return UICollectionViewCell() }
+                let post = generatedPosts[indexPath.row]
+                
+                if let images = post.postImage, !images.isEmpty {
+                    let cell = collectionView.dequeueReusableCell(
+                        withReuseIdentifier: "PublishReadyImageCollectionViewCell",
+                        for: indexPath
+                    ) as! PublishReadyImageCollectionViewCell
+                    cell.configure(with: post)
+                    return cell
+                } else {
+                    let cell = collectionView.dequeueReusableCell(
+                        withReuseIdentifier: "PublishReadyTextCollectionViewCell",
+                        for: indexPath
+                    ) as! PublishReadyTextCollectionViewCell
+                    cell.configure(with: post)
+                    return cell
             }
         }
         
@@ -369,7 +368,7 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
         }
         if indexPath.section == 2 {
             guard indexPath.row < generatedPosts.count else { return }
-            let previewPost = generatedPosts[indexPath.row] // Get from local array
+            let previewPost = generatedPosts[indexPath.row] // get from local array
 
             self.showRefinementLoading()
 

@@ -54,9 +54,9 @@ actor PostGenerationModel {
             {
               "platformName": "\(request.platform)",
               "platformIconName": "Enum ('icon-linkedin', 'icon-x', 'icon-instagram')",
-              "caption": "String (40-60 words teaser. Use \\n\\n for line breaks. INCLUDE 3-4 hashtags at the bottom)",
+              "caption": "String (40-60 words teaser. Use \\n\\n for line breaks. INCLUDE 3-4 hashtags at the bottom. Add more words if user asks.)",
               "images": [{"type": "stock", "path": "img_XX"}],
-              "hashtags": ["#String1, #String2 (Exactly 4)"],
+              "hashtags": ["String (Exactly 4)"],
               "postingTimes": ["String (E.g., 'Monday at 9:00 AM') (Day at Time)"]
             }
             """
@@ -129,7 +129,7 @@ extension PostGenerationModel {
                 "platformIconName": "Enum ('icon-linkedin', 'icon-x', 'icon-instagram')",
                 "caption": "String (Post body). Short paragraphs ONLY (1-2 sentences max). Use \n\n for double spacing between points.",
                 "images": [{"type": "stock", "path": "img_XX"}],
-                "hashtags": ["#String1, #String2 (Exactly 4)"],
+                "hashtags": ["String (Exactly 4)"],
                 "postingTimes": ["String (E.g., 'Mon 9:00 AM') (Day at Time)"]
             }
             """

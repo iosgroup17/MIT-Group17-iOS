@@ -18,16 +18,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             let window = UIWindow(windowScene: windowScene)
             self.window = window
 
-            // 1. Check if Supabase has a logged-in user
+            // check if supabase has a logged-in user
             if let currentUser = SupabaseManager.shared.client.auth.currentUser {
                 
-                // 2. Check the local flag for THIS specific user ID
+                //c heck the local flag for THIS specific user id
                 let userId = currentUser.id.uuidString
                 let userKey = "hasCompletedOnboarding_\(userId)"
                 let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: userKey)
 
                 if hasCompletedOnboarding {
-                    // Logged in AND this specific ID finished onboarding
+                    // Logged in AND this specific id finished onboarding
                     showMainApp(window: window)
                 } else {
                     // Logged in but new account (or hasn't finished onboarding)
@@ -51,14 +51,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         func showOnboardingQuiz(window: UIWindow) {
             let storyboard = UIStoryboard(name: "Profile", bundle: nil)
-            // Make sure this matches the Storyboard ID of your Onboarding Parent/Controller
             let onboardingVC = storyboard.instantiateViewController(withIdentifier: "OnboardingParentVC")
             window.rootViewController = onboardingVC
         }
 
         
-
-        // Call this from wherever your logout button is
         func handleLogout() {
             guard let window = self.window else { return }
             showLogin(window: window)
@@ -66,9 +63,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
     
     func showOnboarding(window: UIWindow) {
-        let storyboard = UIStoryboard(name: "Profile", bundle: nil) // Check your file name!
+        let storyboard = UIStoryboard(name: "Profile", bundle: nil) 
         
-        // Instantiate the Quiz Parent VC
         let onboardingVC = storyboard.instantiateViewController(withIdentifier: "LoginAuthVC")
  
         window.rootViewController = onboardingVC
