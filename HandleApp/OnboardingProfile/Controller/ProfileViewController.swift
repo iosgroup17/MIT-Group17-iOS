@@ -22,6 +22,7 @@ class ProfileViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        loadGoogleProfileImage()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -55,6 +56,53 @@ class ProfileViewController: UIViewController {
         styleCard(accountCardView)
         styleCard(detailsCardView)
         styleCard(socialCardView)
+    }
+    
+    func loadGoogleProfileImage() {
+        // 1. Get the current user from Supabase
+        guard let currentUser = SupabaseManager.shared.client.auth.currentUser else {
+            print("Could not fetch user")
+            return
+        }
+                      
+        // 2. Grab the metadata
+        let metadata = currentUser.userMetadata
+                
+        // 3. Safely extract the avatar URL
+        var avatarURLString: String? = nil
+                
+        // Check standard Google image keys
+        if let urlString = metadata["avatar_url"]?.value as? String {
+            avatarURLString = urlString
+        } else if let urlString = metadata["avatar_url"] as? String {
+            avatarURLString = urlString
+        } else if let urlString = metadata["picture"]?.value as? String {
+            avatarURLString = urlString
+        } else if let urlString = metadata["picture"] as? String {
+            avatarURLString = urlString
+        }
+
+        // 4. Convert string to an actual URL
+        guard let finalURLString = avatarURLString, let url = URL(string: finalURLString) else {
+            print("No valid avatar URL found in user metadata.")
+            return
+        }
+
+        // 5. Download the image asynchronously so we don't freeze the app
+        Task {
+            do {
+                let (data, _) = try await URLSession.shared.data(from: url)
+                if let downloadedImage = UIImage(data: data) {
+                            
+                    // 6. Update the UI on the Main Thread
+                    await MainActor.run {
+                        self.profileImageView.image = downloadedImage
+                    }
+                }
+            } catch {
+                print("Failed to download profile image: \(error.localizedDescription)")
+            }
+        }
     }
     
     func styleCard(_ view: UIView) {
