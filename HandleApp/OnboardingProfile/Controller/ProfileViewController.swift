@@ -124,7 +124,6 @@ class ProfileViewController: UIViewController {
             self.openEditor(forStep: 6)
         }
         
-        let logoutRow = ProfileRow()
         let logoutIcon = UIImage(systemName: "rectangle.portrait.and.arrow.right")
         addRow(to: socialStack,
                title: "Logout",
