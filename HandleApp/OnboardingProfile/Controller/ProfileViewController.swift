@@ -223,18 +223,23 @@ class ProfileViewController: UIViewController {
 
     func handleLogout() {
         Task {
-            // 1. Sign out from Supabase
             try? await SupabaseManager.shared.client.auth.signOut()
-            
-            // 2. Clear your local data store if necessary
-            // OnboardingDataStore.shared.clear()
+            OnboardingDataStore.shared.reset()
 
             DispatchQueue.main.async {
-                // 3. Navigate back to the Login/Welcome screen
-                let storyboard = UIStoryboard(name: "Profile", bundle: nil)
-                if let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginAuthVC") as? LoginAuthViewController {
-                    loginVC.modalPresentationStyle = .fullScreen
-                    self.present(loginVC, animated: true)
+                if let window = self.view.window,
+                   let _ = window.windowScene?.delegate as? SceneDelegate {
+                    
+                    let storyboard = UIStoryboard(name: "Profile", bundle: nil)
+                    let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginAuthVC")
+                    
+                    window.rootViewController = loginVC
+                    
+                    UIView.transition(with: window,
+                                    duration: 0.3,
+                                    options: .transitionCrossDissolve,
+                                    animations: nil,
+                                    completion: nil)
                 }
             }
         }

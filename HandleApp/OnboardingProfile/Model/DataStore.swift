@@ -165,4 +165,21 @@ class OnboardingDataStore {
             self.userAnswers[response.step_index] = response.selection_tags
         }
     }
+    
+    func reset() {
+        self.userAnswers = [:]
+        
+        self.profileImage = nil
+        self.displayName = nil
+        self.shortBio = nil
+        self.projects = []
+        
+        self.socialStatus = [
+            "Instagram": false,
+            "LinkedIn": false,
+            "X (Twitter)": false
+        ]
+        
+        print("OnboardingDataStore has been successfully reset.")
+    }
 }
