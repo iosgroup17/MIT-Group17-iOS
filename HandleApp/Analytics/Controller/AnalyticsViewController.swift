@@ -43,6 +43,11 @@ class AnalyticsViewController: UIViewController {
     // Suggestions
     @IBOutlet weak var suggestionStack: UIStackView!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    
+    @IBOutlet var suggestionCards: [UIView]!
+    @IBOutlet var suggestionTitles: [UILabel]!
+    @IBOutlet var suggestionBodies: [UILabel]!
+    
     // Info Button
     @IBOutlet weak var infoButton: UIButton!
     // MARK: - Variables
@@ -79,6 +84,7 @@ class AnalyticsViewController: UIViewController {
             self.navigationController?.setNavigationBarHidden(false, animated: true)
             
             setupData()
+            setupSuggestions()
             
             Task {
                 DispatchQueue.main.async {
@@ -87,6 +93,68 @@ class AnalyticsViewController: UIViewController {
                 }
             }
         }
+    
+    func setupSuggestions() {
+        Task {
+            let items = await SupabaseManager.shared.fetchPendingSuggestions()
+            
+            DispatchQueue.main.async {
+                // 🛑 CRITICAL: Save the data so the Tap Gestures can find it!
+                self.activeSuggestions = items
+                
+                self.suggestionCards.forEach { $0.isHidden = true }
+                
+                if items.isEmpty {
+                    self.showWeeklyCompletionState()
+                    return
+                }
+                
+                for (index, item) in items.enumerated() {
+                    guard index < self.suggestionCards.count else { break }
+                    let card = self.suggestionCards[index]
+                    card.isHidden = false
+                    card.alpha = 1.0 // Ensure it's visible
+                    card.tag = index
+                    
+                    self.suggestionTitles[index].text = item.title
+                    self.suggestionBodies[index].text = item.ai_rule
+                }
+            }
+        }
+    }
+    
+    func updateSuggestionsUI() {
+        // Hide all first, then show only what we have
+        suggestionCards.forEach { $0.isHidden = true }
+        
+        for (index, item) in activeSuggestions.enumerated() {
+            guard index < suggestionCards.count else { break }
+            
+            let card = suggestionCards[index]
+            card.isHidden = false
+            card.alpha = 1.0
+            card.tag = index // Store index for the tap action
+            
+            suggestionTitles[index].text = item.title
+            self.suggestionBodies[index].text = item.ai_rule
+            
+            // Minimalist style: light border, no gradients
+            card.layer.borderColor = UIColor.systemGray5.cgColor
+            card.layer.borderWidth = 1.0
+            card.layer.cornerRadius = 12
+        }
+    }
+    
+    func loadSmartSuggestions() {
+        Task {
+            let items = await SupabaseManager.shared.fetchPendingSuggestions()
+            self.activeSuggestions = items
+            
+            DispatchQueue.main.async {
+                self.updateSuggestionsUI()
+            }
+        }
+    }
 
     // MARK: - Data Fetching
         func setupData() {
@@ -340,90 +408,11 @@ class AnalyticsViewController: UIViewController {
         return stack
     }
     
-    // MARK: - Programmatic Suggestions UI
-    func updateSuggestionsUI() {
-        suggestionStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        
-        let actedCount = activeSuggestions.filter { $0.status != "pending" }.count
-        if actedCount >= 2 {
-            showWeeklyCompletionState()
-            return
-        }
-        
-        let pendingOnes = activeSuggestions.filter { $0.status == "pending" }
-        if pendingOnes.isEmpty {
-            showWeeklyCompletionState()
-        } else {
-            for suggestion in pendingOnes {
-                guard let originalIndex = activeSuggestions.firstIndex(where: { $0.suggestion_id == suggestion.suggestion_id }) else { continue }
-                
-                // Build the card programmatically using YOUR AnalyticsCardView
-                let cardView = AnalyticsCardView()
-                
-                let vStack = UIStackView()
-                vStack.axis = .vertical
-                vStack.spacing = 8
-                vStack.translatesAutoresizingMaskIntoConstraints = false
-                
-                let titleLabel = UILabel()
-                titleLabel.text = suggestion.title ?? "Smart Suggestion"
-                titleLabel.font = .systemFont(ofSize: 16, weight: .bold)
-                
-                let descLabel = UILabel()
-                descLabel.text = suggestion.ai_rule ?? "No description available"
-                descLabel.font = .systemFont(ofSize: 14)
-                descLabel.textColor = .secondaryLabel
-                descLabel.numberOfLines = 0
-                
-                let hStack = UIStackView()
-                hStack.axis = .horizontal
-                hStack.spacing = 12
-                hStack.distribution = .fillEqually
-                
-                let applyBtn = UIButton(type: .system)
-                applyBtn.setTitle("Apply", for: .normal)
-                applyBtn.backgroundColor = .systemBlue
-                applyBtn.setTitleColor(.white, for: .normal)
-                applyBtn.layer.cornerRadius = 8
-                applyBtn.titleLabel?.font = .systemFont(ofSize: 14, weight: .semibold)
-                applyBtn.heightAnchor.constraint(equalToConstant: 36).isActive = true
-                applyBtn.tag = originalIndex
-                // Notice this now uses UIButton target instead of gesture
-                applyBtn.addTarget(self, action: #selector(didTapApplySuggestion(_:)), for: .touchUpInside)
-                
-                let removeBtn = UIButton(type: .system)
-                removeBtn.setTitle("Dismiss", for: .normal)
-                removeBtn.backgroundColor = .systemGray5
-                removeBtn.setTitleColor(.systemRed, for: .normal)
-                removeBtn.layer.cornerRadius = 8
-                removeBtn.titleLabel?.font = .systemFont(ofSize: 14, weight: .semibold)
-                removeBtn.heightAnchor.constraint(equalToConstant: 36).isActive = true
-                removeBtn.tag = originalIndex
-                removeBtn.addTarget(self, action: #selector(didTapRemoveSuggestion(_:)), for: .touchUpInside)
-                
-                hStack.addArrangedSubview(removeBtn)
-                hStack.addArrangedSubview(applyBtn)
-                
-                vStack.addArrangedSubview(titleLabel)
-                vStack.addArrangedSubview(descLabel)
-                vStack.addArrangedSubview(hStack)
-                
-                cardView.addSubview(vStack)
-                
-                // Pin inner stack to the AnalyticsCardView
-                NSLayoutConstraint.activate([
-                    vStack.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 16),
-                    vStack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 16),
-                    vStack.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -16),
-                    vStack.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -16)
-                ])
-                
-                suggestionStack.addArrangedSubview(cardView)
-            }
-        }
-    }
     
     private func showWeeklyCompletionState() {
+        // Clear any hidden cards from the stack so the stub centers correctly
+        suggestionStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        
         let container = UIView()
         container.translatesAutoresizingMaskIntoConstraints = false
         container.heightAnchor.constraint(equalToConstant: 120).isActive = true
@@ -442,7 +431,23 @@ class AnalyticsViewController: UIViewController {
             label.centerYAnchor.constraint(equalTo: container.centerYAnchor)
         ])
         
+        // Animate the appearance of the stub
+        container.alpha = 0
         suggestionStack.addArrangedSubview(container)
+        UIView.animate(withDuration: 0.5) { container.alpha = 1.0 }
+    }
+    
+    private func checkSuggestionsEmptyState(removedIndex: Int) {
+        // 1. Mark the suggestion as no longer 'pending' locally
+        activeSuggestions[removedIndex].status = "accepted" // or "declined"
+        
+        // 2. Count how many are still pending
+        let remainingPending = activeSuggestions.filter { $0.status == "pending" }
+        
+        // 3. If zero, show your completion stub
+        if remainingPending.isEmpty {
+            showWeeklyCompletionState()
+        }
     }
 
     // MARK: - Actions
@@ -469,7 +474,7 @@ class AnalyticsViewController: UIViewController {
                 // Present it nicely
                 let navController = UINavigationController(rootViewController: authVC)
                 if let sheet = navController.sheetPresentationController {
-                    sheet.detents = [.medium(), .large()] // Gives it that modern half-screen swipe up look
+                    sheet.detents = [.large()] // Gives it that modern half-screen swipe up look
                 }
                 self.present(navController, animated: true)
                 
@@ -480,57 +485,51 @@ class AnalyticsViewController: UIViewController {
         }
     
     
-    @objc func didTapRemoveSuggestion(_ sender: UIButton) {
-        let index = sender.tag
+    @IBAction func didTapDismissSuggestion(_ sender: UIButton) {
+        // 1. Find the parent card view that holds the tag
+        guard let cardView = sender.superview else { return }
+        let index = cardView.tag
+        
+        // 2. Safety check for array bounds
         guard index < activeSuggestions.count else { return }
         let suggestion = activeSuggestions[index]
         
-        // Find the parent card view to hide it
-        var parentView: UIView? = sender
-        while parentView != nil && !(parentView is AnalyticsCardView) {
-            parentView = parentView?.superview
-        }
-        let cardView = parentView
-        
         Task {
-            // Uncomment the line below to actually update the DB
-            // await SupabaseManager.shared.updateSuggestionStatus(id: suggestion.suggestion_id, status: "rejected")
+            // 3. Update Supabase
+            await SupabaseManager.shared.updateSuggestionStatus(id: suggestion.suggestion_id, status: "declined")
+            
             DispatchQueue.main.async {
+                // 4. Animate the card away
                 UIView.animate(withDuration: 0.3, animations: {
-                    cardView?.isHidden = true
-                    cardView?.alpha = 0
+                    cardView.alpha = 0
+                    cardView.isHidden = true
                 }) { _ in
-                    cardView?.removeFromSuperview()
-                    self.activeSuggestions[index].status = "rejected"
-                    self.updateSuggestionsUI() // Refresh state
+                    // 5. Update local state and check if all are gone
+                    self.checkSuggestionsEmptyState(removedIndex: index)
                 }
-                self.showToast(message: "Suggestion Dismissed", isSuccess: false)
+                self.showToast(message: "Suggestion Removed", isSuccess: false)
             }
         }
     }
     
-    @objc func didTapApplySuggestion(_ sender: UIButton) {
-        let index = sender.tag
+    @IBAction func didTapApplySuggestion(_ sender: UITapGestureRecognizer) {
+        guard let cardView = sender.view else { return }
+        let index = cardView.tag
         guard index < activeSuggestions.count else { return }
+        
         let suggestion = activeSuggestions[index]
         
-        var parentView: UIView? = sender
-        while parentView != nil && !(parentView is AnalyticsCardView) {
-            parentView = parentView?.superview
-        }
-        let cardView = parentView
-        
         Task {
-            // Uncomment the line below to actually update the DB
-            // await SupabaseManager.shared.updateSuggestionStatus(id: suggestion.suggestion_id, status: "accepted")
+            await SupabaseManager.shared.updateSuggestionStatus(id: suggestion.suggestion_id, status: "accepted")
+            
             DispatchQueue.main.async {
+                // 1. Animate out
                 UIView.animate(withDuration: 0.3, animations: {
-                    cardView?.isHidden = true
-                    cardView?.alpha = 0
+                    cardView.alpha = 0
+                    cardView.isHidden = true
                 }) { _ in
-                    cardView?.removeFromSuperview()
-                    self.activeSuggestions[index].status = "accepted"
-                    self.updateSuggestionsUI() // Refresh state
+                    // 2. Remove from local array and check if empty
+                    self.checkSuggestionsEmptyState(removedIndex: index)
                 }
                 self.showToast(message: "Strategy Applied!", isSuccess: true)
             }
@@ -561,20 +560,16 @@ class AnalyticsViewController: UIViewController {
         toastView.backgroundColor = isSuccess ? .systemGreen : .systemRed
         toastView.alpha = 0.0
         toastView.layer.cornerRadius = 20
-        
         let label = UILabel()
         label.text = (isSuccess ? "✓ " : "✕ ") + message
         label.textColor = .white
         label.font = .boldSystemFont(ofSize: 14)
         label.textAlignment = .center
-        
         toastView.addSubview(label)
         self.view.addSubview(toastView)
-        
         let screenWidth = self.view.frame.width
         toastView.frame = CGRect(x: (screenWidth - 200)/2, y: 60, width: 200, height: 40)
         label.frame = toastView.bounds
-        
         Task {
             _ = await UIView.animateAsync(duration: 0.3) { toastView.alpha = 1.0; toastView.frame.origin.y = 100 }
             try? await Task.sleep(nanoseconds: 1_500_000_000)

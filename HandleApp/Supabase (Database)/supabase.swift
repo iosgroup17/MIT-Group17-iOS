@@ -612,29 +612,28 @@ extension SupabaseManager {
 struct Suggestion: Codable{
     let suggestion_id: UUID
     let title: String
-    let body: String
     let ai_rule: String
+    let industry: String
     var status: String
 }
 
 extension SupabaseManager {
     // Fetch pending cards for the Analytics UI
     func fetchPendingSuggestions() async -> [Suggestion] {
+        guard let userId = client.auth.currentSession?.user.id else { return [] }
+        
         do {
-            // Query BOTH the real session ID and the hardcoded test ID
             let results: [Suggestion] = try await client.from("user_suggestions")
                 .select("*")
-                .or("user_id.eq.\(currentUserID.uuidString),user_id.eq.\(testUserID.uuidString)")
+                .eq("user_id", value: userId) // Only fetch for THIS user
                 .eq("status", value: "pending")
                 .order("created_at", ascending: false)
                 .limit(3)
                 .execute()
                 .value
-            
-            print("Fetched \(results.count) suggestions (including Test ID)")
             return results
         } catch {
-            print("UI Fetch Error: \(error)")
+            print("❌ Fetch Error: \(error)")
             return []
         }
     }
@@ -643,10 +642,10 @@ extension SupabaseManager {
         do {
             try await client.from("user_suggestions")
                 .update(["status": status])
-                .eq("suggestion_id", value: id)
+                .eq("suggestion_id", value: id.uuidString) // 🛑 Use 'suggestion_id' column
                 .execute()
         } catch {
-            print("Status Update Error: \(error)")
+            print("❌ Status Update Error: \(error)")
         }
     }
 
@@ -671,7 +670,7 @@ extension SupabaseManager {
         do {
             let currentUser = try await client.auth.session.user
             let results: [OnboardingResponse] = try await client
-                .from("onboarding_responses") // Replace with your actual table name
+                .from("onboarding_responses")
                 .select("*")
                 .eq("user_id", value: currentUser.id)
                 .execute()

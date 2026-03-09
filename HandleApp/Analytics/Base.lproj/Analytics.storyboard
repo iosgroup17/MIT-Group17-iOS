@@ -566,6 +566,9 @@
                                                                     <imageReference key="image" image="xmark" catalog="system" symbolScale="small"/>
                                                                     <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" weight="semibold"/>
                                                                 </buttonConfiguration>
+                                                                <connections>
+                                                                    <action selector="didTapDismissSuggestion:" destination="vSe-a6-cVM" eventType="touchUpInside" id="x8B-0L-dgV"/>
+                                                                </connections>
                                                             </button>
                                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" translatesAutoresizingMaskIntoConstraints="NO" id="dvI-jT-Zb2">
                                                                 <rect key="frame" x="16" y="16" width="316" height="68"/>
@@ -622,6 +625,9 @@
                                                                     <imageReference key="image" image="xmark" catalog="system" symbolScale="small"/>
                                                                     <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" weight="semibold"/>
                                                                 </buttonConfiguration>
+                                                                <connections>
+                                                                    <action selector="didTapDismissSuggestion:" destination="vSe-a6-cVM" eventType="touchUpInside" id="dTP-QY-gmR"/>
+                                                                </connections>
                                                             </button>
                                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" translatesAutoresizingMaskIntoConstraints="NO" id="eUF-2P-U0h">
                                                                 <rect key="frame" x="16" y="16" width="316" height="68"/>
@@ -766,11 +772,25 @@
                         <outlet property="totalEngagementLabel" destination="HfK-JH-oUZ" id="28y-X7-U3e"/>
                         <outlet property="weeksStreakLabel" destination="uiH-Yd-SVL" id="10C-kf-uXc"/>
                         <outlet property="xPostsLabel" destination="wxA-gr-yWe" id="8XR-D9-dos"/>
+                        <outletCollection property="suggestionCards" destination="kU7-ED-kUi" collectionClass="NSMutableArray" id="yLZ-hd-cgJ"/>
+                        <outletCollection property="suggestionCards" destination="uR7-nt-4yW" collectionClass="NSMutableArray" id="Sue-xl-kJm"/>
+                        <outletCollection property="suggestionTitles" destination="bUg-1c-Txf" collectionClass="NSMutableArray" id="YAK-88-4we"/>
+                        <outletCollection property="suggestionTitles" destination="xZq-9R-E4U" collectionClass="NSMutableArray" id="6gW-tw-mqb"/>
+                        <outletCollection property="suggestionBodies" destination="vy4-g6-ai5" collectionClass="NSMutableArray" id="zON-jM-9l9"/>
+                        <outletCollection property="suggestionBodies" destination="2x9-CE-ggB" collectionClass="NSMutableArray" id="LLg-v6-plT"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="pOU-vU-82A" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-                <tapGestureRecognizer id="PqT-AU-xcl"/>
-                <tapGestureRecognizer id="1FQ-MM-e6o"/>
+                <tapGestureRecognizer id="PqT-AU-xcl">
+                    <connections>
+                        <action selector="didTapApplySuggestion:" destination="vSe-a6-cVM" id="wF2-l4-4Vv"/>
+                    </connections>
+                </tapGestureRecognizer>
+                <tapGestureRecognizer id="1FQ-MM-e6o">
+                    <connections>
+                        <action selector="didTapApplySuggestion:" destination="vSe-a6-cVM" id="GJ8-0K-CcS"/>
+                    </connections>
+                </tapGestureRecognizer>
                 <tapGestureRecognizer id="SXX-0N-eT5"/>
                 <tapGestureRecognizer id="WOm-Y7-lcp"/>
             </objects>
