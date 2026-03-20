@@ -25,7 +25,8 @@ class NotificationManager {
     
     // 2. Schedule Notification for SCHEDULED posts (3 Hours Before)
     func schedulePostReminder(for post: Post) {
-        guard let postId = post.id, let scheduledDate = post.scheduledAt else { return }
+        let postId = post.id
+        guard let scheduledDate = post.scheduledAt else { return }
         
         // Calculate 3 hours (10,800 seconds) before the scheduled time
         let triggerDate = scheduledDate.addingTimeInterval(-10800)
@@ -40,7 +41,7 @@ class NotificationManager {
         let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: triggerDate)
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
         
-        let request = UNNotificationRequest(identifier: postId.uuidString, content: content, trigger: trigger)
+        let request = UNNotificationRequest(identifier: postId?.uuidString ?? "", content: content, trigger: trigger)
         
         UNUserNotificationCenter.current().add(request)
         print("Scheduled reminder for \(triggerDate)")
@@ -48,7 +49,7 @@ class NotificationManager {
     
     // 3. Schedule Notification for SAVED/DRAFT posts (2 Days After)
     func scheduleDraftReminder(for post: Post) {
-        guard let postId = post.id else { return }
+        let postId = post.id 
         
         let content = UNMutableNotificationContent()
         content.title = "Unfinished Draft: \(post.platformName)"
@@ -58,7 +59,7 @@ class NotificationManager {
         // 2 Days in seconds = 172,800 seconds
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 172800, repeats: false)
         
-        let request = UNNotificationRequest(identifier: postId.uuidString, content: content, trigger: trigger)
+        let request = UNNotificationRequest(identifier: postId?.uuidString ?? "", content: content, trigger: trigger)
         
         UNUserNotificationCenter.current().add(request)
         print("Draft reminder set for 2 days from now")

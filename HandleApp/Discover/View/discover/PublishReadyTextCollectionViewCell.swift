@@ -14,7 +14,7 @@ class PublishReadyTextCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var platformIcon: UIImageView!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var captionLabel: UILabel!
-    @IBOutlet weak var hashtagCollectionView: UICollectionView!
+   // @IBOutlet weak var hashtagCollectionView: UICollectionView!
     @IBOutlet weak var predictionView: UIView!
     @IBOutlet weak var predictionLabel: UILabel!
     
@@ -33,11 +33,11 @@ class PublishReadyTextCollectionViewCell: UICollectionViewCell {
         predictionView.backgroundColor = .systemTeal.withAlphaComponent(0.1)
         predictionView.layer.cornerRadius = 16
         
-        hashtagCollectionView.delegate = self
-        hashtagCollectionView.dataSource = self
-        
-        hashtagCollectionView.register(UINib(nibName: "TrendingTopicHashtagCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "TrendingTopicHashtagCollectionViewCell")
-        // Initialization code
+//        hashtagCollectionView.delegate = self
+//        hashtagCollectionView.dataSource = self
+//        
+//        hashtagCollectionView.register(UINib(nibName: "TrendingTopicHashtagCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "TrendingTopicHashtagCollectionViewCell")
+//        // Initialization code
     }
     
     func configure(with post: PublishReadyPost) {
@@ -46,42 +46,42 @@ class PublishReadyTextCollectionViewCell: UICollectionViewCell {
         predictionLabel.text = post.predictionText
         platformIcon.image = UIImage(named: post.platformIcon)
         
-        self.hashtags = post.hashtags
-        hashtagCollectionView.reloadData()
+//        self.hashtags = post.hashtags
+//        hashtagCollectionView.reloadData()
     }
 
 }
 
-extension PublishReadyTextCollectionViewCell: UICollectionViewDataSource {
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return hashtags.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TrendingTopicHashtagCollectionViewCell", for: indexPath) as! TrendingTopicHashtagCollectionViewCell
-        
-        cell.configure(text: hashtags[indexPath.row], isOutlined: true)
-        
-        return cell
-        
-    }
-}
-
-extension PublishReadyTextCollectionViewCell: UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        
-        let rawText = "#\(hashtags[indexPath.row])"
-  
-        let font = UIFont.preferredFont(forTextStyle: .callout)
-        let textAttributes = [NSAttributedString.Key.font: font]
-
-        let textWidth = rawText.size(withAttributes: textAttributes).width
-        
-        let totalWidth = ceil(textWidth) + 12
-        
-        return CGSize(width: totalWidth, height: 27)
-    }
-}
+//extension PublishReadyTextCollectionViewCell: UICollectionViewDataSource {
+//    
+//    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+//        return hashtags.count
+//    }
+//    
+//    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+//        
+//        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TrendingTopicHashtagCollectionViewCell", for: indexPath) as! TrendingTopicHashtagCollectionViewCell
+//        
+//        cell.configure(text: hashtags[indexPath.row], isOutlined: true)
+//        
+//        return cell
+//        
+//    }
+//}
+//
+//extension PublishReadyTextCollectionViewCell: UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
+//    
+//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+//        
+//        let rawText = "#\(hashtags[indexPath.row])"
+//  
+//        let font = UIFont.preferredFont(forTextStyle: .callout)
+//        let textAttributes = [NSAttributedString.Key.font: font]
+//
+//        let textWidth = rawText.size(withAttributes: textAttributes).width
+//        
+//        let totalWidth = ceil(textWidth) + 12
+//        
+//        return CGSize(width: totalWidth, height: 27)
+//    }
+//}

@@ -163,14 +163,15 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
                 
         return configuration
     }
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         self.performSegue(withIdentifier: "openEditorModal", sender: indexPath)
-        }
+    }
+    
     //Pass data to scheduler and Editor suite VC.
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "openEditorModal" {
-                // This handles both direct pushes and modal nav wrappers
                 let destinationVC = (segue.destination as? UINavigationController)?.topViewController as? EditorSuiteViewController
                                     ?? segue.destination as? EditorSuiteViewController
 

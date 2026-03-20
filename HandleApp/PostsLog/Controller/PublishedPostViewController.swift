@@ -8,10 +8,10 @@
 import UIKit
 
 class PublishedPostViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPopoverPresentationControllerDelegate {
-
+    
     @IBOutlet weak var publishedTableView: UITableView!
     @IBOutlet weak var filterStackView: UIStackView!
-
+    
     
     var publishedPosts: [Post] = []
     var displayedPosts: [Post] = []
@@ -20,10 +20,10 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
     override func viewDidLoad() {
         super.viewDidLoad()
         let imageNib = UINib(nibName: "PublishedPostImageTableViewCell", bundle: nil)
-            publishedTableView.register(imageNib, forCellReuseIdentifier: "ImagePublishedCell")
-           
+        publishedTableView.register(imageNib, forCellReuseIdentifier: "ImagePublishedCell")
+        
         let textNib = UINib(nibName: "PublishedPostTextTableViewCell", bundle: nil)
-            publishedTableView.register(textNib, forCellReuseIdentifier: "TextPublishedCell")
+        publishedTableView.register(textNib, forCellReuseIdentifier: "TextPublishedCell")
         self.publishedTableView.delegate = self
         self.publishedTableView.dataSource = self
         displayedPosts = publishedPosts
@@ -52,7 +52,7 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
     @IBAction func buttonTapped(_ sender: UIButton) {
         let tag = sender.tag
         var selectedPlatform: String?
-
+        
         switch tag {
         case 1:
             selectedPlatform = "All"
@@ -69,12 +69,12 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
         guard let platform = selectedPlatform else { return }
         
         print("ACTION: Tag \(tag) selected. Platform: \(platform)")
-
+        
         if platform != currentPlatformFilter {
             currentPlatformFilter = platform
         }
     }
-
+    
     var currentPlatformFilter: String = "All" {
         didSet {
             updateCapsuleAppearance()
@@ -84,12 +84,12 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
     
     func applyFilters() {
         var filtered = publishedPosts
-
+        
         // 1. Filter by Platform
         if currentPlatformFilter != "All" {
             filtered = filtered.filter { $0.platformName == currentPlatformFilter }
         }
-
+        
         // 2. Filter by Time
         if currentTimeFilter != "All" {
             let daysAgo = currentTimeFilter == "Last 7 Days" ? 7 : 30
@@ -99,7 +99,7 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
                 return publishDate >= cutoffDate
             }
         }
-
+        
         self.displayedPosts = filtered
         self.publishedTableView.reloadData()
     }
@@ -149,28 +149,26 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
         
         present(alertController, animated: true)
     }
-
+    
     func getDate(daysAgo: Int) -> Date {
         return Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date())!
     }
-
     
-
+    
+    
     //Table View
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
-
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return displayedPosts.count
     }
-
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-      
+        
         let post = displayedPosts[indexPath.row]
         let hasImages = post.imageNames?.isEmpty == false
-
-        // 3. Dequeue and configure
         if hasImages {
             let cell = tableView.dequeueReusableCell(withIdentifier: "ImagePublishedCell", for: indexPath) as! PublishedPostImageTableViewCell
             cell.configure(with: post)
@@ -182,17 +180,37 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
         }
     }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-            // Automatically calculate height based on Autolayout constraints in the cell
-            return UITableView.automaticDimension
-        }
-        
-        // Provide an estimated height for performance
-        func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
-            return 150
-        }
-        
+        // Automatically calculate height based on Autolayout constraints in the cell
+        return UITableView.automaticDimension
+    }
+    
+    // Provide an estimated height for performance
+    func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 150
+    }
+    
+    //Redirect to actual post
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-            // Just deselect the row, no expansion logic needed anymore
             tableView.deselectRow(at: indexPath, animated: true)
+            let post = displayedPosts[indexPath.row]
+            
+            var urlString = ""
+            
+            switch post.platformName.lowercased() {
+            case "instagram":
+                urlString = "https://www.instagram.com/reels/\(post.id)/"
+            case "linkedin":
+                urlString = "https://www.linkedin.com/feed/update/\(post.id)/"
+            case "x":
+                urlString = "https://twitter.com/user/status/\(post.id)"
+            default:
+                return
+            }
+            
+            if let url = URL(string: urlString) {
+                UIApplication.shared.open(url)
+            }
         }
+    }
 }

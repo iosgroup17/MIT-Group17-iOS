@@ -29,6 +29,9 @@ class PostsViewController: UIViewController {
     
     var currentWeekStartDate: Date = Calendar.current.startOfDay(for: Date())
     
+    // Newly added variable.
+    private var contentSizeObserver: NSKeyValueObservation?
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -41,7 +44,8 @@ class PostsViewController: UIViewController {
         postsTableView.register(textNib, forCellReuseIdentifier: "SchForTodayTableViewCell")
         
         postsTableView.rowHeight = UITableView.automaticDimension
-            postsTableView.estimatedRowHeight = 100
+        postsTableView.estimatedRowHeight = 150
+        postsTableView.isScrollEnabled = false
             
         let calendar = Calendar.current
         currentWeekStartDate = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())) ?? Date()
@@ -71,8 +75,6 @@ class PostsViewController: UIViewController {
         applyPillShadowStyle(to: savedStackView)
         
         
-
-        updateTableViewHeight()
         postsTableView.dataSource = self
         postsTableView.delegate = self
         
@@ -84,8 +86,25 @@ class PostsViewController: UIViewController {
 
         cardTableView.layer.cornerRadius = 16
         
-
+        //Observer for ensuring card size increases as posts are added
+        contentSizeObserver = postsTableView.observe(\.contentSize, options: .new) { [weak self] (_, change) in
+            guard let self = self, let newHeight = change.newValue?.height else { return }
+            
+            if abs(self.tableViewHeightConstraint.constant - (newHeight + 10)) > 1 {
+                DispatchQueue.main.async {
+                    self.tableViewHeightConstraint.constant = newHeight + 10
+                    UIView.animate(withDuration: 0.2) {
+                        self.view.layoutIfNeeded()
+                    }
+                }
+            }
+        }
     }
+
+    deinit {
+        contentSizeObserver?.invalidate()
+    }
+
     override func viewWillAppear(_ animated: Bool) {
             super.viewWillAppear(animated)
             fetchData() // Refresh every time the view appears
@@ -93,11 +112,11 @@ class PostsViewController: UIViewController {
     //Fetch posts from supabase.
     func fetchData() {
         Task {
-                // 1. Fetch EVERYTHING
+                //Fetch all posts
                 let fetchedPosts = await SupabaseManager.shared.fetchUserPosts()
                 self.allPosts = fetchedPosts
                 
-                // 2. Filter locally for "Today's Schedule"
+                //Filter locally for today's posts
                 let today = Date()
                 self.todayScheduledPosts = fetchedPosts.filter { post in
                     guard post.status == .scheduled, let date = post.scheduledAt else { return false }
@@ -106,9 +125,14 @@ class PostsViewController: UIViewController {
                 
                 await MainActor.run {
                     self.postsTableView.reloadData()
-                    self.updateTableViewHeight()
                     
-                    // We pass 'currentWeekStartDate' so it doesn't reset the scroll position
+                    // Old: self.updateTableViewHeight()
+                    // Replaced with an async call to ensure the table has finished its reload
+                    // before we calculate the final height for the container.
+                    DispatchQueue.main.async {
+                        self.updateTableViewHeight()
+                    }
+                    
                     self.setupCustomCalendar(for: self.currentWeekStartDate)
                 }
             }
@@ -199,22 +223,17 @@ class PostsViewController: UIViewController {
         let container = UIView()
             container.addSubview(label)
             label.translatesAutoresizingMaskIntoConstraints = false
-            
-            // 1. Set translatesAutoresizingMaskIntoConstraints to false for the container
             container.translatesAutoresizingMaskIntoConstraints = false
 
             NSLayoutConstraint.activate([
                 label.centerXAnchor.constraint(equalTo: container.centerXAnchor),
                 label.centerYAnchor.constraint(equalTo: container.centerYAnchor, constant: -3),
-                
-                // 2. Force the container to be a square
                 container.heightAnchor.constraint(equalToConstant: 32),
                 container.widthAnchor.constraint(equalToConstant: 32)
             ])
 
             if isSelected {
                 container.backgroundColor = .systemTeal.withAlphaComponent(40/255)
-                // 3. Corner radius should be half of the height/width
                 container.layer.cornerRadius = 16
                 container.clipsToBounds = true
                 label.textColor = .systemTeal
@@ -263,15 +282,15 @@ class PostsViewController: UIViewController {
         }
 
         
-        // Priority 1: If there is ANYTHING scheduled, show Yellow (Work Remaining)
+        //If there is ANYTHING scheduled, show Yellow (Work Remaining)
         if hasScheduledPost {
             return .systemYellow
         }
-        // Priority 2: If nothing is scheduled, but something is published, show Green (Day Complete)
+        //If nothing is scheduled, but something is published, show Green (Day Complete)
         else if hasPublishedPost {
             return .systemGreen
         }
-        // Fallback
+        //Fallback
         else {
             return .clear
         }
@@ -331,15 +350,11 @@ class PostsViewController: UIViewController {
     }
             
     func updateTableViewHeight() {
-            postsTableView.layoutIfNeeded()
-
-            let requiredHeight = postsTableView.contentSize.height
-
-            tableViewHeightConstraint.constant = requiredHeight
-            
-            UIView.animate(withDuration: 0.3) {
-                self.view.layoutIfNeeded()
-            }
+        let newHeight = postsTableView.contentSize.height
+        if !postsTableView.isEditing && abs(tableViewHeightConstraint.constant - newHeight) > 1 {
+            tableViewHeightConstraint.constant = newHeight + 2
+            self.view.layoutIfNeeded()
+        }
     }
 }
 extension PostsViewController: UITableViewDataSource, UITableViewDelegate {

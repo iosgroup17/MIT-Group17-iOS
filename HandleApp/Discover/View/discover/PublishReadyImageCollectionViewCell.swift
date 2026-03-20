@@ -79,7 +79,7 @@ class PublishReadyImageCollectionViewCell: UICollectionViewCell {
                     imageView.image = nil 
                 }
         
-        self.hashtags = post.hashtags
+        self.hashtags = post.hashtags ?? [""]
         hashtagCollectionView.reloadData()
     }
     

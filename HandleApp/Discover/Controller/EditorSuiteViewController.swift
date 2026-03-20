@@ -175,7 +175,7 @@ class EditorSuiteViewController: UIViewController {
                 // upload the custom images to storage
                 let uploadedNames = await SupabaseManager.shared.uploadImagesToStorage(images: displayedImages)
                 
-                // format to jsonb structure 
+                // format to jsonb structure
                 var finalImageRefs: [PostImageRef] = []
                 for name in uploadedNames {
                     finalImageRefs.append(PostImageRef(type: "custom", path: name))

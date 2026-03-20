@@ -198,17 +198,29 @@ class OnboardingViewController: UIViewController {
     }
     
     func navigateToProfileScreen() {
-        // save flag to skip onboarding next time
-        UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
+        //Get the current User ID
+        guard let userId = SupabaseManager.shared.client.auth.currentUser?.id.uuidString else {
+            print("❌ Error: No user logged in during onboarding completion")
+            return
+        }
+        let userKey = "hasCompletedOnboarding_\(userId)"
+        UserDefaults.standard.set(true, forKey: userKey)
         
-        // using scene delegate to switch root VC
-        if let sceneDelegate = self.view.window?.windowScene?.delegate as? SceneDelegate,
-           let window = sceneDelegate.window {
-            
-            // call helper showMainApp from scene delegate
-            sceneDelegate.showMainApp(window: window)
-            
-            UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: nil, completion: nil)
+        print("✅ Onboarding completed for user: \(userId). Flag set in UserDefaults.")
+
+        DispatchQueue.main.async {
+            if let sceneDelegate = self.view.window?.windowScene?.delegate as? SceneDelegate,
+               let window = sceneDelegate.window {
+                
+                // Call helper showMainApp from scene delegate
+                sceneDelegate.showMainApp(window: window)
+                
+                UIView.transition(with: window,
+                                duration: 0.5,
+                                options: .transitionCrossDissolve,
+                                animations: nil,
+                                completion: nil)
+            }
         }
     }
     

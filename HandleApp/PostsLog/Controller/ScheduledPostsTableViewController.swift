@@ -219,7 +219,8 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         self.performSegue(withIdentifier: "openEditorModal", sender: indexPath)
-        }
+    }
+    
     //Pass data to scheduler and editor suite VC
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "openEditorModal" {

@@ -38,7 +38,7 @@ actor OnDevicePostEngine {
                     {
                       "posts": [
                         {
-                          "post_heading": "String (Max 15 chars) ",
+                          "post_heading": "String (3 words) ",
                           "platform_icon": "Enum ('icon-linkedin', 'icon-x', 'icon-instagram')",
                           "caption": "String (60-90 characters teaser. NO HASHTAGS)",
                           "hashtags": "Array (Exactly 3) [#String, #String]",
@@ -110,7 +110,7 @@ extension OnDevicePostEngine {
     func refinePostForEditor(post: PublishReadyPost, context: UserProfile) async throws -> EditorDraftData {
         let session = createFreshSession()
         
-        let platformName = post.platformIcon.contains("linkedin") ? "LinkedIn" : (post.platformIcon.contains("instagram") ? "Instagram" : "X (Twitter)")
+        let platformName = post.platformIcon.contains("linkedin") ? "LinkedIn" : (post.platformIcon.contains("instagram") ? "Instagram" : "X")
         
         
         let prompt = """
@@ -120,7 +120,6 @@ extension OnDevicePostEngine {
 
          ### INPUT DRAFT
          - Platform: \(platformName)
-         - Heading: "\(post.postHeading)"
          - Concept: "\(post.caption)"
 
          ### MANDATORY GUIDELINES
@@ -131,7 +130,7 @@ extension OnDevicePostEngine {
          ### UI CONSTRAINTS (Strict)
          - Structure: Short paragraphs ONLY (1-2 sentences max). Use \n\n for double spacing between points. READABILITY MAXIMUM.
          - Caption: 80-120 words. Max 3 emojis.
-         - Images: 2-3 paths from [img_01 to img_34].
+         - Images: 2-3 random paths from [img_01 to img_34].
          - Hashtags: 4 compound tags (e.g. #TechTips), ≤12 chars each.
          - Times: 2 specific "[Day] at [Time]" optimized for \(platformName).
 
@@ -141,7 +140,7 @@ extension OnDevicePostEngine {
            "platformName": "\(platformName)",
            "platformIconName": "\(post.platformIcon)",
            "caption": "String (80-120 words)",
-           "images": "Array/Null (Insta: [{'type': 'stock', 'path': 'img_01'}], others: null)"
+           "images": "Array {'type': 'stock', 'path': 'img_01'})"
            "hashtags": "Array (Exactly 4) [#String, #String]",
            "postingTimes": ["String (E.g., 'Monday at 9:00 AM') (Day at Time)"]
          }

@@ -4,10 +4,10 @@ import Supabase
 
 struct Post: Codable, Identifiable {
     var id: UUID?
-    var userId: UUID        // Links to profiles.id
-    let topicId: UUID?      // Link to the trend (optional)
+    var userId: UUID
+    let topicId: UUID?
     
-    // STRICT ENUM (Matches DB)
+    
     var status: PostStatus
     
     // Content

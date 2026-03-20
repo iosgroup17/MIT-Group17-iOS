@@ -12,24 +12,20 @@ import GoogleSignIn
 
 class LoginAuthViewController: UIViewController {
 
-    @IBOutlet weak var footerButton: UIButton! // The "Don't have an account?" button
-    
-    // MARK: - State
-    // This variable tracks which mode we are in
+    @IBOutlet weak var footerButton: UIButton!
     var isSignUpMode = false {
         didSet { updateUI() }
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Initialize UI for Login mode
         updateUI()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        // Replace "WelcomeViewController" with the actual ID of your first screen
+        //Welcome modal
         let hasSeenWelcome = UserDefaults.standard.bool(forKey: "hasSeenWelcome")
             if !hasSeenWelcome {
                 if let welcomeVC = storyboard?.instantiateViewController(withIdentifier: "WelcomeViewController") {
@@ -75,7 +71,7 @@ class LoginAuthViewController: UIViewController {
 
     // MARK: - Interactions
     
-    // 1. Footer Tapped -> Switch Mode
+    //Footer Tapped -> Switch Mode
     @IBAction func footerTapped(_ sender: UIButton) {
         // Animate the transition slightly for polish
         UIView.transition(with: view, duration: 0.3, options: .transitionCrossDissolve) {
@@ -83,10 +79,7 @@ class LoginAuthViewController: UIViewController {
         }
     }
 
-    // 2. Main Action (Login OR Sign Up)
-    
-    
-    // MARK: - 3. Google Login
+    //Main Action (Login OR Sign Up)
     @IBAction func googleTapped(_ sender: UIButton) {
             
             // 1. Safely read the keys from Info.plist
@@ -124,45 +117,46 @@ class LoginAuthViewController: UIViewController {
                 }
             }
         }
-    
-    
-    
-
     // MARK: - Navigation Helper
     func navigateToHome() {
-            Task {
-                let remoteData = await SupabaseManager.shared.fetchUserOnboardingData()
-                OnboardingDataStore.shared.syncWithRemoteData(remoteData)
-                
-                guard let userId = SupabaseManager.shared.client.auth.currentUser?.id.uuidString else {
-                    await self.showAlert(message: "Auth Error: Could not get user ID.")
-                    return
-                }
-                
-                let userKey = "hasCompletedOnboarding_\(userId)"
-                
-                if !remoteData.isEmpty {
-                    UserDefaults.standard.set(true, forKey: userKey)
-                }
+        Task {
+            // 1. Fetch data from Supabase
+            let remoteData = await SupabaseManager.shared.fetchUserOnboardingData()
+            OnboardingDataStore.shared.syncWithRemoteData(remoteData)
+            
+            guard let userId = SupabaseManager.shared.client.auth.currentUser?.id.uuidString else {
+                print("❌ Auth Error: No User ID")
+                return
+            }
+            
+            let userKey = "hasCompletedOnboarding_\(userId)"
+            
+            // 2. Logic Change: If remoteData is NOT empty, we definitely set true.
+            if !remoteData.isEmpty {
+                UserDefaults.standard.set(true, forKey: userKey)
+                print("✅ Data found in Supabase. Flag set to TRUE.")
+            }
 
-                DispatchQueue.main.async {
-                    if let window = self.view.window,
-                       let sceneDelegate = window.windowScene?.delegate as? SceneDelegate {
-                        
-                        let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: userKey)
-                        
-                        if hasCompletedOnboarding {
-                            sceneDelegate.showMainApp(window: window)
-                        } else {
-                            sceneDelegate.showOnboardingQuiz(window: window)
-                        }
-                        
-                        UIView.transition(with: window, duration: 0.5, options: .transitionFlipFromRight, animations: nil)
+            DispatchQueue.main.async {
+                if let window = self.view.window,
+                   let sceneDelegate = window.windowScene?.delegate as? SceneDelegate {
+                    
+                    // 3. Final Check
+                    let hasCompleted = UserDefaults.standard.bool(forKey: userKey)
+                    
+                    if hasCompleted {
+                        print("🚀 Routing to Main App")
+                        sceneDelegate.showMainApp(window: window)
+                    } else {
+                        print("📝 Routing to Onboarding Quiz")
+                        sceneDelegate.showOnboardingQuiz(window: window)
                     }
+                    
+                    UIView.transition(with: window, duration: 0.5, options: .transitionFlipFromRight, animations: nil)
                 }
             }
         }
-    
+    }
     func showAlert(message: String) {
         let alert = UIAlertController(title: "Alert", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))

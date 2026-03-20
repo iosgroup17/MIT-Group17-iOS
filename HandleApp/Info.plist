@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSCameraUsageDescription</key>
-	<string>Handle needs camera access so you can take photos to attach to your social media posts.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -27,8 +25,6 @@
 	</array>
 	<key>GIDClientID</key>
 	<string>$(GOOGLE_CLIENT_ID)</string>
-	<key>WebGIDClientID</key>
-	<string>$(WEB_GOOGLE_CLIENT_ID)</string>
 	<key>GeminiAPIKey</key>
 	<string>$(GEMINI_API_KEY)</string>
 	<key>InstagramAppID</key>
@@ -60,5 +56,7 @@
 			</array>
 		</dict>
 	</dict>
+	<key>WebGIDClientID</key>
+	<string>$(WEB_GOOGLE_CLIENT_ID)</string>
 </dict>
 </plist>

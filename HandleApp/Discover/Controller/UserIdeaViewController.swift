@@ -12,7 +12,7 @@ class UserIdeaViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var messageTextField: UITextField!
     @IBOutlet weak var sendButton: UIButton!
-    @IBOutlet weak var inputBarBottomConstraint: NSLayoutConstraint!
+    @IBOutlet weak var inputBar: UIView!
     
     var currentStep: ChatStep = .waitingForIdea
     var messages: [Message] = []
@@ -52,8 +52,7 @@ class UserIdeaViewController: UIViewController {
                     type: .text)
                 )
             }
-
-        // Do any additional setup after loading the view.
+        styleInputBar()
     }
     
     func setupTableView() {
@@ -163,15 +162,15 @@ class UserIdeaViewController: UIViewController {
         }
     
     
-    func navigateToEditor(with draft: EditorDraftData) {
-        if let editorVC = storyboard?.instantiateViewController(withIdentifier: "EditorModalEntry") as? EditorSuiteViewController {
+        func navigateToEditor(with draft: EditorDraftData) {
+            if let editorVC = storyboard?.instantiateViewController(withIdentifier: "EditorModalEntry") as? EditorSuiteViewController {
             
-            editorVC.draft = draft
+                editorVC.draft = draft
             
-            navigationController?.pushViewController(editorVC, animated: true)
+                navigationController?.pushViewController(editorVC, animated: true)
 
+            }
         }
-    }
 }
 
 extension UserIdeaViewController: UITableViewDelegate, UITableViewDataSource {
@@ -365,24 +364,31 @@ extension UserIdeaViewController: UITextFieldDelegate {
     }
     
     @objc func keyboardWillShow(notification: NSNotification) {
-        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
-            let bottomPadding = view.safeAreaInsets.bottom
-            inputBarBottomConstraint.constant = keyboardSize.height - bottomPadding
-            UIView.animate(withDuration: 0.3) { self.view.layoutIfNeeded() }
-            
             if !messages.isEmpty {
                 let indexPath = IndexPath(row: messages.count - 1, section: 0)
                 tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
             }
         }
-    }
     
     @objc func keyboardWillHide(notification: NSNotification) {
-        inputBarBottomConstraint.constant = 0
-        UIView.animate(withDuration: 0.3) { self.view.layoutIfNeeded() }
+        
     }
     
     @objc func dismissKeyboard() {
         view.endEditing(true)
     }
+    
+    func styleInputBar() {
+        inputBar?.layer.cornerRadius = 20
+        inputBar?.layer.masksToBounds = true
+        
+        // 2. Add a very subtle light grey border (just like iMessage)
+        inputBar?.layer.borderWidth = 0.5
+        inputBar?.layer.borderColor = UIColor.systemGray4.cgColor
+        
+        // 3. Make the background color white
+        inputBar?.backgroundColor = .white
+        
+    }
+
 }

@@ -16,7 +16,7 @@ struct DiscoverIdeaResponse {
 //    let hashtags: [String]
 //    let trendingContext: String
 //    let category: String
-//    
+//
 //    // Map JSON keys (snake_case) to Swift properties (camelCase)
 //    enum CodingKeys: String, CodingKey {
 //        case id // optional, if AI sends it (it won't based on prompt)
@@ -27,14 +27,14 @@ struct DiscoverIdeaResponse {
 //        case trendingContext = "trending_context"
 //        case category
 //    }
-//    
+//
 //    // Custom init to handle the missing ID from AI
 //    init(from decoder: Decoder) throws {
 //        let container = try decoder.container(keyedBy: CodingKeys.self)
-//        
+//
 //        // Use ID if present, otherwise generate new UUID
 //        self.id = try container.decodeIfPresent(String.self, forKey: .id) ?? UUID().uuidString
-//        
+//
 //        self.topicName = try container.decode(String.self, forKey: .topicName)
 //        self.shortDescription = try container.decode(String.self, forKey: .shortDescription)
 //        self.platformIcon = try container.decode(String.self, forKey: .platformIcon)
@@ -152,7 +152,7 @@ struct EditorDraftData: Codable {
     let postingTimes: [String]?
     
     enum CodingKeys: String, CodingKey {
-        case postHeading = "post_heading" 
+        case postHeading = "post_heading"
         case platformName, platformIconName, caption, images, hashtags, postingTimes, id
     }
 }

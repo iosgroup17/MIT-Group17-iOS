@@ -113,7 +113,19 @@ class ProfileViewController: UIViewController {
         view.layer.shadowRadius = 6
     }
     
-    func loadData() {
+    func loadData(){
+        Task{
+            let remoteResponses = await SupabaseManager.shared.fetchUserOnboardingData()
+            
+            OnboardingDataStore.shared.syncWithRemoteData(remoteResponses)
+            
+            await MainActor.run{
+                self.refreshUI()
+            }
+        }
+    }
+    
+    func refreshUI() {
         let store = OnboardingDataStore.shared
         
         completionProgress.setProgress(store.completionPercentage, animated: false)

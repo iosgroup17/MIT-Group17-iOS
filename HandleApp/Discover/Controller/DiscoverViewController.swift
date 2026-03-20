@@ -188,14 +188,14 @@ class DiscoverViewController: UIViewController {
                 
                 let itemSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .absolute(160)
+                    heightDimension: .absolute(80)
                 )
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 
                 
                 let groupSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .absolute(165)
+                    heightDimension: .absolute(85)
                 )
                 
                 // Use .horizontal for horizontal flow ( L - R )
@@ -208,7 +208,7 @@ class DiscoverViewController: UIViewController {
                 
                 
                 sectionLayout.contentInsets = NSDirectionalEdgeInsets(
-                    top: 10, leading: 16, bottom: 10, trailing: 16
+                    top: 16, leading: 16, bottom: 20, trailing: 16
                 )
                 
                 return sectionLayout
@@ -229,7 +229,7 @@ class DiscoverViewController: UIViewController {
                     alignment: .top
                 )
                 
-                header.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: -8, bottom: 0, trailing: 16)
+                header.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: -8, bottom: 4, trailing: 16)
                 
                 let itemSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
@@ -251,7 +251,7 @@ class DiscoverViewController: UIViewController {
                 sectionLayout.orthogonalScrollingBehavior = .continuous
                 sectionLayout.interGroupSpacing = 12
                 sectionLayout.contentInsets = NSDirectionalEdgeInsets(
-                    top: 4, leading: 16, bottom: 16, trailing: 16
+                    top: 16, leading: 16, bottom: 30, trailing: 16
                 )
                 
                 sectionLayout.boundarySupplementaryItems = [header]
@@ -280,11 +280,11 @@ class DiscoverViewController: UIViewController {
                 )
                 
                 let sectionLayout = NSCollectionLayoutSection(group: group)
-                sectionLayout.interGroupSpacing = 16
+                sectionLayout.interGroupSpacing = 20
                 
                 let headerSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .absolute(40)
+                    heightDimension: .absolute(44)
                 )
                 
                 let header = NSCollectionLayoutBoundarySupplementaryItem(
@@ -293,11 +293,11 @@ class DiscoverViewController: UIViewController {
                     alignment: .top
                 )
                 
-                header.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: -8, bottom: -8, trailing: 0)
+                header.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: -8, bottom: 4, trailing: 0)
                 
                 sectionLayout.boundarySupplementaryItems = [header]
                 
-                sectionLayout.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 16, bottom: 16, trailing: 16)
+                sectionLayout.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: 16, bottom: 20, trailing: 16)
                 
                 return sectionLayout
             }
@@ -429,6 +429,13 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
         }
         
         func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+            
+            if indexPath.section == 0 {
+                let storyboard = UIStoryboard(name: "Discover", bundle: nil)
+                if let destVC = storyboard.instantiateViewController(withIdentifier: "ChatViewController") as? UserIdeaViewController {
+                    navigationController?.pushViewController(destVC, animated: true)
+                }
+            }
          
             if indexPath.section == 1 {
                 let selectedTopic = trendingTopics[indexPath.row]

@@ -11,7 +11,7 @@ class TrendingTopicCollectionViewCell: UICollectionViewCell {
 
     @IBOutlet weak var shadowContainer: UIView!
     @IBOutlet weak var cardView: UIView!
-    @IBOutlet weak var platformIcon: UIImageView!
+    //@IBOutlet weak var platformIcon: UIImageView!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var descriptionLabel: UILabel!
     @IBOutlet weak var hashtagsCollectionView: UICollectionView!
@@ -42,7 +42,7 @@ class TrendingTopicCollectionViewCell: UICollectionViewCell {
     func configure (with topic: TrendingTopic) {
         titleLabel.text = topic.topicName
         descriptionLabel.text = topic.shortDescription
-        platformIcon.image = UIImage(named: topic.platformIcon)
+        //platformIcon.image = UIImage(named: topic.platformIcon)
         
         self.hashtags = topic.hashtags
         hashtagsCollectionView.reloadData()
