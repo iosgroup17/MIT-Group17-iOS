@@ -80,7 +80,7 @@ class AnalyticsViewController: UIViewController {
         override func viewWillAppear(_ animated: Bool) {
             super.viewWillAppear(animated)
             
-            // Ensure nav bar stays visible when returning from AuthVC
+            //nav bar stays visible when returning from AuthVC
             self.navigationController?.setNavigationBarHidden(false, animated: true)
             
             setupData()
@@ -99,7 +99,7 @@ class AnalyticsViewController: UIViewController {
             let items = await SupabaseManager.shared.fetchPendingSuggestions()
             
             DispatchQueue.main.async {
-                // 🛑 CRITICAL: Save the data so the Tap Gestures can find it!
+                //Save the data so the Tap Gestures can find it
                 self.activeSuggestions = items
                 
                 self.suggestionCards.forEach { $0.isHidden = true }
@@ -162,7 +162,7 @@ class AnalyticsViewController: UIViewController {
             
             if handleScoreLabel?.text == "---" { self.activityIndicator?.startAnimating() }
             
-            // 🛑 NEW: Completely clear the Best Post UI to a default loading state
+            // clear the Best Post UI to a default loading state
             self.bestPostTextLabel?.text = "Loading content..."
             self.bestPostDateLabel?.text = "--"
             self.bestPostPlatformImage?.image = UIImage(named: "placeholder") ?? UIImage(systemName: "photo")
@@ -313,12 +313,11 @@ class AnalyticsViewController: UIViewController {
                             self.currentBestPostURL = post.post_url
                             self.updateBestPostUI(with: post)
                         } else {
-                            // 🛑 NEW: EMPTY STATE (No posts or no platform connected)
+                            //(No posts or no platform connected)
                             self.bestPostTextLabel?.text = "No top post found for this week."
                             self.bestPostDateLabel?.text = "--"
-                            
-                            // Looks for an image named "placeholder" in your Assets.xcassets
-                            // Falls back to a system photo icon if "placeholder" isn't found
+        
+                            // placeholder for best post image else system photo icon
                             self.bestPostPlatformImage?.image = UIImage(named: "placeholder") ?? UIImage(systemName: "photo")
                             self.bestPostPlatformImage?.tintColor = .systemGray4
                         }
@@ -326,7 +325,7 @@ class AnalyticsViewController: UIViewController {
                 } catch {
                     print("Best post error: \(error)")
                     DispatchQueue.main.async {
-                        // 🛑 NEW: ERROR STATE
+                        // ERROR STATE
                         self.bestPostTextLabel?.text = "No top post found for this week."
                         self.bestPostDateLabel?.text = "--"
                         self.bestPostPlatformImage?.image = UIImage(named: "placeholder") ?? UIImage(systemName: "photo")
@@ -337,7 +336,6 @@ class AnalyticsViewController: UIViewController {
         }
 
         func updateBestPostUI(with post: BestPost) {
-            // 🛑 NEW: Remove the gray tint so original platform colors (Twitter/LinkedIn/Insta) show properly
             bestPostPlatformImage?.tintColor = nil
             bestPostPlatformImage?.image = UIImage(named: "icon-\(post.platform.lowercased())")
             
@@ -368,7 +366,7 @@ class AnalyticsViewController: UIViewController {
                     } else if post.platform.lowercased() == "linkedin" {
                         stats.append(("Shares", post.shares_reposts ?? 0))
                     } else if post.platform.lowercased() == "instagram" {
-                        // 🛑 NEW: Added support to show extra metrics (Plays/Views) for Instagram!
+                        //extra metrics (Plays/Views) for Instagram
                         if let v = post.extra_metric, v > 0 { stats.append(("Plays", v)) }
                     }
                     
@@ -410,7 +408,7 @@ class AnalyticsViewController: UIViewController {
     
     
     private func showWeeklyCompletionState() {
-        // Clear any hidden cards from the stack so the stub centers correctly
+        // Clear hidden cards from the stack so the stub centers correctly
         suggestionStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
         let container = UIView()
@@ -450,17 +448,11 @@ class AnalyticsViewController: UIViewController {
         }
     }
 
-    // MARK: - Actions
-    
-    // MARK: - Navigation Actions
     // MARK: - Navigation Actions
         @objc func openLinkPlatforms() {
-            // 🛑 FIX: Use 'self.storyboard' to automatically search the current storyboard
-            // (This prevents the crash if your storyboard is named "Analytics" instead of "Main")
             guard let currentStoryboard = self.storyboard else { return }
             
             if let authVC = currentStoryboard.instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController {
-                
                 // Set your specific manage mode flag
                 authVC.isManageMode = true
                 
@@ -471,15 +463,14 @@ class AnalyticsViewController: UIViewController {
                     }
                 }
                 
-                // Present it nicely
+                // Present it
                 let navController = UINavigationController(rootViewController: authVC)
                 if let sheet = navController.sheetPresentationController {
-                    sheet.detents = [.large()] // Gives it that modern half-screen swipe up look
+                    sheet.detents = [.large()]
                 }
                 self.present(navController, animated: true)
                 
             } else {
-                // Safe fallback just in case
                 print("ERROR: Could not find a View Controller with the Storyboard ID 'AuthViewController'.")
             }
         }
@@ -528,7 +519,7 @@ class AnalyticsViewController: UIViewController {
                     cardView.alpha = 0
                     cardView.isHidden = true
                 }) { _ in
-                    // 2. Remove from local array and check if empty
+                // 2. Remove from local array and check if empty
                     self.checkSuggestionsEmptyState(removedIndex: index)
                 }
                 self.showToast(message: "Strategy Applied!", isSuccess: true)

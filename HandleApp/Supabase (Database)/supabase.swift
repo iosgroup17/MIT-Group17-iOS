@@ -327,16 +327,16 @@ class SupabaseManager {
     func ensureAnonymousSession() async {
         // If a session exists, we don't create a new one to avoid ID churn
         if client.auth.currentSession != nil {
-            print("✅ Session active for scrapers: \(client.auth.currentSession?.user.id.uuidString ?? "")")
+            print("Session active for scrapers: \(client.auth.currentSession?.user.id.uuidString ?? "")")
             return
         }
         
         do {
             // Required so the 'process-scrape' functions have a valid JWT
             _ = try await client.auth.signInAnonymously()
-            print("✅ Anonymous session established.")
+            print("Anonymous session established.")
         } catch {
-            print("❌ Auth Failed: \(error)")
+            print("Auth Failed: \(error)")
         }
     }
     

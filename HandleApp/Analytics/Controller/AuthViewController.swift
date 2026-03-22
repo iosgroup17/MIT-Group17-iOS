@@ -208,7 +208,7 @@ class AuthViewController: UIViewController, ASWebAuthenticationPresentationConte
                     self.updateButtonVisuals(platform: platform, button: button)
                     self.checkConnections()
                     
-                    // FIX: Notify the ProfileViewController immediately
+                    //notify the ProfileViewController immediately
                     // that a connection was successful.
                     self.onCompletion?(true)
                 }
