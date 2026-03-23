@@ -41,46 +41,46 @@ class EditorSuiteViewController: UIViewController {
         setupUI()
         populateData()
         setupNavigationButtons()
-        
+        setupKeyboardDismissal()
     }
-
+    
     func setupCollectionViews() {
-
-            imagesCollectionView.dataSource = self
-            imagesCollectionView.delegate = self
-            
-            hashtagCollectionView.dataSource = self
-            hashtagCollectionView.delegate = self
-            
-            timeCollectionView.dataSource = self
-            timeCollectionView.delegate = self
-            
-            
-            imagesCollectionView.register(UINib(nibName: "ImageCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "ImageCollectionViewCell")
         
-            let hashtagNib = UINib(nibName: "HashtagCollectionViewCell", bundle: nil)
-            hashtagCollectionView.register(hashtagNib, forCellWithReuseIdentifier: "HashtagCollectionViewCell")
-            timeCollectionView.register(hashtagNib, forCellWithReuseIdentifier: "HashtagCollectionViewCell")
-        }
+        imagesCollectionView.dataSource = self
+        imagesCollectionView.delegate = self
+        
+        hashtagCollectionView.dataSource = self
+        hashtagCollectionView.delegate = self
+        
+        timeCollectionView.dataSource = self
+        timeCollectionView.delegate = self
+        
+        
+        imagesCollectionView.register(UINib(nibName: "ImageCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "ImageCollectionViewCell")
+        
+        let hashtagNib = UINib(nibName: "HashtagCollectionViewCell", bundle: nil)
+        hashtagCollectionView.register(hashtagNib, forCellWithReuseIdentifier: "HashtagCollectionViewCell")
+        timeCollectionView.register(hashtagNib, forCellWithReuseIdentifier: "HashtagCollectionViewCell")
+    }
     
     func setupUI() {
-            
-            captionTextView.layer.cornerRadius = 8
-            captionTextView.layer.borderWidth = 1
-            captionTextView.layer.borderColor = UIColor.systemGray5.cgColor
-            captionTextView.textContainerInset = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
-           
-            hashtagContainerView.layer.cornerRadius = 12
-            hashtagContainerView.layer.borderWidth = 1
-            hashtagContainerView.layer.borderColor = UIColor.systemGray4.cgColor
-            
-            timeContainerView.layer.cornerRadius = 12
-            timeContainerView.layer.borderWidth = 1
-            timeContainerView.layer.borderColor = UIColor.systemGray4.cgColor
-    
-        }
         
-
+        captionTextView.layer.cornerRadius = 8
+        captionTextView.layer.borderWidth = 1
+        captionTextView.layer.borderColor = UIColor.systemGray5.cgColor
+        captionTextView.textContainerInset = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
+        
+        hashtagContainerView.layer.cornerRadius = 12
+        hashtagContainerView.layer.borderWidth = 1
+        hashtagContainerView.layer.borderColor = UIColor.systemGray4.cgColor
+        
+        timeContainerView.layer.cornerRadius = 12
+        timeContainerView.layer.borderWidth = 1
+        timeContainerView.layer.borderColor = UIColor.systemGray4.cgColor
+        
+    }
+    
+    
     func populateData() {
         guard let data = draft else { return }
         
@@ -127,8 +127,6 @@ class EditorSuiteViewController: UIViewController {
     }
     
     
-    
-
     func setupNavigationButtons() {
         let shareAction = UIAction(image: UIImage(systemName: "square.and.arrow.up")) { [weak self] _ in
             self?.handleShareFlow()
@@ -140,13 +138,13 @@ class EditorSuiteViewController: UIViewController {
     
     @IBAction func regenerateTapped(_ sender: UIButton) {
         guard let currentText = captionTextView.text else { return }
-
-                sender.isEnabled = false
-                
+        
+        sender.isEnabled = false
+        
         Task {
             do {
                 let newCaption = try await captionService.regenerate(currentText, tone: "professional")
-
+                
                 await MainActor.run {
                     self.captionTextView.text = newCaption
                     sender.isEnabled = true
@@ -159,9 +157,9 @@ class EditorSuiteViewController: UIViewController {
         
     }
     
-
+    
     @IBAction func saveButtonTapped(_ sender: Any) {
-
+        
         let loadingAlert = UIAlertController(title: "Saving...", message: nil, preferredStyle: .alert)
         let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 20, width: 50, height: 50))
         loadingIndicator.hidesWhenStopped = true
@@ -172,58 +170,57 @@ class EditorSuiteViewController: UIViewController {
         present(loadingAlert, animated: true)
         
         Task {
-                // upload the custom images to storage
-                let uploadedNames = await SupabaseManager.shared.uploadImagesToStorage(images: displayedImages)
+            // upload the custom images to storage
+            let uploadedNames = await SupabaseManager.shared.uploadImagesToStorage(images: displayedImages)
+            
+            // format to jsonb structure
+            var finalImageRefs: [PostImageRef] = []
+            for name in uploadedNames {
+                finalImageRefs.append(PostImageRef(type: "custom", path: name))
+            }
+            
+            
+            let savedPost = Post(
+                id: draft?.id ?? UUID(),
+                userId: SupabaseManager.shared.currentUserID,
+                topicId: nil,
                 
-                // format to jsonb structure
-                var finalImageRefs: [PostImageRef] = []
-                for name in uploadedNames {
-                    finalImageRefs.append(PostImageRef(type: "custom", path: name))
-                }
-
-
-                let savedPost = Post(
-                    id: draft?.id ?? UUID(),
-                    userId: SupabaseManager.shared.currentUserID,
-                    topicId: nil,
-
-                    status: .saved,
-
-                    postHeading: draft?.postHeading ?? "",
-                    fullCaption: captionTextView.text,
-                    imageNames: finalImageRefs.isEmpty ? nil : finalImageRefs,
-                    
-                    platformName: draft?.platformName ?? "General",
-                    platformIconName: draft?.platformIconName,
-                    hashtags: draft?.hashtags,
-                    optimalPostingTimes: draft?.postingTimes
-                )
+                status: .saved,
+                
+                postHeading: draft?.postHeading ?? "",
+                fullCaption: captionTextView.text,
+                imageNames: finalImageRefs.isEmpty ? nil : finalImageRefs,
+                
+                platformName: draft?.platformName ?? "General",
+                platformIconName: draft?.platformIconName,
+                hashtags: draft?.hashtags,
+                optimalPostingTimes: draft?.postingTimes
+            )
             
             print(SupabaseManager.shared.currentUserID)
-
-
-                do {
-                    try await SupabaseManager.shared.upsertPost(post: savedPost)
-                    await MainActor.run {
-                        loadingAlert.dismiss(animated: true) {
-                            self.dismiss(animated: true) {
-                                print("Post saved successfully.")
-                            }
+            
+            
+            do {
+                try await SupabaseManager.shared.upsertPost(post: savedPost)
+                await MainActor.run {
+                    loadingAlert.dismiss(animated: true) {
+                        self.dismiss(animated: true) {
+                            print("Post saved successfully.")
                         }
                     }
-                } catch {
-                    await MainActor.run {
-                        NotificationManager.shared.scheduleDraftReminder(for: savedPost)
-                        loadingAlert.dismiss(animated: true) {
-                            let errAlert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
-                            print(error.localizedDescription)
-                            errAlert.addAction(UIAlertAction(title: "OK", style: .default))
-                            self.present(errAlert, animated: true)
-                        }
+                }
+            } catch {
+                await MainActor.run {
+                    NotificationManager.shared.scheduleDraftReminder(for: savedPost)
+                    loadingAlert.dismiss(animated: true) {
+                        let errAlert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+                        print(error.localizedDescription)
+                        errAlert.addAction(UIAlertAction(title: "OK", style: .default))
+                        self.present(errAlert, animated: true)
                     }
-
                 }
             }
+        }
     }
     
     
@@ -238,10 +235,10 @@ class EditorSuiteViewController: UIViewController {
         }
         return urls
     }
-
+    
     func markPostAsPublished() {
         guard let draftID = draft?.id else { return }
-
+        
         let publishedPost = Post(
             id: draftID,
             userId: SupabaseManager.shared.currentUserID,
@@ -264,7 +261,7 @@ class EditorSuiteViewController: UIViewController {
                 await MainActor.run {
                     NotificationManager.shared.cancelNotification(for: draftID)
                     self.showToast(message: "Post marked as Published!")
-
+                    
                     self.navigationController?.popToRootViewController(animated: true)
                 }
             } catch {
@@ -313,11 +310,11 @@ class EditorSuiteViewController: UIViewController {
         let activityVC = UIActivityViewController(activityItems: itemsToShare, applicationActivities: nil)
         
         activityVC.completionWithItemsHandler = { (activityType, completed, returnedItems, error) in
-
+            
             imageURLs.forEach { try? FileManager.default.removeItem(at: $0) }
-    
+            
             if completed {
-
+                
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     let alert = UIAlertController(
                         title: "Confirm Post",
@@ -345,7 +342,17 @@ class EditorSuiteViewController: UIViewController {
         
         self.present(activityVC, animated: true)
     }
-
+    
+    private func setupKeyboardDismissal() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
+    }
 }
 
 
@@ -401,19 +408,19 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
         if collectionView == imagesCollectionView {
-
-                if indexPath.row == displayedImages.count {
-                    print("User tapped Add Button")
-                    selectedImageIndex = nil
-                    showImagePickerOptions()
-                }
-
-                else {
-                    print("User tapped Image at index \(indexPath.row) to replace it")
-                    selectedImageIndex = indexPath.row
-                    showImagePickerOptions()
-                }
+            
+            if indexPath.row == displayedImages.count {
+                print("User tapped Add Button")
+                selectedImageIndex = nil
+                showImagePickerOptions()
             }
+            
+            else {
+                print("User tapped Image at index \(indexPath.row) to replace it")
+                selectedImageIndex = indexPath.row
+                showImagePickerOptions()
+            }
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -590,3 +597,4 @@ class ShareTextSource: NSObject, UIActivityItemSource {
         return text
     }
 }
+

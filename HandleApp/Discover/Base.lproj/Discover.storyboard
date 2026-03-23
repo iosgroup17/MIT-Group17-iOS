@@ -68,7 +68,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="TWj-Sr-LmK">
-                                <rect key="frame" x="0.0" y="124" width="402" height="621"/>
+                                <rect key="frame" x="0.0" y="124" width="402" height="626.66666666666663"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="UserCell" id="pX0-Vh-ljx" customClass="ChatCellTableViewCell" customModule="HandleApp" customModuleProvider="target">
@@ -163,12 +163,15 @@
                                     </tableViewCell>
                                 </prototypes>
                             </tableView>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Byw-lO-U2B">
-                                <rect key="frame" x="16" y="745" width="311.33333333333331" height="56"/>
+                            <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Byw-lO-U2B">
+                                <rect key="frame" x="12" y="750.66666666666663" width="315.33333333333331" height="55.333333333333371"/>
                                 <subviews>
-                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Type your idea" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="mcQ-j8-JsZ">
-                                        <rect key="frame" x="0.0" y="0.0" width="311.33333333333331" height="56"/>
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" ambiguous="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Type your idea" adjustsFontSizeToFit="NO" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="mcQ-j8-JsZ">
+                                        <rect key="frame" x="0.0" y="0.0" width="315" height="55.333333333333336"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="315" id="eec-8E-Sg5"/>
+                                        </constraints>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits"/>
                                         <userDefinedRuntimeAttributes>
@@ -181,10 +184,7 @@
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="50" id="35x-8x-dxX"/>
-                                    <constraint firstItem="mcQ-j8-JsZ" firstAttribute="leading" secondItem="Byw-lO-U2B" secondAttribute="leading" id="9A1-De-p7b"/>
                                     <constraint firstItem="mcQ-j8-JsZ" firstAttribute="top" secondItem="Byw-lO-U2B" secondAttribute="top" id="NBw-RZ-o1T"/>
-                                    <constraint firstAttribute="trailing" secondItem="mcQ-j8-JsZ" secondAttribute="trailing" id="VEP-3g-x5R"/>
                                     <constraint firstAttribute="bottom" secondItem="mcQ-j8-JsZ" secondAttribute="bottom" id="cow-V3-nAs"/>
                                 </constraints>
                                 <userDefinedRuntimeAttributes>
@@ -194,10 +194,7 @@
                                 </userDefinedRuntimeAttributes>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zVb-cQ-eRp">
-                                <rect key="frame" x="339.33333333333331" y="753" width="50.666666666666686" height="40"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="40" id="W3V-8i-lOd"/>
-                                </constraints>
+                                <rect key="frame" x="339.33333333333331" y="758.66666666666663" width="50.666666666666686" height="34.333333333333371"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" image="paperplane.fill" catalog="system"/>
                                 <connections>
@@ -209,16 +206,18 @@
                         <keyboardLayoutGuide key="keyboard" id="ivd-uf-3Gf"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="Byw-lO-U2B" firstAttribute="leading" secondItem="vQZ-PJ-3jW" secondAttribute="leading" constant="16" id="002-sr-XNe"/>
+                            <constraint firstItem="ivd-uf-3Gf" firstAttribute="top" secondItem="Byw-lO-U2B" secondAttribute="bottom" id="5py-pr-Zfw"/>
                             <constraint firstItem="vQZ-PJ-3jW" firstAttribute="trailing" secondItem="TWj-Sr-LmK" secondAttribute="trailing" id="6UA-RV-fWw"/>
-                            <constraint firstItem="zVb-cQ-eRp" firstAttribute="leading" secondItem="Byw-lO-U2B" secondAttribute="trailing" constant="12" id="73H-NS-7jx"/>
                             <constraint firstItem="Byw-lO-U2B" firstAttribute="top" secondItem="TWj-Sr-LmK" secondAttribute="bottom" id="B00-Wx-gyh"/>
                             <constraint firstItem="TWj-Sr-LmK" firstAttribute="leading" secondItem="vQZ-PJ-3jW" secondAttribute="leading" id="CET-jL-tTS"/>
-                            <constraint firstItem="ivd-uf-3Gf" firstAttribute="top" secondItem="Byw-lO-U2B" secondAttribute="bottom" constant="5" id="MeV-hk-7e7"/>
+                            <constraint firstItem="Byw-lO-U2B" firstAttribute="leading" secondItem="vQZ-PJ-3jW" secondAttribute="leading" constant="12" id="Fex-FV-62b"/>
+                            <constraint firstItem="zVb-cQ-eRp" firstAttribute="leading" secondItem="Byw-lO-U2B" secondAttribute="trailing" constant="12" id="Lfr-Pk-E4u"/>
                             <constraint firstItem="zVb-cQ-eRp" firstAttribute="centerY" secondItem="Byw-lO-U2B" secondAttribute="centerY" id="QmM-1H-vBC"/>
                             <constraint firstItem="TWj-Sr-LmK" firstAttribute="top" secondItem="vQZ-PJ-3jW" secondAttribute="top" id="Qq1-xq-TOZ"/>
-                            <constraint firstItem="vQZ-PJ-3jW" firstAttribute="trailing" secondItem="zVb-cQ-eRp" secondAttribute="trailing" constant="12" id="a7v-bQ-u5W"/>
+                            <constraint firstItem="zVb-cQ-eRp" firstAttribute="top" secondItem="TWj-Sr-LmK" secondAttribute="bottom" constant="8" id="SyX-x3-fvu"/>
+                            <constraint firstItem="vQZ-PJ-3jW" firstAttribute="trailing" secondItem="zVb-cQ-eRp" secondAttribute="trailing" constant="12" id="Uel-xO-dwu"/>
                             <constraint firstItem="zVb-cQ-eRp" firstAttribute="top" secondItem="TWj-Sr-LmK" secondAttribute="bottom" constant="8" symbolic="YES" id="fCP-W9-k3v"/>
+                            <constraint firstItem="ivd-uf-3Gf" firstAttribute="top" secondItem="zVb-cQ-eRp" secondAttribute="bottom" constant="13" id="lmm-td-9Te"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="What's on your mind" id="hNm-NS-biA"/>

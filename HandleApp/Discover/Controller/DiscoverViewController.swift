@@ -147,20 +147,20 @@ class DiscoverViewController: UIViewController {
                 }
 
 
-                    
-                    print("Generative AI: Starting generation")
+                
+                print("Generative AI: Starting generation")
 
-                    let generatedPosts = try await OnDevicePostEngine.shared.generatePublishReadyPosts(
-                        context: userProfile
-                    )
+                let generatedPosts = try await OnDevicePostEngine.shared.generatePublishReadyPosts(
+                    context: userProfile
+                )
 
 
-                    await MainActor.run {
-                        print("AI Generation Complete. Reloading Section 2.")
-                        self.publishReadyPosts = generatedPosts
-                        self.isGeneratingPosts = false
-                        self.collectionView.reloadSections(IndexSet(integer: 2))
-                    }
+                await MainActor.run {
+                    print("AI Generation Complete. Reloading Section 2.")
+                    self.publishReadyPosts = generatedPosts
+                    self.isGeneratingPosts = false
+                    self.collectionView.reloadSections(IndexSet(integer: 2))
+                }
 
                 
             } catch {
@@ -308,182 +308,178 @@ class DiscoverViewController: UIViewController {
     
 extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
         
-        func numberOfSections(in collectionView: UICollectionView) -> Int {
-            return 3
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 3
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        if section == 0 { return 1 }
+        if section == 1 { return trendingTopics.count }
+        if section == 2 { return isGeneratingPosts ? 1 : publishReadyPosts.count }
+        
+        return 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
+        if indexPath.section == 0 {
+            
+            let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: "CurateAICollectionViewCell",
+                for: indexPath
+            ) as! CurateAICollectionViewCell
+            
+            cell.didTapButtonAction = { [weak self] in
+                self?.navigateToChat()
+            }
+            
+            return cell
+            
         }
         
-        func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-            if section == 0 { return 1 }
-            if section == 1 { return trendingTopics.count }
-            if section == 2 { return isGeneratingPosts ? 1 : publishReadyPosts.count }
+        
+        if indexPath.section == 1 {
             
-            return 0
+            let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: "TrendingTopicCollectionViewCell",
+                for: indexPath
+            ) as! TrendingTopicCollectionViewCell
+            
+            let idea = trendingTopics[indexPath.row]
+            
+            cell.configure(with: idea)
+            
+            return cell
+          
         }
         
-        func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-            
-            if indexPath.section == 0 {
+        if indexPath.section == 2 {
+            if isGeneratingPosts {
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "LoadingCell", for: indexPath)
                 
-                let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: "CurateAICollectionViewCell",
-                    for: indexPath
-                ) as! CurateAICollectionViewCell
+                // clear out old views when cells are reused
+                cell.contentView.subviews.forEach { $0.removeFromSuperview() }
                 
-                cell.didTapButtonAction = { [weak self] in
-                    self?.navigateToChat()
-                }
+                let spinner = UIActivityIndicatorView(style: .medium)
+                spinner.translatesAutoresizingMaskIntoConstraints = false
+                spinner.startAnimating()
                 
-                return cell
-                
-            }
-            
-            
-            if indexPath.section == 1 {
-                
-                let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: "TrendingTopicCollectionViewCell",
-                    for: indexPath
-                ) as! TrendingTopicCollectionViewCell
-                
-                let idea = trendingTopics[indexPath.row]
-                
-                cell.configure(with: idea)
+                cell.contentView.addSubview(spinner)
+                NSLayoutConstraint.activate([
+                    spinner.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor),
+                    spinner.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
+                ])
                 
                 return cell
-              
             }
             
-            if indexPath.section == 2 {
-                if isGeneratingPosts {
-                    let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "LoadingCell", for: indexPath)
-                    
-                    // clear out old views when cells are reused
-                    cell.contentView.subviews.forEach { $0.removeFromSuperview() }
-                    
-                    let spinner = UIActivityIndicatorView(style: .medium)
-                    spinner.translatesAutoresizingMaskIntoConstraints = false
-                    spinner.startAnimating()
-                    
-                    cell.contentView.addSubview(spinner)
-                    NSLayoutConstraint.activate([
-                        spinner.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor),
-                        spinner.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
-                    ])
-                    
-                    return cell
-                }
-                
-                
-                let post = publishReadyPosts[indexPath.row]
-           
-                if let img = post.postImage, !img.isEmpty {
-                    let cell = collectionView.dequeueReusableCell(
-                        withReuseIdentifier: "PublishReadyImageCollectionViewCell",
-                        for: indexPath
-                    ) as! PublishReadyImageCollectionViewCell
-                    
-                    cell.configure(with: post)
-                    return cell
-                    
-                } else {
-                    let cell = collectionView.dequeueReusableCell(
-                        withReuseIdentifier: "PublishReadyTextCollectionViewCell",
-                        for: indexPath
-                    ) as! PublishReadyTextCollectionViewCell
-                    
-                    cell.configure(with: post)
-                    return cell
-                }
-            }
             
-            return UICollectionViewCell()
+            let post = publishReadyPosts[indexPath.row]
+       
+            if let img = post.postImage, !img.isEmpty {
+                let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: "PublishReadyImageCollectionViewCell",
+                    for: indexPath
+                ) as! PublishReadyImageCollectionViewCell
+                
+                cell.configure(with: post)
+                return cell
+                
+            } else {
+                let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: "PublishReadyTextCollectionViewCell",
+                    for: indexPath
+                ) as! PublishReadyTextCollectionViewCell
+                
+                cell.configure(with: post)
+                return cell
+            }
         }
+        
+        return UICollectionViewCell()
+    }
     
     func navigateToChat() {
         let storyboard = UIStoryboard(name: "Discover", bundle: nil)
   
         if let chatVC = storyboard.instantiateViewController(withIdentifier: "ChatViewController") as? UserIdeaViewController {
             self.navigationController?.pushViewController(chatVC, animated: true)
-        } else {
-            print("Error: Could not find ChatViewController")
-        }
+        } 
     }
         
-        func collectionView(_ collectionView: UICollectionView,
-                            viewForSupplementaryElementOfKind kind: String,
-                            at indexPath: IndexPath) -> UICollectionReusableView {
-            
-            let header = collectionView.dequeueReusableSupplementaryView(
-                ofKind: kind,
-                withReuseIdentifier: "HeaderCollectionReusableView",
-                for: indexPath
-            ) as! HeaderCollectionReusableView
-            
-            if indexPath.section == 1 {
-                header.titleLabel.text = "Trending Topics"
-            } else if indexPath.section == 2 {
-                header.titleLabel.text = "Publish-Ready Posts For You"
-            }
-            
-            return header
+    func collectionView(_ collectionView: UICollectionView,
+                        viewForSupplementaryElementOfKind kind: String,
+                        at indexPath: IndexPath) -> UICollectionReusableView {
+        
+        let header = collectionView.dequeueReusableSupplementaryView(
+            ofKind: kind,
+            withReuseIdentifier: "HeaderCollectionReusableView",
+            for: indexPath
+        ) as! HeaderCollectionReusableView
+        
+        if indexPath.section == 1 {
+            header.titleLabel.text = "Trending Topics"
+        } else if indexPath.section == 2 {
+            header.titleLabel.text = "Publish-Ready Posts For You"
         }
         
-        func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-            
-            if indexPath.section == 0 {
-                let storyboard = UIStoryboard(name: "Discover", bundle: nil)
-                if let destVC = storyboard.instantiateViewController(withIdentifier: "ChatViewController") as? UserIdeaViewController {
-                    navigationController?.pushViewController(destVC, animated: true)
-                }
-            }
-         
-            if indexPath.section == 1 {
-                let selectedTopic = trendingTopics[indexPath.row]
-                print("Selected Topic: \(selectedTopic.topicName)")
-                
-                let storyboard = UIStoryboard(name: "Discover", bundle: nil)
-                if let destVC = storyboard.instantiateViewController(withIdentifier: "TopicIdeasVC") as? TopicIdeaViewController {
-                    
-                    destVC.topic = selectedTopic
-                    destVC.pageTitle = selectedTopic.topicName
-                    
-                    navigationController?.pushViewController(destVC, animated: true)
-                }
-            }
-            
-            
-            if indexPath.section == 2 {
-                let selectedPost = publishReadyPosts[indexPath.row]
-    
-                self.showRefinementLoading()
-                        
-                        Task {
-                            do {
-                                guard let profile = await SupabaseManager.shared.fetchUserProfile() else {
-                                    await MainActor.run { self.hideRefinementLoading() }
-                                    return
-                                }
-  
-                                let finalDraft = try await OnDevicePostEngine.shared.refinePostForEditor(
-                                    post: selectedPost,
-                                    context: profile
-                                )
-                                
-                                await MainActor.run {
-                                    self.hideRefinementLoading()
-
-                                    self.performSegue(withIdentifier: "ShowEditorSegue", sender: finalDraft)
-                                }
-                            } catch {
-                                await MainActor.run {
-                                    self.hideRefinementLoading()
-                                    print("Error refining post: \(error)")
-                                }
-                            }
-                        }
-                
+        return header
+    }
+        
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        if indexPath.section == 0 {
+            let storyboard = UIStoryboard(name: "Discover", bundle: nil)
+            if let destVC = storyboard.instantiateViewController(withIdentifier: "ChatViewController") as? UserIdeaViewController {
+                navigationController?.pushViewController(destVC, animated: true)
             }
         }
+     
+        if indexPath.section == 1 {
+            let selectedTopic = trendingTopics[indexPath.row]
+            print("Selected Topic: \(selectedTopic.topicName)")
+            
+            let storyboard = UIStoryboard(name: "Discover", bundle: nil)
+            if let destVC = storyboard.instantiateViewController(withIdentifier: "TopicIdeasVC") as? TopicIdeaViewController {
+                
+                destVC.topic = selectedTopic
+                destVC.pageTitle = selectedTopic.topicName
+                
+                navigationController?.pushViewController(destVC, animated: true)
+            }
+        }
+        
+        if indexPath.section == 2 {
+            let selectedPost = publishReadyPosts[indexPath.row]
+
+            self.showRefinementLoading()
+                    
+            Task {
+                do {
+                    guard let profile = await SupabaseManager.shared.fetchUserProfile() else {
+                        await MainActor.run { self.hideRefinementLoading() }
+                        return
+                    }
+                    
+                    let finalDraft = try await OnDevicePostEngine.shared.refinePostForEditor(
+                        post: selectedPost,
+                        context: profile
+                    )
+                    
+                    await MainActor.run {
+                        self.hideRefinementLoading()
+                        
+                        self.performSegue(withIdentifier: "ShowEditorSegue", sender: finalDraft)
+                    }
+                } catch {
+                    await MainActor.run {
+                        self.hideRefinementLoading()
+                        print("Error refining post: \(error)")
+                    }
+                }
+            }
+        }
+    }
     
     func showRefinementLoading() {
         let alert = UIAlertController(title: nil, message: "Preparing Editor...", preferredStyle: .alert)
@@ -507,6 +503,5 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
             editorVC.draft = data
         }
     }
-        
-    }
+}
 

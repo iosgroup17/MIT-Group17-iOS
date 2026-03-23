@@ -7,10 +7,8 @@ struct Post: Codable, Identifiable {
     var userId: UUID
     let topicId: UUID?
     
-    
     var status: PostStatus
     
-    // Content
     var postHeading: String
     var fullCaption: String?
     var imageNames: [PostImageRef]?
@@ -19,7 +17,6 @@ struct Post: Codable, Identifiable {
     let hashtags: [String]?
     var optimalPostingTimes: [String]?
     
-    // Scheduling
     var scheduledAt: Date?
     var publishedAt: Date?
 
@@ -45,7 +42,6 @@ struct Post: Codable, Identifiable {
     }
 }
 
-// MARK: - Helper Filters
 extension Post {
     
     static func loadTomorrowScheduledPosts(from allPosts: [Post]) -> [Post] {

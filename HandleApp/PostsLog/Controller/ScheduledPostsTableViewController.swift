@@ -38,21 +38,22 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
         allLaterPosts = scheduledLaterPosts
         refreshData()
     }
+    
     //Data refresh from supabase.
     func refreshData() {
         Task {
-            // 1. Fetch Master List
+            //Fetch all posts
             let allPosts = await SupabaseManager.shared.fetchUserPosts()
             self.allFetchedPosts = allPosts
             
-            // 2. Filter Today
+            //Filter posts scheduled for today
             let today = Date()
             let todayPosts = allPosts.filter { post in
                 guard post.status == .scheduled, let date = post.scheduledAt else { return false }
                 return Calendar.current.isDate(date, inSameDayAs: today)
             }
             
-            // 3. Filter Tomorrow & Later
+            //Filter posts scheduled for tomorrow or later
             let tomorrowPosts = Post.loadTomorrowScheduledPosts(from: allPosts)
             let laterPosts = Post.loadScheduledPostsLater(from: allPosts)
 
@@ -60,17 +61,13 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
             self.allTomorrowPosts = tomorrowPosts
             self.allLaterPosts = laterPosts
             
-            // 4. Update UI on Main Thread
             await MainActor.run {
-                // Check if a filter is already active.
-                // If "All", just show data. If "LinkedIn", apply the filter immediately.
                 if self.currentPlatformFilter == "All" {
                     self.scheduledTodayPosts = todayPosts
                     self.scheduledTomorrowPosts = tomorrowPosts
                     self.scheduledLaterPosts = laterPosts
                     self.postTableView.reloadData()
                 } else {
-                    // If the user refreshed while looking at "Instagram", keep showing only "Instagram"
                     self.filterScheduledPosts(by: self.currentPlatformFilter)
                 }
             }
@@ -141,16 +138,16 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        // 1. Get the post for the current row
+        //Get the post for the current row
         let post: Post
         if indexPath.section == 0 { post = scheduledTodayPosts[indexPath.row] }
         else if indexPath.section == 1 { post = scheduledTomorrowPosts[indexPath.row] }
         else { post = scheduledLaterPosts[indexPath.row] }
 
-        // 2. Check if the post has images to decide which identifier to use
+        //Check if the post has images to decide which identifier to use
         let hasImages = post.imageNames?.isEmpty == false
 
-        // 3. Dequeue and configure
+        //Dequeue and configure
         if hasImages {
             let cell = tableView.dequeueReusableCell(withIdentifier: "ScheduledPostImageTableViewCell", for: indexPath) as! ScheduledPostImageTableViewCell
             cell.configure(with: post)
@@ -174,7 +171,6 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
     }
     
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        
         // Delete Action
         let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] (action, view, completionHandler) in
             guard let self = self else { return }
@@ -216,6 +212,7 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
         
         return configuration
     }
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         self.performSegue(withIdentifier: "openEditorModal", sender: indexPath)
@@ -236,18 +233,17 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
                  if indexPath.section == 0 { selectedPost = scheduledTodayPosts[indexPath.row] }
                  else if indexPath.section == 1 { selectedPost = scheduledTomorrowPosts[indexPath.row] }
                  else { selectedPost = scheduledLaterPosts[indexPath.row] }
-                let draftData = EditorDraftData(
-                                id: selectedPost.id,
-                                postHeading: selectedPost.postHeading,
-                                platformName: selectedPost.platformName,
-                                platformIconName: selectedPost.platformIconName,
-                                caption: selectedPost.fullCaption,
-                                images: selectedPost.imageNames,
-                                hashtags: selectedPost.hashtags ?? [],
-                                postingTimes: selectedPost.optimalPostingTimes ?? []
-                            )
-                 editorVC.draft = draftData
-                
+            let draftData = EditorDraftData(
+                            id: selectedPost.id,
+                            postHeading: selectedPost.postHeading,
+                            platformName: selectedPost.platformName,
+                            platformIconName: selectedPost.platformIconName,
+                            caption: selectedPost.fullCaption,
+                            images: selectedPost.imageNames,
+                            hashtags: selectedPost.hashtags ?? [],
+                            postingTimes: selectedPost.optimalPostingTimes ?? []
+                        )
+                editorVC.draft = draftData
             }
         }
     }

@@ -36,14 +36,14 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
     }
     func fetchData() {
         Task {
-            // 1. Fetch Master List
+            //Fetch all posts
             let allPosts = await SupabaseManager.shared.fetchUserPosts()
             
-            // 2. Use Extension to Filter
+            // 2.Fetch published posts
             self.publishedPosts = Post.loadPublishedPosts(from: allPosts)
             
             await MainActor.run {
-                self.applyFilters() // This will update 'displayedPosts'
+                self.applyFilters()
                 self.publishedTableView.reloadData()
             }
         }
@@ -85,12 +85,12 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
     func applyFilters() {
         var filtered = publishedPosts
         
-        // 1. Filter by Platform
+        //Filter by Platform
         if currentPlatformFilter != "All" {
             filtered = filtered.filter { $0.platformName == currentPlatformFilter }
         }
         
-        // 2. Filter by Time
+        //Filter by Time
         if currentTimeFilter != "All" {
             let daysAgo = currentTimeFilter == "Last 7 Days" ? 7 : 30
             let cutoffDate = Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date())!
@@ -154,8 +154,6 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
         return Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date())!
     }
     
-    
-    
     //Table View
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
@@ -180,37 +178,12 @@ class PublishedPostViewController: UIViewController, UITableViewDelegate, UITabl
         }
     }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        // Automatically calculate height based on Autolayout constraints in the cell
+        //Calculate height automatically
         return UITableView.automaticDimension
     }
     
     // Provide an estimated height for performance
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         return 150
-    }
-    
-    //Redirect to actual post
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-            tableView.deselectRow(at: indexPath, animated: true)
-            let post = displayedPosts[indexPath.row]
-            
-            var urlString = ""
-            
-            switch post.platformName.lowercased() {
-            case "instagram":
-                urlString = "https://www.instagram.com/reels/\(post.id)/"
-            case "linkedin":
-                urlString = "https://www.linkedin.com/feed/update/\(post.id)/"
-            case "x":
-                urlString = "https://twitter.com/user/status/\(post.id)"
-            default:
-                return
-            }
-            
-            if let url = URL(string: urlString) {
-                UIApplication.shared.open(url)
-            }
-        }
     }
 }

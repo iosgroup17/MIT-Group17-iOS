@@ -19,68 +19,74 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             let window = UIWindow(windowScene: windowScene)
             self.window = window
 
-            // 2. Wrap the async setup in a Task
             Task {
                 await setupAuthListener()
             }
 
         Task {
             if let user = SupabaseManager.shared.client.auth.currentUser {
-                do {
-                    // Try to fetch something from the database
-                    // If the user was deleted, this will FAIL
-                    try await SupabaseManager.shared.client.from("profiles").select().execute()
-                    routeUser(user)
-                } catch {
-                    // If it fails, the user is likely deleted or token expired
-                    try? await SupabaseManager.shared.client.auth.signOut()
-                }
+                await routeUser(user)
             } else {
                 showLogin(window: window)
             }
         }
 
-            window.makeKeyAndVisible()
+        window.makeKeyAndVisible()
+    }
+
+       
+    private func routeUser(_ user: User) async {
+        guard let window = self.window else { return }
+        let userId = user.id.uuidString
+        let userKey = "hasCompletedOnboarding_\(userId)"
+        
+     
+        var hasCompletedOnboarding = UserDefaults.standard.bool(forKey: userKey)
+
+       
+        if !hasCompletedOnboarding {
+            print("Local flag is false, checking Supabase...")
+            let remoteData = await SupabaseManager.shared.fetchUserOnboardingData()
+            if !remoteData.isEmpty {
+                hasCompletedOnboarding = true
+                
+                UserDefaults.standard.set(true, forKey: userKey)
+            }
         }
 
-        // Helper to handle the routing logic
-        private func routeUser(_ user: User) {
-            guard let window = self.window else { return }
-            let userId = user.id.uuidString
-            let userKey = "hasCompletedOnboarding_\(userId)"
-            let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: userKey)
-
+       
+        await MainActor.run {
             if hasCompletedOnboarding {
                 showMainApp(window: window)
             } else {
                 showOnboardingQuiz(window: window)
             }
         }
+    }
 
-        // 4. This is where the async magic happens
-        private func setupAuthListener() async {
-            // In the new Supabase SDK, onAuthStateChange is an AsyncStream
-            print("Setting up auth listner")
+        
+    private func setupAuthListener() async {
+            print("Setting up auth listener")
             for await (event, session) in SupabaseManager.shared.client.auth.authStateChanges {
                 print("Auth Event: \(event)")
                 
-                await MainActor.run {
-                    guard let window = self.window else { return }
-                    
-                    // If logged out, force the login screen
-                    if event == .signedOut || session == nil {
+                let user = session?.user
+                
+               
+                if event == .signedOut || session == nil {
+                    await MainActor.run {
+                        guard let window = self.window else { return }
                         self.showLogin(window: window)
                         UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
                     }
-                    // Optional: If they just signed in, you could also route them here
-                    else if event == .signedIn, let user = session?.user {
-                        self.routeUser(user)
-                    }
+                } else if event == .signedIn, let user = user {
+                   
+                    await self.routeUser(user)
                 }
             }
         }
 
-        // MARK: - Routing Methods (Keep these as you had them)
+     
         func showLogin(window: UIWindow) {
             let storyboard = UIStoryboard(name: "Profile", bundle: nil)
             let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginAuthVC")

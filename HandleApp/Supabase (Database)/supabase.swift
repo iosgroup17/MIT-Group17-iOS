@@ -102,11 +102,11 @@ class SupabaseManager {
     }
     
     var currentUserID: UUID {
-        // Priority 1: Use the real authenticated session if it exists (Required for scrapers)
+        //Use the real authenticated session if it exists (Required for scrapers)
         if let authID = client.auth.currentSession?.user.id {
             return authID
         }
-        // Priority 2: Fallback for test data fetching only
+        //Fallback for test data fetching only
         return testUserID
     }
     
@@ -193,7 +193,6 @@ class SupabaseManager {
     func runHandleScoreCalculation(handle: String) async -> Int {
             let params: [String: String] = ["handle": handle, "user_id": currentUserID.uuidString]
             do {
-                // Invokes the edge function we just updated
                 let response: [String: Int] = try await client.functions
                     .invoke("process-tweet-scrape", options: FunctionInvokeOptions(body: params))
                 return response["handle_score"] ?? 0
@@ -325,14 +324,14 @@ class SupabaseManager {
     }
     
     func ensureAnonymousSession() async {
-        // If a session exists, we don't create a new one to avoid ID churn
+   
         if client.auth.currentSession != nil {
             print("Session active for scrapers: \(client.auth.currentSession?.user.id.uuidString ?? "")")
             return
         }
         
         do {
-            // Required so the 'process-scrape' functions have a valid JWT
+            
             _ = try await client.auth.signInAnonymously()
             print("Anonymous session established.")
         } catch {
@@ -358,7 +357,7 @@ class SupabaseManager {
                let lastDate = ISO8601DateFormatter().date(from: lastDateStr) {
                 let hoursSince = Date().timeIntervalSince(lastDate) / 3600
                 if hoursSince < 24 {
-                    print("⏳ Data is fresh (\(Int(hoursSince))h old). Skipping auto-scrape.")
+                    print("Data is fresh (\(Int(hoursSince))h old). Skipping auto-scrape.")
                     return
                 }
             }
@@ -618,7 +617,7 @@ struct Suggestion: Codable{
 }
 
 extension SupabaseManager {
-    // Fetch pending cards for the Analytics UI
+    
     func fetchPendingSuggestions() async -> [Suggestion] {
         guard let userId = client.auth.currentSession?.user.id else { return [] }
         
@@ -633,11 +632,11 @@ extension SupabaseManager {
                 .value
             return results
         } catch {
-            print("❌ Fetch Error: \(error)")
+            print("Fetch Error: \(error)")
             return []
         }
     }
-    // Update status (Accept/Decline)
+  
     func updateSuggestionStatus(id: UUID, status: String) async {
         do {
             try await client.from("user_suggestions")
@@ -645,7 +644,7 @@ extension SupabaseManager {
                 .eq("suggestion_id", value: id.uuidString) 
                 .execute()
         } catch {
-            print("❌ Status Update Error: \(error)")
+            print("Status Update Error: \(error)")
         }
     }
 

@@ -17,23 +17,25 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        NotificationManager.shared.requestAuthorization()
+        
         let imageNib = UINib(nibName: "SavedPostImageTableViewCell", bundle: nil)
             tableView.register(imageNib, forCellReuseIdentifier: "ImageSavedCell")
-           
         let textNib = UINib(nibName: "SavedPostTextTableViewCell", bundle: nil)
             tableView.register(textNib, forCellReuseIdentifier: "TextSavedCell")
-        displayedPosts = savedPosts
+        
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 100
+        
+        displayedPosts = savedPosts
         fetchSavedPosts()
     }
+    
     func fetchSavedPosts() {
         Task {
-            // 1. Fetch Master List
+            //Fetch all posts
             let allPosts = await SupabaseManager.shared.fetchUserPosts()
             
-            // 2. Use Extension to Filter
+            //Fetch saved posts
             self.savedPosts = Post.loadSavedPosts(from: allPosts)
             
             print("Saved Drafts count: \(self.savedPosts.count)")
@@ -44,6 +46,7 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
             }
         }
     }
+    
     //Filter by platform.
     func didSelectPlatform(_ platform: String) {
         print("Selected Platform: \(platform)")
@@ -85,6 +88,7 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
         }
         present(alertController, animated: true, completion: nil)
     }
+    
     func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
         return .none
     }
@@ -102,8 +106,6 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
      
         let post = displayedPosts[indexPath.row]
         let hasImages = post.imageNames?.isEmpty == false
-
-        // 3. Dequeue and configure
         if hasImages {
             let cell = tableView.dequeueReusableCell(withIdentifier: "ImageSavedCell", for: indexPath) as! SavedPostImageTableViewCell
             cell.configure(with: post)
@@ -131,7 +133,6 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
     }
 
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        
         //Delete action
         let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] (action, view, completionHandler) in
                 guard let self = self else { return }
@@ -172,26 +173,26 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
     //Pass data to scheduler and Editor suite VC.
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "openEditorModal" {
-                let destinationVC = (segue.destination as? UINavigationController)?.topViewController as? EditorSuiteViewController
-                                    ?? segue.destination as? EditorSuiteViewController
+            let destinationVC = (segue.destination as? UINavigationController)?.topViewController as? EditorSuiteViewController
+                                ?? segue.destination as? EditorSuiteViewController
 
-                if let editorVC = destinationVC, let indexPath = sender as? IndexPath {
-                    let selectedPost = displayedPosts[indexPath.row]
+            if let editorVC = destinationVC, let indexPath = sender as? IndexPath {
+                let selectedPost = displayedPosts[indexPath.row]
                     
-                    let draftData = EditorDraftData(
-                                    id: selectedPost.id,
-                                    postHeading: selectedPost.postHeading,
-                                    platformName: selectedPost.platformName,
-                                    platformIconName: selectedPost.platformIconName,
-                                    caption: selectedPost.fullCaption,
-                                    images: selectedPost.imageNames, // Now passing array directly
-                                    hashtags: selectedPost.hashtags ?? [],
-                                    postingTimes: selectedPost.optimalPostingTimes ?? []
-                    )
+                let draftData = EditorDraftData(
+                                id: selectedPost.id,
+                                postHeading: selectedPost.postHeading,
+                                platformName: selectedPost.platformName,
+                                platformIconName: selectedPost.platformIconName,
+                                caption: selectedPost.fullCaption,
+                                images: selectedPost.imageNames,
+                                hashtags: selectedPost.hashtags ?? [],
+                                postingTimes: selectedPost.optimalPostingTimes ?? []
+                )
                     
-                    editorVC.draft = draftData
-                }
+                editorVC.draft = draftData
             }
+        }
     }
     /*
     // Override to support rearranging the table view.

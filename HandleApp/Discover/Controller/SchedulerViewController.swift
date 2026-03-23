@@ -99,8 +99,7 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
         // Update labels immediately
         updateDateLabel()
         updateTimeLabel()
-        
-        }
+    }
 
     @IBAction func dateSwitchToggled(_ sender: UISwitch) {
         if sender.isOn {
@@ -121,7 +120,6 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
             }
             self.view.layoutIfNeeded()
         }
-        
     }
     
     @IBAction func timeSwitchToggled(_ sender: UISwitch) {
@@ -136,7 +134,6 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
             self.timePicker.isHidden = !sender.isOn
             self.timePicker.alpha = sender.isOn ? 1.0 : 0.0
             
-
             if sender.isOn {
                 self.datePicker.isHidden = true
                 self.datePicker.alpha = 0.0
@@ -146,28 +143,28 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
     }
     
     @IBAction func datePickerChanged(_ sender: UIDatePicker) {
-            updateDateLabel()
-        }
+        updateDateLabel()
+    }
         
-        @IBAction func timePickerChanged(_ sender: UIDatePicker) {
-            updateTimeLabel()
-        }
+    @IBAction func timePickerChanged(_ sender: UIDatePicker) {
+        updateTimeLabel()
+    }
     
-     func updateDateLabel() {
-             let formatter = DateFormatter()
-             formatter.dateFormat = "E, MMM d, yyyy"
-             dateDetailLabel.text = formatter.string(from: datePicker.date)
-         }
-    
-     func updateTimeLabel() {
+    func updateDateLabel() {
          let formatter = DateFormatter()
-         formatter.timeStyle = .short
-         timeDetailLabel.text = formatter.string(from: timePicker.date)
-     }
+         formatter.dateFormat = "E, MMM d, yyyy"
+         dateDetailLabel.text = formatter.string(from: datePicker.date)
+    }
+    
+    func updateTimeLabel() {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        timeDetailLabel.text = formatter.string(from: timePicker.date)
+    }
     
     @IBAction func closeButtonTapped(_ sender: UIBarButtonItem) {
-            dismiss(animated: true, completion: nil)
-        }
+        dismiss(animated: true, completion: nil)
+    }
     
     @IBAction func scheduleButtonTapped(_ sender: UIBarButtonItem) {
     
@@ -211,71 +208,70 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
                )
                
 
-               Task {
-                   do {
-                       try await SupabaseManager.shared.upsertPost(post: newPost)
-                       if let id = newPost.id {
-                           NotificationManager.shared.cancelNotification(for: id)
-                       }
-                       NotificationManager.shared.schedulePostReminder(for: newPost)
-                       await MainActor.run {
-                           loadingAlert.dismiss(animated: true) {
-                               self.dismiss(animated: true) {
-                                   self.navigateToScheduledTab()
-                               }
-                           }
-                       }
-                   } catch {
-   
-                       await MainActor.run {
-                           loadingAlert.dismiss(animated: true) {
-                               let errAlert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
-                               print(error)
-                               errAlert.addAction(UIAlertAction(title: "OK", style: .default))
-                               self.present(errAlert, animated: true)
-                           }
-                       }
-                   }
-               }
+        Task {
+            do {
+                try await SupabaseManager.shared.upsertPost(post: newPost)
+                if let id = newPost.id {
+                    NotificationManager.shared.cancelNotification(for: id)
+                }
+                NotificationManager.shared.schedulePostReminder(for: newPost)
+                await MainActor.run {
+                    loadingAlert.dismiss(animated: true) {
+                        self.dismiss(animated: true) {
+                            self.navigateToScheduledTab()
+                        }
+                    }
+                }
+            } catch {
+                
+                await MainActor.run {
+                    loadingAlert.dismiss(animated: true) {
+                        let errAlert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+                        print(error)
+                        errAlert.addAction(UIAlertAction(title: "OK", style: .default))
+                        self.present(errAlert, animated: true)
+                    }
+                }
+            }
+        }
     }
     
     func navigateToScheduledTab() {
-
-            if let tabBar = self.tabBarController {
-  
-                tabBar.selectedIndex = 1
-                self.navigationController?.popToRootViewController(animated: false)
-            } else {
-  
-                self.dismiss(animated: true)
-            }
+        
+        if let tabBar = self.tabBarController {
+            
+            tabBar.selectedIndex = 1
+            self.navigationController?.popToRootViewController(animated: false)
+        } else {
+            
+            self.dismiss(animated: true)
         }
+    }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
             return postData == nil ? 0 : 1
         }
         
-        func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-            guard let data = postData else { return UICollectionViewCell() }
-            
-            if let images = data.images, let firstImage = images.first {
-                let cell = postPreviewCollectionView.dequeueReusableCell(withReuseIdentifier: "PostPreviewImageCollectionViewCell", for: indexPath) as! PostPreviewImageCollectionViewCell
-                cell.configure(
-                    platformName: data.platformName,
-                    iconName: data.iconName,
-                    caption: data.caption,
-                    image: firstImage
-                )
-                return cell
-            } else {
-                let cell = postPreviewCollectionView.dequeueReusableCell(withReuseIdentifier: "PostPreviewTextCollectionViewCell", for: indexPath) as! PostPreviewTextCollectionViewCell
-                cell.configure(
-                    platformName: data.platformName,
-                    iconName: data.iconName,
-                    caption: data.caption
-                )
-                return cell
-            }
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let data = postData else { return UICollectionViewCell() }
+        
+        if let images = data.images, let firstImage = images.first {
+            let cell = postPreviewCollectionView.dequeueReusableCell(withReuseIdentifier: "PostPreviewImageCollectionViewCell", for: indexPath) as! PostPreviewImageCollectionViewCell
+            cell.configure(
+                platformName: data.platformName,
+                iconName: data.iconName,
+                caption: data.caption,
+                image: firstImage
+            )
+            return cell
+        } else {
+            let cell = postPreviewCollectionView.dequeueReusableCell(withReuseIdentifier: "PostPreviewTextCollectionViewCell", for: indexPath) as! PostPreviewTextCollectionViewCell
+            cell.configure(
+                platformName: data.platformName,
+                iconName: data.iconName,
+                caption: data.caption
+            )
+            return cell
         }
-
+    }
 }

@@ -29,7 +29,6 @@ class PostsViewController: UIViewController {
     
     var currentWeekStartDate: Date = Calendar.current.startOfDay(for: Date())
     
-    // Newly added variable.
     private var contentSizeObserver: NSKeyValueObservation?
 
     override func viewDidLoad() {
@@ -126,9 +125,7 @@ class PostsViewController: UIViewController {
                 await MainActor.run {
                     self.postsTableView.reloadData()
                     
-                    // Old: self.updateTableViewHeight()
-                    // Replaced with an async call to ensure the table has finished its reload
-                    // before we calculate the final height for the container.
+                    //Update table view height when screen is loaded
                     DispatchQueue.main.async {
                         self.updateTableViewHeight()
                     }
@@ -264,16 +261,16 @@ class PostsViewController: UIViewController {
     func getStatusColor(for dateToCheck: Date) -> UIColor {
         let calendar = Calendar.current
             
-        // 1. Filter 'allPosts' to get ONLY the posts for this specific date
+        //Filter to get the posts for specific date
         let postsForDay = allPosts.filter { post in
             guard let postDate = post.scheduledAt else { return false }
             return calendar.isDate(postDate, inSameDayAs: dateToCheck)
         }
             
-        // 2. If no posts exist on this day, return invisible
+        //If no posts exist on this day, return invisible
         guard !postsForDay.isEmpty else { return .clear }
             
-        // 3. Check for specific Statuses
+        //Check for specific Statuses
         let hasScheduledPost = postsForDay.contains { post in
             return post.status == .scheduled
         }
@@ -282,7 +279,7 @@ class PostsViewController: UIViewController {
         }
 
         
-        //If there is ANYTHING scheduled, show Yellow (Work Remaining)
+        //If there is anything scheduled, show Yellow (Work Remaining)
         if hasScheduledPost {
             return .systemYellow
         }
@@ -380,14 +377,15 @@ extension PostsViewController: UITableViewDataSource, UITableViewDelegate {
             return cell
         }
     }
+    
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             todayScheduledPosts.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
         }
     }
+    
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        
         //Delete action
         let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] (action, view, completionHandler) in
             guard let self = self else { return }
@@ -413,10 +411,12 @@ extension PostsViewController: UITableViewDataSource, UITableViewDelegate {
                 
         return configuration
     }
-     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         self.performSegue(withIdentifier: "openEditorModal", sender: indexPath)
-        }
+    }
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "openEditorModal" {
             var destinationVC: EditorSuiteViewController?

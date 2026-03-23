@@ -68,45 +68,45 @@ class TopicIdeaViewController: UIViewController {
         guard let currentTopic = topic else { return }
                 
        // let trendContextString = "\(currentTopic.topicName): \(currentTopic.shortDescription). Context: \(currentTopic.trendingContext)"
-    
-                self.isGeneratingPosts = true
-                self.collectionView.reloadSections(IndexSet(integer: 2))
+
+            self.isGeneratingPosts = true
+            self.collectionView.reloadSections(IndexSet(integer: 2))
                 
-                Task {
-                    let userProfile = await SupabaseManager.shared.fetchUserProfile() ?? UserProfile(
-                        professionalIdentity: ["Content Creator"],
-                        currentFocus: ["Growth"],
-                        industry: ["General"],
-                        primaryGoals: ["Engagement"],
-                        contentFormats: ["Tips"],
-                        platforms: ["LinkedIn"],
-                        targetAudience: ["Professionals"],
-                        acceptedRules: []
-                    )
+        Task {
+            let userProfile = await SupabaseManager.shared.fetchUserProfile() ?? UserProfile(
+                professionalIdentity: ["Content Creator"],
+                currentFocus: ["Growth"],
+                industry: ["General"],
+                primaryGoals: ["Engagement"],
+                contentFormats: ["Tips"],
+                platforms: ["LinkedIn"],
+                targetAudience: ["Professionals"],
+                acceptedRules: []
+            )
+            
+            do {
+                print("Generating posts for topic: \(currentTopic.topicName)")
+                let aiPosts = try await OnDevicePostEngine.shared.generateTrendingTopicPosts(
+                    topic: currentTopic,
+                    context: userProfile
+                )
+                
+                await MainActor.run {
                     
-                    do {
-                        print("Generating posts for topic: \(currentTopic.topicName)")
-                        let aiPosts = try await OnDevicePostEngine.shared.generateTrendingTopicPosts(
-                            topic: currentTopic,
-                            context: userProfile
-                        )
-                        
-                        await MainActor.run {
-         
-                            self.generatedPosts = aiPosts
-                            self.isGeneratingPosts = false
-                            self.collectionView.reloadSections(IndexSet(integer: 2))
-                        }
-                        
-                    } catch {
-                        print("Error generating topic posts: \(error)")
-                        await MainActor.run {
-                            self.isGeneratingPosts = false
-                            self.collectionView.reloadSections(IndexSet(integer: 2))
-                        }
-                    }
+                    self.generatedPosts = aiPosts
+                    self.isGeneratingPosts = false
+                    self.collectionView.reloadSections(IndexSet(integer: 2))
                 }
+                
+            } catch {
+                print("Error generating topic posts: \(error)")
+                await MainActor.run {
+                    self.isGeneratingPosts = false
+                    self.collectionView.reloadSections(IndexSet(integer: 2))
+                }
+            }
         }
+    }
     
     func showRefinementLoading() {
             let alert = UIAlertController(title: nil, message: "Preparing Editor...", preferredStyle: .alert)
@@ -289,41 +289,41 @@ extension TopicIdeaViewController: UICollectionViewDataSource, UICollectionViewD
         
         if indexPath.section == 2 {
             if isGeneratingPosts {
-                        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "LoadingCell", for: indexPath)
-                        
-                        // Clear out any old views just in case cells are reused
-                        cell.contentView.subviews.forEach { $0.removeFromSuperview() }
-                        
-                        let spinner = UIActivityIndicatorView(style: .medium)
-                        spinner.translatesAutoresizingMaskIntoConstraints = false
-                        spinner.startAnimating()
-                        
-                        cell.contentView.addSubview(spinner)
-                        NSLayoutConstraint.activate([
-                            spinner.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor),
-                            spinner.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
-                        ])
-                        
-                        return cell
-                    }
-                        
-                guard indexPath.row < generatedPosts.count else { return UICollectionViewCell() }
-                let post = generatedPosts[indexPath.row]
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "LoadingCell", for: indexPath)
                 
-                if let images = post.postImage, !images.isEmpty {
-                    let cell = collectionView.dequeueReusableCell(
-                        withReuseIdentifier: "PublishReadyImageCollectionViewCell",
-                        for: indexPath
-                    ) as! PublishReadyImageCollectionViewCell
-                    cell.configure(with: post)
-                    return cell
-                } else {
-                    let cell = collectionView.dequeueReusableCell(
-                        withReuseIdentifier: "PublishReadyTextCollectionViewCell",
-                        for: indexPath
-                    ) as! PublishReadyTextCollectionViewCell
-                    cell.configure(with: post)
-                    return cell
+                // Clear out any old views just in case cells are reused
+                cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+                
+                let spinner = UIActivityIndicatorView(style: .medium)
+                spinner.translatesAutoresizingMaskIntoConstraints = false
+                spinner.startAnimating()
+                
+                cell.contentView.addSubview(spinner)
+                NSLayoutConstraint.activate([
+                    spinner.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor),
+                    spinner.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
+                ])
+                
+                return cell
+            }
+            
+            guard indexPath.row < generatedPosts.count else { return UICollectionViewCell() }
+            let post = generatedPosts[indexPath.row]
+            
+            if let images = post.postImage, !images.isEmpty {
+                let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: "PublishReadyImageCollectionViewCell",
+                    for: indexPath
+                ) as! PublishReadyImageCollectionViewCell
+                cell.configure(with: post)
+                return cell
+            } else {
+                let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: "PublishReadyTextCollectionViewCell",
+                    for: indexPath
+                ) as! PublishReadyTextCollectionViewCell
+                cell.configure(with: post)
+                return cell
             }
         }
         
