@@ -13,7 +13,7 @@ class OnboardingDataStore {
 
         OnboardingStep(
             index: 0,
-            title: "How do you identify professionally?",
+            title: "What best describes your role?",
             description: nil,
             layoutType: .singleSelectChips,
             options: [
@@ -24,71 +24,71 @@ class OnboardingDataStore {
 
         OnboardingStep(
             index: 1,
-            title: "What are you working on right now?",
+            title: "What are you doing right now?",
             description: nil,
             layoutType: .singleSelectCards,
             options: [
                 OnboardingOption(title: "Building a startup or product"),
-                OnboardingOption(title: "Working in a full-time role"),
-                OnboardingOption(title: "Growing a side project"),
-                OnboardingOption(title: "Juggling multiple things")
+                OnboardingOption(title: "Working full-time"),
+                OnboardingOption(title: "Working on a side project"),
+                OnboardingOption(title: "Doing multiple things")
             ]
         ),
 
         OnboardingStep(
             index: 2,
-            title: "Which domain best fits your work?",
+            title: "Which area do you work in?",
             description: nil,
             layoutType: .singleSelectCards,
             options: [
                 OnboardingOption(title: "Technology & Software", iconName: "grid_tech"),
-                OnboardingOption(title: "Marketing, Branding & Growth", iconName: "grid_media"),
-                OnboardingOption(title: "Finance, Strategy & Operations", iconName: "grid_finance"),
-                OnboardingOption(title: "Design, Product & UX", iconName: "favorite"),
-                OnboardingOption(title: "Education, Coaching & Knowledge", iconName: "grid_edu"),
-                OnboardingOption(title: "Media, Content & Community", iconName: "hospitality")
+                OnboardingOption(title: "Marketing & Growth", iconName: "grid_media"),
+                OnboardingOption(title: "Finance & Operations", iconName: "grid_finance"),
+                OnboardingOption(title: "Design & Product", iconName: "favorite"),
+                OnboardingOption(title: "Education & Coaching", iconName: "grid_edu"),
+                OnboardingOption(title: "Media & Content", iconName: "hospitality")
             ]
         ),
 
         OnboardingStep(
             index: 3,
-            title: "What’s your main goal right now?",
+            title: "What is your main goal right now?",
             description: nil,
             layoutType: .singleSelectCards,
             options: [
                 OnboardingOption(
                     title: "Build visibility",
-                    subtitle: "Grow your professional Presence and Reach"
+                    subtitle: "Get noticed and grow your reach"
                 ),
                 OnboardingOption(
                     title: "Generate leads",
-                    subtitle: "Attract potential Customers and Inquiries"
+                    subtitle: "Get potential customers and inquiries"
                 ),
                 OnboardingOption(
-                    title: "Recruit candidates",
-                    subtitle: "Find and engage talented Professionals"
+                    title: "Hire people",
+                    subtitle: "Find and attract good candidates"
                 ),
                 OnboardingOption(
-                    title: "Launch/promote",
-                    subtitle: "Announce products features or initiatives"
+                    title: "Launch or promote",
+                    subtitle: "Share your product or updates"
                 ),
                 OnboardingOption(
                     title: "Attract investors",
-                    subtitle: "Build credibility with funding sources"
+                    subtitle: "Show value to potential investors"
                 )
         ]),
 
         OnboardingStep(
             index: 4,
-            title: "What content feels natural to you?",
+            title: "What type of content do you like to create?",
             description: "Select all that apply.",
             layoutType: .multiSelectCards,
             options: [
-                OnboardingOption(title: "Thought leadership", subtitle: "Share insights and perspectives", iconName: "light-bulb"),
-                OnboardingOption(title: "Educational", subtitle: "Teach your audience something new", iconName: "open-book"),
-                OnboardingOption(title: "Behind the Scenes", subtitle: "Show your process and culture", iconName: "directors-chair"),
-                OnboardingOption(title: "Case Studies", subtitle: "Highlight results and wins", iconName: "caseStudies"),
-                OnboardingOption(title: "Interactive Q&A", subtitle: "Engage with your community", iconName: "speech-bubble")
+                OnboardingOption(title: "Thought leadership", subtitle: "Share your ideas and opinions", iconName: "light-bulb"),
+                OnboardingOption(title: "Educational", subtitle: "Teach something useful", iconName: "open-book"),
+                OnboardingOption(title: "Behind the scenes", subtitle: "Show your work or process", iconName: "directors-chair"),
+                OnboardingOption(title: "Case studies", subtitle: "Share results or success stories", iconName: "caseStudies"),
+                OnboardingOption(title: "Q&A", subtitle: "Answer questions and interact", iconName: "speech-bubble")
             ]
         ),
 
@@ -106,16 +106,16 @@ class OnboardingDataStore {
 
         OnboardingStep(
             index: 6,
-            title: "Who should your content reach?",
+            title: "Who do you want to reach?",
             description: "Select all that apply.",
             layoutType: .multiSelectCards,
             options: [
-                OnboardingOption(title: "New Prospects", subtitle: "People discovering you for the first time"),
-                OnboardingOption(title: "Current Customers", subtitle: "Those already using your product"),
-                OnboardingOption(title: "Investors", subtitle: "Individuals considering funding you"),
-                OnboardingOption(title: "Job Candidates", subtitle: "Potential hires exploring opportunities"),
-                OnboardingOption(title: "Professional Peers", subtitle: "Colleagues in your industry"),
-                OnboardingOption(title: "Wider Community", subtitle: "General audience")
+                OnboardingOption(title: "New prospects", subtitle: "People who don’t know you yet"),
+                OnboardingOption(title: "Current customers", subtitle: "People already using your product"),
+                OnboardingOption(title: "Investors", subtitle: "People who may fund you"),
+                OnboardingOption(title: "Job candidates", subtitle: "People looking to work with you"),
+                OnboardingOption(title: "Peers", subtitle: "Others in your field"),
+                OnboardingOption(title: "General audience", subtitle: "Anyone interested")
             ]
         )
     ]
@@ -125,23 +125,19 @@ class OnboardingDataStore {
     var shortBio: String?
     var projects: [String] = []
     
-    // Social Connections (Status)
     var socialStatus: [String: Bool] = [
         "Instagram": false,
         "LinkedIn": false,
         "X (Twitter)": false
     ]
     
-    // Helper to calculate "Profile Completion" %
     var completionPercentage: Float {
         var totalPoints = 0
         var earnedPoints = 0
         
-        // Quiz Points (6 Questions)
         totalPoints += 6
         earnedPoints += userAnswers.count
         
-        // Profile Points (Name, Bio, Image)
         totalPoints += 3
         if displayName != nil { earnedPoints += 1 }
         if shortBio != nil { earnedPoints += 1 }
