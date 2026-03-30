@@ -23,9 +23,6 @@ class EditorSuiteViewController: UIViewController {
     @IBOutlet weak var hashtagTitleLabel: UILabel!
     @IBOutlet weak var hashtagCollectionView: UICollectionView!
     
-    @IBOutlet weak var timeContainerView: UIView!
-    @IBOutlet weak var timeTitleLabel: UILabel!
-    @IBOutlet weak var timeCollectionView: UICollectionView!
     
     private let captionService: CaptionGenerator = RegenerateCaption()
     
@@ -52,15 +49,11 @@ class EditorSuiteViewController: UIViewController {
         hashtagCollectionView.dataSource = self
         hashtagCollectionView.delegate = self
         
-        timeCollectionView.dataSource = self
-        timeCollectionView.delegate = self
-        
         
         imagesCollectionView.register(UINib(nibName: "ImageCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "ImageCollectionViewCell")
         
         let hashtagNib = UINib(nibName: "HashtagCollectionViewCell", bundle: nil)
         hashtagCollectionView.register(hashtagNib, forCellWithReuseIdentifier: "HashtagCollectionViewCell")
-        timeCollectionView.register(hashtagNib, forCellWithReuseIdentifier: "HashtagCollectionViewCell")
     }
     
     func setupUI() {
@@ -73,10 +66,6 @@ class EditorSuiteViewController: UIViewController {
         hashtagContainerView.layer.cornerRadius = 12
         hashtagContainerView.layer.borderWidth = 1
         hashtagContainerView.layer.borderColor = UIColor.systemGray4.cgColor
-        
-        timeContainerView.layer.cornerRadius = 12
-        timeContainerView.layer.borderWidth = 1
-        timeContainerView.layer.borderColor = UIColor.systemGray4.cgColor
         
     }
     
@@ -123,7 +112,6 @@ class EditorSuiteViewController: UIViewController {
         
         imagesCollectionView.reloadData()
         hashtagCollectionView.reloadData()
-        timeCollectionView.reloadData()
     }
     
     
@@ -193,8 +181,7 @@ class EditorSuiteViewController: UIViewController {
                 
                 platformName: draft?.platformName ?? "General",
                 platformIconName: draft?.platformIconName,
-                hashtags: draft?.hashtags,
-                optimalPostingTimes: draft?.postingTimes
+                hashtags: draft?.hashtags
             )
             
             print(SupabaseManager.shared.currentUserID)
@@ -250,7 +237,6 @@ class EditorSuiteViewController: UIViewController {
             platformName: draft?.platformName ?? "General",
             platformIconName: draft?.platformIconName,
             hashtags: draft?.hashtags,
-            optimalPostingTimes: draft?.postingTimes,
             scheduledAt: nil,
             publishedAt: Date()
         )
@@ -365,7 +351,6 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
         case imagesCollectionView:
                     return displayedImages.count + 1
         case hashtagCollectionView: return draft?.hashtags?.count ?? 0
-        case timeCollectionView:    return draft?.postingTimes?.count ?? 0
         default: return 0
         }
     }
@@ -386,16 +371,12 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
                     return cell
             
     
-        case hashtagCollectionView, timeCollectionView:
+        case hashtagCollectionView:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HashtagCollectionViewCell", for: indexPath) as! HashtagCollectionViewCell
             
             if collectionView == hashtagCollectionView {
                 if let tag = draft?.hashtags?[indexPath.row] {
                     cell.configure(text: tag)
-                }
-            } else {
-                if let time = draft?.postingTimes?[indexPath.row] {
-                    cell.configure(text: time)
                 }
             }
             return cell
@@ -430,13 +411,11 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
         }
         
 
-        if collectionView == hashtagCollectionView || collectionView == timeCollectionView {
+        if collectionView == hashtagCollectionView {
             
             var text = ""
             if collectionView == hashtagCollectionView {
                 text = draft?.hashtags?[indexPath.row] ?? ""
-            } else {
-                text = draft?.postingTimes?[indexPath.row] ?? ""
             }
             
             let font = UIFont.systemFont(ofSize: 13, weight: .medium)
@@ -468,8 +447,7 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
                         iconName: icon,
                         caption: finalCaption,
                         images: finalImages,
-                        hashtags: tags,
-                        optimalPostingTimes: draft?.postingTimes
+                        hashtags: tags
                     )
                     
                     destinationVC.postData = package
@@ -479,7 +457,7 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
                     destinationVC.existingPostId = draft?.id
          
                     destinationVC.imageNames = draft?.images
-                    destinationVC.optimalPostingTimes = draft?.postingTimes
+                    
                 }
             }
         }

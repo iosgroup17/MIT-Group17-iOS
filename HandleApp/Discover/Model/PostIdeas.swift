@@ -149,11 +149,10 @@ struct EditorDraftData: Codable {
     let caption: String?
     let images: [PostImageRef]?
     let hashtags: [String]?
-    let postingTimes: [String]?
     
     enum CodingKeys: String, CodingKey {
         case postHeading = "post_heading"
-        case platformName, platformIconName, caption, images, hashtags, postingTimes, id
+        case platformName, platformIconName, caption, images, hashtags, id
     }
 }
 

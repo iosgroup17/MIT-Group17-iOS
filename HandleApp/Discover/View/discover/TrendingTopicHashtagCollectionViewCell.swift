@@ -19,20 +19,12 @@ class TrendingTopicHashtagCollectionViewCell: UICollectionViewCell {
         // Initialization code
     }
 
-    func configure(text: String, isOutlined: Bool) {
+    func configure(text: String) {
         tagLabel.text = text
         
-        if isOutlined {
-            
-            tagContainer.backgroundColor = .white
-            tagContainer.layer.borderWidth = 1
-            tagContainer.layer.borderColor = UIColor.systemTeal.cgColor
-            tagLabel.textColor = .black
-        } else {
-            tagContainer.backgroundColor = UIColor.systemTeal.withAlphaComponent(0.1)
-            tagContainer.layer.borderWidth = 0
-            tagLabel.textColor = .black
-        }
+        tagContainer.backgroundColor = UIColor.systemTeal.withAlphaComponent(0.1)
+        tagContainer.layer.borderWidth = 0
+        tagLabel.textColor = .black
     }
     
 }

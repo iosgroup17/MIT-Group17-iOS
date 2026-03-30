@@ -34,7 +34,6 @@ class PublishReadyImageCollectionViewCell: UICollectionViewCell {
         
         imageView.layer.cornerRadius = 16
         
-        predictionView.backgroundColor = .systemTeal.withAlphaComponent(0.1)
         predictionView.layer.cornerRadius = 16
         
         hashtagCollectionView.delegate = self
@@ -96,7 +95,7 @@ extension PublishReadyImageCollectionViewCell: UICollectionViewDataSource {
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TrendingTopicHashtagCollectionViewCell", for: indexPath) as! TrendingTopicHashtagCollectionViewCell
         
-        cell.configure(text: hashtags[indexPath.row], isOutlined: true)
+        cell.configure(text: hashtags[indexPath.row])
         
         return cell
         

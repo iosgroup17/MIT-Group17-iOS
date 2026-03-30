@@ -60,7 +60,7 @@ extension TrendingTopicCollectionViewCell: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TrendingTopicHashtagCollectionViewCell", for: indexPath) as! TrendingTopicHashtagCollectionViewCell
                 
-        cell.configure(text: hashtags[indexPath.row], isOutlined: false)
+        cell.configure(text: hashtags[indexPath.row])
         
         return cell
     }

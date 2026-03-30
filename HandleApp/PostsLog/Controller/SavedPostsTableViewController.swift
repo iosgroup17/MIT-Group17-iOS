@@ -186,8 +186,7 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
                                 platformIconName: selectedPost.platformIconName,
                                 caption: selectedPost.fullCaption,
                                 images: selectedPost.imageNames,
-                                hashtags: selectedPost.hashtags ?? [],
-                                postingTimes: selectedPost.optimalPostingTimes ?? []
+                                hashtags: selectedPost.hashtags ?? []
                 )
                     
                 editorVC.draft = draftData

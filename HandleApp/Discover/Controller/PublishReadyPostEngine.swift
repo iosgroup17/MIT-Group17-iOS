@@ -132,7 +132,6 @@ extension OnDevicePostEngine {
          - Caption: 80-120 words. Max 3 emojis.
          - Images: 2-3 random paths from [img_01 to img_34].
          - Hashtags: 4 compound tags (e.g. #TechTips), ≤12 chars each.
-         - Times: 2 specific "[Day] at [Time]" optimized for \(platformName).
 
          ### OUTPUT SCHEMA (JSON Only)
          {
@@ -141,8 +140,7 @@ extension OnDevicePostEngine {
            "platformIconName": "\(post.platformIcon)",
            "caption": "String (80-120 words)",
            "images": "Array {'type': 'stock', 'path': 'img_01'})"
-           "hashtags": "Array (Exactly 4) [#String, #String]",
-           "postingTimes": ["String (E.g., 'Monday at 9:00 AM') (Day at Time)"]
+           "hashtags": "Array (Exactly 4) [#String, #String]"
          }
         """
     

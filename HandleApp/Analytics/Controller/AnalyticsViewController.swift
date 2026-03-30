@@ -58,7 +58,6 @@ class AnalyticsViewController: UIViewController {
     var activeSuggestions: [Suggestion] = []
 
     // MARK: - Lifecycle
-    // MARK: - Lifecycle
         override func viewDidLoad() {
             super.viewDidLoad()
             self.navigationItem.hidesBackButton = true

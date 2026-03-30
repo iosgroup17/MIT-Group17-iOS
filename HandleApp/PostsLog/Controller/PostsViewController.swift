@@ -39,8 +39,8 @@ class PostsViewController: UIViewController {
         let imageNib = UINib(nibName: "SchForTodayImageTableViewCell", bundle: nil)
             postsTableView.register(imageNib, forCellReuseIdentifier: "SchForTodayImageTableViewCell")
                     
-            let textNib = UINib(nibName: "SchForTodayTableViewCell", bundle:nil)
-        postsTableView.register(textNib, forCellReuseIdentifier: "SchForTodayTableViewCell")
+        let textNib = UINib(nibName: "SchForTodayTableViewCell", bundle:nil)
+            postsTableView.register(textNib, forCellReuseIdentifier: "SchForTodayTableViewCell")
         
         postsTableView.rowHeight = UITableView.automaticDimension
         postsTableView.estimatedRowHeight = 150
@@ -436,8 +436,7 @@ extension PostsViewController: UITableViewDataSource, UITableViewDelegate {
                                 platformIconName: selectedPost.platformIconName,
                                 caption: selectedPost.fullCaption,
                                 images: selectedPost.imageNames, // Now passing array directly
-                                hashtags: selectedPost.hashtags ?? [],
-                                postingTimes: selectedPost.optimalPostingTimes ?? []
+                                hashtags: selectedPost.hashtags ?? []
                             )
                  
                  editorVC.draft = draftData

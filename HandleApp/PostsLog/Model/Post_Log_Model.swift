@@ -15,7 +15,6 @@ struct Post: Codable, Identifiable {
     var platformName: String
     var platformIconName: String?
     let hashtags: [String]?
-    var optimalPostingTimes: [String]?
     
     var scheduledAt: Date?
     var publishedAt: Date?
@@ -38,7 +37,6 @@ struct Post: Codable, Identifiable {
         case platformIconName = "platform_icon_name"
         case scheduledAt = "scheduled_at"
         case publishedAt = "published_at"
-        case optimalPostingTimes = "optimal_posting_times"
     }
 }
 
