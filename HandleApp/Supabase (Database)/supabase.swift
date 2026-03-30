@@ -561,51 +561,6 @@ extension SupabaseManager {
             return nil
         }
     }
-    
-
-    func loadPostsIdeas() async throws -> DiscoverIdeaResponse {
-        
-        print("Fetching discovery data from Supabase...")
-        
-
-        async let trendingQuery: [TrendingTopic] = client
-            .from("trending_topics")
-            .select()
-            .execute()
-            .value
-
-
-        async let actionsQuery: [TopicAction] = client
-            .from("topic_actions")
-            .select()
-            .execute()
-            .value
-        
-        
-        let (trending, allActions) = try await (
-            trendingQuery,
-            actionsQuery
-        )
-        
-        let groupedActions = Dictionary(grouping: allActions, by: { $0.topicDetailId })
-        
-
-        let populatedTopics = trending.map { topic -> TrendingTopic in
-            var newTopic = topic
-            
-            newTopic.actions = groupedActions[topic.id] ?? []
-            
-            newTopic.relevantPosts = []
-            
-            return newTopic
-        }
-        
-        print("Data fetched and grouped successfully!")
-        
-        return DiscoverIdeaResponse(
-            trendingTopics: populatedTopics
-        )
-    }
 }
 
 struct Suggestion: Codable{

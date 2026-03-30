@@ -13,7 +13,6 @@ class DiscoverViewController: UIViewController {
     @IBOutlet weak var collectionView: UICollectionView!
     
     var ideasResponse = DiscoverIdeaResponse()
-    var trendingTopics: [TrendingTopic] = []
     var publishReadyPosts: [PublishReadyPost] = []
     
     var isGeneratingPosts: Bool = false
@@ -21,16 +20,10 @@ class DiscoverViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        trendingTopics = ideasResponse.trendingTopics
         publishReadyPosts = ideasResponse.publishReadyPosts
         
         collectionView.delegate = self
         collectionView.dataSource = self
-        
-        collectionView.register(
-            UINib(nibName: "TrendingTopicCollectionViewCell", bundle: nil),
-            forCellWithReuseIdentifier: "TrendingTopicCollectionViewCell"
-        )
         
         
         collectionView.register(
@@ -94,17 +87,11 @@ class DiscoverViewController: UIViewController {
             
             do {
                 var userProfile: UserProfile
-                var userNiche = "Technology & Software"
                 
                 if let profile = await SupabaseManager.shared.fetchUserProfile() {
                     userProfile = profile
-                    
-                    if let industry = profile.industry.first, !industry.isEmpty {
-                        userNiche = industry
-                    }
-                    print("Loaded Profile for Niche: \(userNiche)")
                 } else {
-             
+                    
                     print("Profile fetch failed. Using Default Context.")
                     userProfile = UserProfile(
                         professionalIdentity: ["Content Creator"],
@@ -117,31 +104,9 @@ class DiscoverViewController: UIViewController {
                         acceptedRules: []
                     )
                 }
-
-                var fetchedTrends: [TrendingTopic] = []
-
-                fetchedTrends = try await SupabaseManager.shared.client
-                    .from("trending_topics")
-                    .select("*")
-                    .eq("category", value: userNiche)
-                    .order("created_at", ascending: false)
-                    .limit(10)
-                    .execute()
-                    .value
                 
-                if fetchedTrends.isEmpty {
-                    print("Niche trends empty. Fetching Global Trends...")
-                    fetchedTrends = try await SupabaseManager.shared.client
-                        .from("trending_topics")
-                        .select("*")
-                        .order("created_at", ascending: false)
-                        .limit(10)
-                        .execute()
-                        .value
-                }
 
                 await MainActor.run {
-                    self.trendingTopics = fetchedTrends
                     self.isGeneratingPosts = true
                     self.collectionView.reloadData()
                 }
@@ -159,7 +124,7 @@ class DiscoverViewController: UIViewController {
                     print("AI Generation Complete. Reloading Section 2.")
                     self.publishReadyPosts = generatedPosts
                     self.isGeneratingPosts = false
-                    self.collectionView.reloadSections(IndexSet(integer: 2))
+                    self.collectionView.reloadSections(IndexSet(integer: 1))
                 }
 
                 
@@ -167,7 +132,7 @@ class DiscoverViewController: UIViewController {
                 print("Critical Error in Data Load: \(error)")
                 await MainActor.run {
                     self.isGeneratingPosts = false
-                    self.collectionView.reloadSections(IndexSet(integer: 2))
+                    self.collectionView.reloadSections(IndexSet(integer: 1))
                 }
             }
         }
@@ -176,7 +141,6 @@ class DiscoverViewController: UIViewController {
     @MainActor
     private func updateUI(with data: DiscoverIdeaResponse) {
         self.ideasResponse = data
-        self.trendingTopics = data.trendingTopics
         self.collectionView.reloadData()
     }
     
@@ -215,52 +179,7 @@ class DiscoverViewController: UIViewController {
                 
             }
             
-            
             if section == 1 {
-                
-                let headerSize = NSCollectionLayoutSize(
-                    widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .absolute(40)
-                )
-                
-                let header = NSCollectionLayoutBoundarySupplementaryItem(
-                    layoutSize: headerSize,
-                    elementKind: UICollectionView.elementKindSectionHeader,
-                    alignment: .top
-                )
-                
-                header.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: -8, bottom: 4, trailing: 16)
-                
-                let itemSize = NSCollectionLayoutSize(
-                    widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .fractionalHeight(1.0)
-                )
-                let item = NSCollectionLayoutItem(layoutSize: itemSize)
-                
-                let groupSize = NSCollectionLayoutSize(
-                    widthDimension: .absolute(222),
-                    heightDimension: .absolute(168)
-                )
-                
-                let group = NSCollectionLayoutGroup.vertical(
-                    layoutSize: groupSize,
-                    subitems: [item]
-                )
-                
-                let sectionLayout = NSCollectionLayoutSection(group: group)
-                sectionLayout.orthogonalScrollingBehavior = .continuous
-                sectionLayout.interGroupSpacing = 12
-                sectionLayout.contentInsets = NSDirectionalEdgeInsets(
-                    top: 16, leading: 16, bottom: 30, trailing: 16
-                )
-                
-                sectionLayout.boundarySupplementaryItems = [header]
-                
-                return sectionLayout
-                
-            }
-            
-            if section == 2 {
                 
                 let itemSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
@@ -309,13 +228,12 @@ class DiscoverViewController: UIViewController {
 extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
         
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 3
+        return 2
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if section == 0 { return 1 }
-        if section == 1 { return trendingTopics.count }
-        if section == 2 { return isGeneratingPosts ? 1 : publishReadyPosts.count }
+        if section == 1 { return isGeneratingPosts ? 1 : publishReadyPosts.count }
         
         return 0
     }
@@ -337,23 +255,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
             
         }
         
-        
         if indexPath.section == 1 {
-            
-            let cell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: "TrendingTopicCollectionViewCell",
-                for: indexPath
-            ) as! TrendingTopicCollectionViewCell
-            
-            let idea = trendingTopics[indexPath.row]
-            
-            cell.configure(with: idea)
-            
-            return cell
-          
-        }
-        
-        if indexPath.section == 2 {
             if isGeneratingPosts {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "LoadingCell", for: indexPath)
                 
@@ -418,9 +320,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
         ) as! HeaderCollectionReusableView
         
         if indexPath.section == 1 {
-            header.titleLabel.text = "Trending Topics"
-        } else if indexPath.section == 2 {
-            header.titleLabel.text = "Publish-Ready Posts For You"
+            header.titleLabel.text = "Suggested For You"
         }
         
         return header
@@ -434,22 +334,8 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
                 navigationController?.pushViewController(destVC, animated: true)
             }
         }
-     
-        if indexPath.section == 1 {
-            let selectedTopic = trendingTopics[indexPath.row]
-            print("Selected Topic: \(selectedTopic.topicName)")
-            
-            let storyboard = UIStoryboard(name: "Discover", bundle: nil)
-            if let destVC = storyboard.instantiateViewController(withIdentifier: "TopicIdeasVC") as? TopicIdeaViewController {
-                
-                destVC.topic = selectedTopic
-                destVC.pageTitle = selectedTopic.topicName
-                
-                navigationController?.pushViewController(destVC, animated: true)
-            }
-        }
         
-        if indexPath.section == 2 {
+        if indexPath.section == 1 {
             let selectedPost = publishReadyPosts[indexPath.row]
 
             self.showRefinementLoading()
