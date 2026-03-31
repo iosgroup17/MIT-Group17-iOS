@@ -73,7 +73,7 @@
                                             <constraint firstItem="pMX-Ui-Y5a" firstAttribute="top" secondItem="Nnj-O1-JxO" secondAttribute="top" id="lVx-bk-xCJ"/>
                                         </constraints>
                                     </view>
-                                    <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="LU9-X9-glh">
+                                    <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="LU9-X9-glh">
                                         <rect key="frame" x="12" y="144" width="346" height="30"/>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                         <constraints>

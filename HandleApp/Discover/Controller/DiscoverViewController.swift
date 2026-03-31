@@ -32,6 +32,11 @@ class DiscoverViewController: UIViewController {
         )
         
         collectionView.register(
+            UINib(nibName: "PostsCollectionViewCell", bundle: nil),
+            forCellWithReuseIdentifier: "PostsCollectionViewCell"
+        )
+        
+        collectionView.register(
             UINib(nibName: "PublishReadyImageCollectionViewCell", bundle: nil),
             forCellWithReuseIdentifier: "PublishReadyImageCollectionViewCell"
         )
@@ -124,7 +129,7 @@ class DiscoverViewController: UIViewController {
                     print("AI Generation Complete. Reloading Section 2.")
                     self.publishReadyPosts = generatedPosts
                     self.isGeneratingPosts = false
-                    self.collectionView.reloadSections(IndexSet(integer: 1))
+                    self.collectionView.reloadSections(IndexSet(integer: 2))
                 }
 
                 
@@ -132,7 +137,7 @@ class DiscoverViewController: UIViewController {
                 print("Critical Error in Data Load: \(error)")
                 await MainActor.run {
                     self.isGeneratingPosts = false
-                    self.collectionView.reloadSections(IndexSet(integer: 1))
+                    self.collectionView.reloadSections(IndexSet(integer: 2))
                 }
             }
         }
@@ -182,6 +187,49 @@ class DiscoverViewController: UIViewController {
             if section == 1 {
                 
                 let itemSize = NSCollectionLayoutSize(
+                        widthDimension: .fractionalWidth(0.5),
+                        heightDimension: .absolute(45)
+                    )
+                
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 4)
+                
+                let groupSize = NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1.0),
+                    heightDimension: .estimated(60)
+                )
+                
+                let group = NSCollectionLayoutGroup.horizontal(
+                    layoutSize: groupSize,
+                    subitems: [item]
+                )
+                
+                let sectionLayout = NSCollectionLayoutSection(group: group)
+                sectionLayout.interGroupSpacing = 16
+                
+                let headerSize = NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1.0),
+                    heightDimension: .absolute(44)
+                )
+                
+                let header = NSCollectionLayoutBoundarySupplementaryItem(
+                    layoutSize: headerSize,
+                    elementKind: UICollectionView.elementKindSectionHeader,
+                    alignment: .top
+                )
+                
+                header.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: -8, bottom: 4, trailing: 0)
+                
+                sectionLayout.boundarySupplementaryItems = [header]
+                
+                sectionLayout.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: 16, bottom: 20, trailing: 16)
+                
+                return sectionLayout
+            }
+            
+            if section == 2 {
+                
+                let itemSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
                     heightDimension: .estimated(255)
                 )
@@ -228,12 +276,13 @@ class DiscoverViewController: UIViewController {
 extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
         
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 2
+        return 3
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if section == 0 { return 1 }
-        if section == 1 { return isGeneratingPosts ? 1 : publishReadyPosts.count }
+        if section == 1 { return 2 }
+        if section == 2 { return isGeneratingPosts ? 1 : publishReadyPosts.count }
         
         return 0
     }
@@ -256,6 +305,26 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
         }
         
         if indexPath.section == 1 {
+            let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: "PostsCollectionViewCell",
+                for: indexPath
+            ) as! PostsCollectionViewCell
+            
+            // Logic: Item 0 is Saved, Item 1 is Scheduled
+            if indexPath.row == 0 {
+                cell.configure(type: "Saved")
+            } else {
+                cell.configure(type: "Scheduled")
+            }
+            
+            // Styling the cell to look like a "Pill"
+            cell.layer.cornerRadius = 12
+            cell.layer.backgroundColor = UIColor.systemGray6.cgColor
+            
+            return cell
+        }
+        
+        if indexPath.section == 2 {
             if isGeneratingPosts {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "LoadingCell", for: indexPath)
                 
@@ -318,8 +387,10 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
             withReuseIdentifier: "HeaderCollectionReusableView",
             for: indexPath
         ) as! HeaderCollectionReusableView
-        
         if indexPath.section == 1 {
+            header.titleLabel.text = "Your Content Summary"
+        }
+        if indexPath.section == 2 {
             header.titleLabel.text = "Suggested For You"
         }
         
@@ -336,6 +407,16 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
         }
         
         if indexPath.section == 1 {
+            if indexPath.row == 0 {
+                print("Navigate to Saved Posts")
+                // performSegue(withIdentifier: "ShowSavedPosts", sender: nil)
+            } else {
+                print("Navigate to Scheduled Posts")
+                // performSegue(withIdentifier: "ShowScheduledPosts", sender: nil)
+            }
+        }
+        
+        if indexPath.section == 2 {
             let selectedPost = publishReadyPosts[indexPath.row]
 
             self.showRefinementLoading()
