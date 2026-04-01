@@ -12,6 +12,7 @@ class PostsCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var textLabel: UILabel!
     @IBOutlet weak var shadowContainer: UIView!
+    @IBOutlet weak var countLabel: UILabel!
     
     
     override func awakeFromNib() {
@@ -25,18 +26,20 @@ class PostsCollectionViewCell: UICollectionViewCell {
         // Initialization code
     }
     
-    func configure(type: String) {
+    func configure(type: String, count: Int) {
      
         if type == "Saved" {
             imageView.image = UIImage(systemName: "bookmark.fill")
             imageView.tintColor = .darkGray
             
             textLabel.text = "Saved"
+            countLabel.text = "\(count) Posts"
         } else {
             imageView.image = UIImage(systemName: "calendar.badge.clock")
             imageView.tintColor = .systemGreen
             
             textLabel.text = "Scheduled"
+            countLabel.text = "\(count) Posts"
         }
         
     }

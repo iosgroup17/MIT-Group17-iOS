@@ -161,6 +161,7 @@ class EditorSuiteViewController: UIViewController {
             // upload the custom images to storage
             let uploadedNames = await SupabaseManager.shared.uploadImagesToStorage(images: displayedImages)
             
+            
             // format to jsonb structure
             var finalImageRefs: [PostImageRef] = []
             for name in uploadedNames {
@@ -189,10 +190,16 @@ class EditorSuiteViewController: UIViewController {
             
             do {
                 try await SupabaseManager.shared.upsertPost(post: savedPost)
+                
                 await MainActor.run {
+                    NotificationCenter.default.post(
+                        name: NSNotification.Name("PostStatusChanged"),
+                        object: nil
+                    )
+        
                     loadingAlert.dismiss(animated: true) {
                         self.dismiss(animated: true) {
-                            print("Post saved successfully.")
+                            print("Post saved successfully. Notification sent.")
                         }
                     }
                 }

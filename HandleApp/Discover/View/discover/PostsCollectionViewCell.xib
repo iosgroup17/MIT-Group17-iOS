@@ -33,13 +33,13 @@
                                         <rect key="frame" x="32" y="0.0" width="152" height="50"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YPM-kK-Leu">
-                                                <rect key="frame" x="0.0" y="0.0" width="152" height="28.333333333333332"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="152" height="14.333333333333334"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="17"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="12 Posts" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xvE-EL-VpG">
-                                                <rect key="frame" x="0.0" y="28.333333333333329" width="152" height="21.666666666666671"/>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xvE-EL-VpG">
+                                                <rect key="frame" x="0.0" y="14.333333333333332" width="152" height="35.666666666666671"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                                 <nil key="textColor"/>
                                                 <color key="highlightedColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -74,6 +74,7 @@
             </constraints>
             <size key="customSize" width="230" height="50"/>
             <connections>
+                <outlet property="countLabel" destination="xvE-EL-VpG" id="iA5-vd-0Kb"/>
                 <outlet property="imageView" destination="8Jt-Fx-5st" id="VFs-7g-Zah"/>
                 <outlet property="shadowContainer" destination="shS-kD-TEt" id="c95-yU-9eR"/>
                 <outlet property="textLabel" destination="YPM-kK-Leu" id="Byj-ZK-aDt"/>

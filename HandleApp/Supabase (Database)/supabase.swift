@@ -450,6 +450,22 @@ extension SupabaseManager {
             }
         }
     
+    // In SupabaseManager.swift
+    func fetchPostCount(for status: Post.PostStatus) async throws -> Int {
+        let userId = self.currentUserID
+        
+        // 1. Match the DB column name 'post_id'
+        // 2. Match the DB value 'SAVED' by uppercasing the rawValue
+        let response = try await client
+            .from("posts")
+            .select("post_id", count: .exact)
+            .eq("user_id", value: userId)
+            .eq("status", value: status.rawValue.uppercased())
+            .execute()
+        
+        return response.count ?? 0
+    }
+    
 //    func createPost(post: Post) async throws {
 //            // Use the smart 'currentUserID'
 //            let targetID = self.currentUserID

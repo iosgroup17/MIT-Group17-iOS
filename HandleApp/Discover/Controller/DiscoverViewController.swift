@@ -17,6 +17,9 @@ class DiscoverViewController: UIViewController {
     
     var isGeneratingPosts: Bool = false
     
+    var savedCount: Int = 0
+    var scheduledCount: Int = 0
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -72,7 +75,16 @@ class DiscoverViewController: UIViewController {
                 name: .userProfileDidChange,
                 object: nil
             )
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(refreshCounts), name: NSNotification.Name("PostStatusChanged"), object: nil)
+    
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        refreshCounts()
+    }
+    
     
     @objc func handleProfileChange() {
         print("Profile changed notification received. Reloading discover data...")
@@ -80,17 +92,32 @@ class DiscoverViewController: UIViewController {
             await loadSupabaseData()
         }
     }
+
     
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
     
-  
+    @objc func refreshCounts() {
+        Task {
+            let sCount = try? await SupabaseManager.shared.fetchPostCount(for: .saved)
+            let schCount = try? await SupabaseManager.shared.fetchPostCount(for: .scheduled)
+
+            print("DEBUG: Fetched Saved: \(sCount ?? -1), Scheduled: \(schCount ?? -1)")
+
+            await MainActor.run {
+                self.savedCount = sCount ?? 0
+                self.scheduledCount = schCount ?? 0
+                self.collectionView.reloadSections(IndexSet(integer: 1))
+            }
+        }
+    }
     
     func loadSupabaseData() async {
-            print("Starting Industry-Specific Data Load...")
             
             do {
+                refreshCounts()
+                
                 var userProfile: UserProfile
                 
                 if let profile = await SupabaseManager.shared.fetchUserProfile() {
@@ -188,7 +215,7 @@ class DiscoverViewController: UIViewController {
                 
                 let itemSize = NSCollectionLayoutSize(
                         widthDimension: .fractionalWidth(0.5),
-                        heightDimension: .absolute(45)
+                        heightDimension: .absolute(50)
                     )
                 
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
@@ -196,7 +223,7 @@ class DiscoverViewController: UIViewController {
                 
                 let groupSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .estimated(60)
+                    heightDimension: .estimated(75)
                 )
                 
                 let group = NSCollectionLayoutGroup.horizontal(
@@ -218,7 +245,7 @@ class DiscoverViewController: UIViewController {
                     alignment: .top
                 )
                 
-                header.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: -8, bottom: 4, trailing: 0)
+                header.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: -8, bottom: 0, trailing: 0)
                 
                 sectionLayout.boundarySupplementaryItems = [header]
                 
@@ -312,9 +339,9 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
             
             // Logic: Item 0 is Saved, Item 1 is Scheduled
             if indexPath.row == 0 {
-                cell.configure(type: "Saved")
+                cell.configure(type: "Saved", count: savedCount)
             } else {
-                cell.configure(type: "Scheduled")
+                cell.configure(type: "Scheduled", count: scheduledCount)
             }
             
             // Styling the cell to look like a "Pill"
@@ -409,10 +436,20 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
         if indexPath.section == 1 {
             if indexPath.row == 0 {
                 print("Navigate to Saved Posts")
-                // performSegue(withIdentifier: "ShowSavedPosts", sender: nil)
+                let storyboard = UIStoryboard(name: "Posts", bundle: nil)
+                if let destinationVC = storyboard.instantiateViewController(withIdentifier: "SavedPostsViewControllerID") as? SavedPostsTableViewController {
+                    self.navigationController?.pushViewController(destinationVC, animated: true)
+                } else {
+                    print("Error: Could not find View Controller with ID 'SavedPostsViewControllerID'")
+                }
             } else {
                 print("Navigate to Scheduled Posts")
-                // performSegue(withIdentifier: "ShowScheduledPosts", sender: nil)
+                let storyboard = UIStoryboard(name: "Posts", bundle: nil)
+                if let destinationVC = storyboard.instantiateViewController(withIdentifier: "ScheduledPostsViewControllerID") as? ScheduledPostsTableViewController {
+                    self.navigationController?.pushViewController(destinationVC, animated: true)
+                } else {
+                    print("Error: Could not find View Controller with ID 'ScheduledPostsViewControllerID'")
+                }
             }
         }
         
