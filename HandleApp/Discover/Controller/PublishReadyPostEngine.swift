@@ -22,31 +22,53 @@ actor OnDevicePostEngine {
         let session = createFreshSession()
         
         let prompt = """
-                ### SYSTEM
-                    Role: World-Class Social Strategist.
-                    CONTEXT: \(await context.promptContext)
+                Context: \(await context.promptContext)
+                Task: Output a RAW JSON array of exactly 6 social media posts (Contrarian, How-To, Personal, Prediction, Behind-Scenes, Tool).
 
-                    ### DIRECTIVES (India IT Rules 2026)
-                    - No false claims, medical advice, or deepfakes.
-                    - Tone: Authentic founder voice. High utility. 
+                RULES:
+                - Tone: Authentic founder voice, high utility. No false claims, medical advice, or deepfakes.
+                - Mix: 2 'icon-linkedin', 2 'icon-x', 2 'icon-instagram'.
+                - post_heading: Max 3 words. Crisp gist.
+                - caption: ~2 lines. Catchy, precise teaser. No hashtags.
+                - hashtags: 2 long compound tags OR 3 short tags.
+                - prediction_text: Max 25 chars. State the exact benefit to the reader.
+                - post_image: Instagram requires 1 random stock image. The path MUST be exactly between 'img_01' and 'img_34'. Others MUST be null.
 
-                    ### TASK
-                    Generate 6 distinct posts (Contrarian, How-To, Personal, Prediction, Behind-Scenes, Tool).
-                    Format: RAW JSON only. Mix: 2x icon-linkedin, 2x icon-x, 2x icon-instagram.
-
-                    ### SCHEMA
+                OUTPUT FORMAT:
+                {
+                  "posts": [
                     {
-                      "posts": [
-                        {
-                          "post_heading": "String (3 words) ",
-                          "platform_icon": "Enum ('icon-linkedin', 'icon-x', 'icon-instagram')",
-                          "caption": "String (60-90 characters teaser. NO HASHTAGS)",
-                          "hashtags": "Array (Exactly 3) [#String, #String]",
-                          "prediction_text": "String (Max 25 characters)",
-                          "post_image": "Array/Null (Insta: [{'type': 'stock', 'path': 'img_01'}], others: null)"
-                        }
-                      ]
+                      "post_heading": "String",
+                      "platform_icon": "Enum('icon-linkedin', 'icon-x', 'icon-instagram')",
+                      "caption": "String",
+                      "hashtags": ["#String"],
+                      "prediction_text": "String",
+                      "post_image": [{"type": "stock", "path": "img_XX"}] // XX is strictly 01 through 34, or null
                     }
+                  ]
+                }
+
+                EXAMPLE:
+                {
+                  "posts": [
+                    {
+                      "post_heading": "Stop Chasing Features",
+                      "platform_icon": "icon-linkedin",
+                      "caption": "More features don't equal more value. We cut our roadmap in half and doubled retention. Here is the exact framework we used.",
+                      "hashtags": ["#ProductStrategy", "#FounderInsights"],
+                      "prediction_text": "Save months of dev time",
+                      "post_image": null
+                    },
+                    {
+                      "post_heading": "Design Systems Win",
+                      "platform_icon": "icon-instagram",
+                      "caption": "Stop rebuilding UI components from scratch every sprint. A solid design system scales your output 10x without adding headcount.",
+                      "hashtags": ["#DesignSystems", "#Scale", "#UIUX"],
+                      "prediction_text": "Ship UI 10x faster today",
+                      "post_image": [ { "type": "stock", "path": "img_14" } ]
+                    }
+                  ]
+                }
                 """
         
         
