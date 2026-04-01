@@ -64,7 +64,7 @@ class OnboardingViewController: UIViewController {
                 selectedOptions = []
             }
             
-            if currentStepIndex == 6 {
+            if currentStepIndex == 2 {
                 // Get the industry from Step 2 (Index 2) or the current selection
                 let industry = selectedOptions.first ?? "Marketing, Branding & Growth"
                 await triggerInitialSuggestions(for: industry)
@@ -109,6 +109,11 @@ class OnboardingViewController: UIViewController {
     
     func updateUIForStep(index: Int) {
         guard let stepData = OnboardingDataStore.shared.getStep(at: index) else { return }
+        let totalOnboardingSteps = 3 // We only want 3 steps for the initial quiz
+        
+        questionLabel.text = stepData.title
+        stepLabel.text = "Step \(index + 1) of \(totalOnboardingSteps)"
+        progressView.setProgress(Float(index + 1) / Float(totalOnboardingSteps), animated: true)
         
         if let desc = stepData.description, !desc.isEmpty {
             descLabel.text = desc
@@ -129,11 +134,6 @@ class OnboardingViewController: UIViewController {
         } else {
             skipButton.isHidden = false
         }
-        
-        // update question step and progress
-        questionLabel.text = stepData.title
-        stepLabel.text = "Step \(index + 1) of 7"
-        progressView.setProgress(Float(index + 1) / 7.0, animated: true)
         
         // instantiate and display child VC based on layout type
         let storyboard = self.storyboard ?? UIStoryboard(name: "Profile", bundle: nil)
@@ -181,12 +181,13 @@ class OnboardingViewController: UIViewController {
     
     // logic to increment index and update UI
     func goToNextStep() {
-        if currentStepIndex < OnboardingDataStore.shared.steps.count - 1 {
+        if !isEditMode && currentStepIndex == 2 {
+            navigateToProfileScreen()
+        } else if currentStepIndex < OnboardingDataStore.shared.steps.count - 1 {
             currentStepIndex += 1
             updateUIForStep(index: currentStepIndex)
         } else {
-            print("Navigate to Home Screen")
-            navigateToProfileScreen()
+            self.dismiss(animated: true) // Fallback for edit mode
         }
     }
     
@@ -200,13 +201,13 @@ class OnboardingViewController: UIViewController {
     func navigateToProfileScreen() {
         //Get the current User ID
         guard let userId = SupabaseManager.shared.client.auth.currentUser?.id.uuidString else {
-            print("❌ Error: No user logged in during onboarding completion")
+            print("Error: No user logged in during onboarding completion")
             return
         }
         let userKey = "hasCompletedOnboarding_\(userId)"
         UserDefaults.standard.set(true, forKey: userKey)
         
-        print("✅ Onboarding completed for user: \(userId). Flag set in UserDefaults.")
+        print("Onboarding completed for user: \(userId). Flag set in UserDefaults.")
 
         DispatchQueue.main.async {
             if let sceneDelegate = self.view.window?.windowScene?.delegate as? SceneDelegate,
@@ -242,9 +243,9 @@ class OnboardingViewController: UIViewController {
                 "dynamic-endpoint",
                 options: FunctionInvokeOptions(headers: headers, body: params)
             )
-            print("🚀 Successfully triggered initial suggestions.")
+            print("Successfully triggered initial suggestions.")
         } catch {
-            print("❌ Trigger failed: \(error)")
+            print("Trigger failed: \(error)")
         }
     }
 }

@@ -12,10 +12,14 @@ class ProfileViewController: UIViewController {
     @IBOutlet weak var detailsCardView: UIView!
     @IBOutlet weak var socialCardView: UIView!
     @IBOutlet weak var progressCardView: UIView!
+    @IBOutlet weak var settingsCardView: UIView!
+    
     
     @IBOutlet weak var accountStack: UIStackView!
     @IBOutlet weak var detailsStack: UIStackView!
     @IBOutlet weak var socialStack: UIStackView!
+    @IBOutlet weak var settingsStack: UIStackView!
+
     
     let store = OnboardingDataStore.shared
     
@@ -39,7 +43,7 @@ class ProfileViewController: UIViewController {
         profileImageView.layer.borderWidth = 2
         profileImageView.layer.borderColor = UIColor.white.cgColor
         
-        let cards = [accountCardView, detailsCardView, socialCardView, progressCardView]
+        let cards = [accountCardView, detailsCardView, socialCardView, progressCardView, settingsCardView]
         for card in cards {
             if let c = card {
                 c.backgroundColor = .white
@@ -56,6 +60,7 @@ class ProfileViewController: UIViewController {
         styleCard(accountCardView)
         styleCard(detailsCardView)
         styleCard(socialCardView)
+        styleCard(settingsCardView)
     }
     
     func loadGoogleProfileImage() {
@@ -128,74 +133,58 @@ class ProfileViewController: UIViewController {
     func refreshUI() {
         let store = OnboardingDataStore.shared
         
-        completionProgress.setProgress(store.completionPercentage, animated: false)
+        let teal = UIColor.systemTeal
+        completionProgress.setProgress(store.completionPercentage, animated: true)
         
-        [accountStack, detailsStack, socialStack].forEach { stack in
+        [accountStack, detailsStack, socialStack, settingsStack].forEach { stack in
             stack?.arrangedSubviews.forEach { $0.removeFromSuperview() }
         }
 
-        
-        addRow(to: accountStack, title: "Display Name", value: store.displayName ?? "", showIcon: false) {
+        addRow(to: accountStack!, title: "Display Name", value: store.displayName ?? "Add Name") {
             self.showTextInput(title: "Edit Name", currentValue: store.displayName) { text in
-                store.displayName = text
-                self.loadData()
+                store.displayName = text; self.loadData()
             }
         }
-        
-        addRow(to: accountStack, title: "Short Bio", value: store.shortBio ?? "", showIcon: false) {
+        addRow(to: accountStack!, title: "Short Bio", value: store.shortBio ?? "Add Bio") {
             self.showTextInput(title: "Edit Bio", currentValue: store.shortBio) { text in
-                store.shortBio = text
-                self.loadData()
+                store.shortBio = text; self.loadData()
             }
         }
-      
-        let role = (store.userAnswers[0] as? [String])?.first ?? "Select"
-        addRow(to: detailsStack, title: "Role", value: role) {
-            self.openEditor(forStep: 0)
-        }
+
+        let goal = (store.userAnswers[0] as? [String])?.first ?? "Set Goal"
+        addRow(to: detailsStack!, title: "Primary Goal", value: goal) { self.openEditor(forStep: 0) }
         
-        let workFocus = (store.userAnswers[1] as? [String])?.first ?? "Select"
-        addRow(to: detailsStack, title: "Focus", value: workFocus) {
-            self.openEditor(forStep: 1)
-        }
+        let focus = (store.userAnswers[1] as? [String])?.first ?? "Set Focus"
+        addRow(to: detailsStack!, title: "Professional Focus", value: focus) { self.openEditor(forStep: 1) }
         
-        let industry = (store.userAnswers[2] as? [String])?.first ?? "Select"
-        addRow(to: detailsStack, title: "Industry", value: industry) {
-            self.openEditor(forStep: 2)
-        }
-        
-        let goals = (store.userAnswers[3] as? [String])?.first ?? "Select"
-        addRow(to: detailsStack, title: "Goals", value: goals) {
+        let expertise = (store.userAnswers[2] as? [String])?.first ?? "Set Expertise"
+        addRow(to: detailsStack!, title: "Expertise", value: expertise) { self.openEditor(forStep: 2) }
+
+        let audience = (store.userAnswers[3] as? [String])?.first
+        addRow(to: socialStack!, title: "Target Audience", value: audience ?? "Boost Strategy 🚀",
+               titleColor: audience == nil ? .systemBlue : .label) {
             self.openEditor(forStep: 3)
         }
-        
-        let formats = (store.userAnswers[4] as? [String])?.joined(separator: ", ") ?? "Select"
-        addRow(to: detailsStack, title: "Formats", value: formats) {
-            self.openEditor(forStep: 4)
-        }
-        
-        let platforms = (store.userAnswers[5] as? [String])?.joined(separator: ", ") ?? "Select"
-        addRow(to: detailsStack, title: "Platforms", value: platforms) {
+
+        let platforms = (store.userAnswers[5] as? [String])?.joined(separator: ", ")
+        addRow(to: socialStack!, title: "Platforms", value: platforms ?? "Boost Strategy 🚀",
+               titleColor: platforms == nil ? .systemBlue : .label) {
             self.openEditor(forStep: 5)
         }
         
-        let audience = (store.userAnswers[6] as? [String])?.joined(separator: ", ") ?? "General"
-        addRow(to: detailsStack, title: "Audience", value: audience) {
-            self.openEditor(forStep: 6)
-        }
-        
+        let tone = (store.userAnswers[6] as? [String])?.first
+            addRow(to: socialStack!,
+                   title: "Brand Tone",
+                   value: tone ?? "Boost Strategy 🚀",) {
+                self.openEditor(forStep: 6)
+            }
+
         let logoutIcon = UIImage(systemName: "rectangle.portrait.and.arrow.right")
-        addRow(to: socialStack,
-               title: "Logout",
-               value: "",
-               titleColor: .systemRed,
-               iconImage: logoutIcon) { [weak self] in
+        addRow(to: settingsStack!, title: "Logout", value: "", titleColor: .systemRed, iconImage: logoutIcon) { [weak self] in
             self?.showLogoutConfirmation()
         }
 
-        hideLastSeparator(in: socialStack)
-        hideLastSeparator(in: detailsStack)
-        hideLastSeparator(in: accountStack)
+        [accountStack, detailsStack, socialStack, settingsStack].forEach { hideLastSeparator(in: $0!) }
     }
     
     func addRow(to stack: UIStackView, title: String, value: String, showIcon: Bool = true, titleColor: UIColor = .label, iconImage: UIImage? = nil, action: @escaping () -> Void) {
