@@ -39,6 +39,10 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
     var existingPostId: UUID?
     
     var postData: ScheduledPostData?
+    
+    /// Called after scheduling succeeds and this VC dismisses itself.
+    /// Use this to pop the presenting EditorSuiteViewController.
+    var onScheduled: (() -> Void)?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -89,7 +93,11 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
     private func setupInitialUI() {
 
         datePicker.datePickerMode = .date
+        datePicker.minimumDate = Calendar.current.startOfDay(for: Date()) // grey out past dates
+        
         timePicker.datePickerMode = .time
+        // default time picker to now so the user doesn't accidentally pick a past time
+        timePicker.date = Date()
         
         dateSwitch.isOn = !datePicker.isHidden
         timeSwitch.isOn = !timePicker.isHidden
@@ -179,6 +187,18 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
                
                let finalDate = calendar.date(from: mergedComps) ?? Date()
                
+               // Validate: final scheduled time must be in the future
+               guard finalDate > Date() else {
+                   let alert = UIAlertController(
+                       title: "Invalid Time",
+                       message: "Please select a date and time in the future.",
+                       preferredStyle: .alert
+                   )
+                   alert.addAction(UIAlertAction(title: "OK", style: .default))
+                   present(alert, animated: true)
+                   return
+               }
+               
     
                let loadingAlert = UIAlertController(title: "Scheduling...", message: nil, preferredStyle: .alert)
                let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 20, width: 50, height: 50))
@@ -215,6 +235,7 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
                 await MainActor.run {
                     loadingAlert.dismiss(animated: true) {
                         self.dismiss(animated: true) {
+                            self.onScheduled?()   // pop EditorSuiteVC before navigating
                             self.navigateToScheduledTab()
                         }
                     }

@@ -465,6 +465,12 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
          
                     destinationVC.imageNames = draft?.images
                     
+                    // When scheduling succeeds, pop the editor too so the user
+                    // is returned cleanly to the home/discover screen.
+                    destinationVC.onScheduled = { [weak self] in
+                        self?.navigationController?.popViewController(animated: false)
+                    }
+                    
                 }
             }
         }

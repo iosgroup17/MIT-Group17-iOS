@@ -454,15 +454,22 @@ extension SupabaseManager {
     func fetchPostCount(for status: Post.PostStatus) async throws -> Int {
         let userId = self.currentUserID
         
-        // 1. Match the DB column name 'post_id'
-        // 2. Match the DB value 'SAVED' by uppercasing the rawValue
-        let response = try await client
+        var query = client
             .from("posts")
             .select("post_id", count: .exact)
             .eq("user_id", value: userId)
             .eq("status", value: status.rawValue.uppercased())
-            .execute()
         
+        // For scheduled posts, only count ones in the present/future
+        // so the badge count matches what's actually visible in the list.
+        if status == .scheduled {
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            let nowString = formatter.string(from: Date())
+            query = query.gte("scheduled_at", value: nowString)
+        }
+        
+        let response = try await query.execute()
         return response.count ?? 0
     }
     
