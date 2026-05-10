@@ -161,23 +161,21 @@ class ProfileViewController: UIViewController {
         addRow(to: detailsStack!, title: "Expertise", value: expertise) { self.openEditor(forStep: 2) }
 
         let audience = (store.userAnswers[3] as? [String])?.first
-        addRow(to: socialStack!, title: "Target Audience", value: audience ?? "Boost Strategy 🚀",
-               titleColor: audience == nil ? .systemBlue : .label) {
+        addRow(to: socialStack!, title: "Target Audience", value: audience ?? "Boost Strategy") {
             self.openEditor(forStep: 3)
         }
 
         let platforms = (store.userAnswers[5] as? [String])?.joined(separator: ", ")
-        addRow(to: socialStack!, title: "Platforms", value: platforms ?? "Boost Strategy 🚀",
-               titleColor: platforms == nil ? .systemBlue : .label) {
+        addRow(to: socialStack!, title: "Platforms", value: platforms ?? "Boost Strategy") {
             self.openEditor(forStep: 5)
         }
         
         let tone = (store.userAnswers[6] as? [String])?.first
-            addRow(to: socialStack!,
-                   title: "Brand Tone",
-                   value: tone ?? "Boost Strategy 🚀",) {
-                self.openEditor(forStep: 6)
-            }
+        addRow(to: socialStack!,
+               title: "Brand Tone",
+               value: tone ?? "Boost Strategy") {
+            self.openEditor(forStep: 6)
+        }
 
         let logoutIcon = UIImage(systemName: "rectangle.portrait.and.arrow.right")
         addRow(to: settingsStack!, title: "Logout", value: "", titleColor: .systemRed, iconImage: logoutIcon) { [weak self] in
