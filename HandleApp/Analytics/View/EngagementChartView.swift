@@ -56,7 +56,7 @@ struct EngagementChartView: View {
                     Image(systemName: "link.badge.plus")
                         .font(.system(size: 40))
                         .foregroundColor(Color(uiColor: .systemGray4))
-                    Text("Connect a platform to track your consistency")
+                    Text("Connect a platform to track your posting activity")
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -116,6 +116,8 @@ struct EngagementChartView: View {
                         }
                     }
                 }
+                .chartXAxisLabel("Day of Week", alignment: .center)
+                .chartYAxisLabel("No. of Posts", position: .leading)
                 .frame(minHeight: 200)
                 
                 HStack(spacing: 16) {

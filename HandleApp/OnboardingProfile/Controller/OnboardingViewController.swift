@@ -64,12 +64,6 @@ class OnboardingViewController: UIViewController {
                 selectedOptions = []
             }
             
-            if currentStepIndex == 2 {
-                // Get the industry from Step 2 (Index 2) or the current selection
-                let industry = selectedOptions.first ?? "Marketing, Branding & Growth"
-                await triggerInitialSuggestions(for: industry)
-            }
-            
             //bg task to update supabase
             Task {
                 print("Syncing Step \(currentStepIndex) to Supabase...")
@@ -225,27 +219,5 @@ class OnboardingViewController: UIViewController {
         }
     }
     
-    func triggerInitialSuggestions(for industry: String) async {
-        let params: [String: String] = [
-            "user_id": SupabaseManager.shared.currentUserID.uuidString,
-            "industry": industry
-        ]
-        
-        // Headers are required to bypass the 401 error
-        let headers: [String: String] = [
-            "Content-Type": "application/json",
-            "Authorization": "Bearer \(SupabaseManager.shared.publicAnonKey)",
-            "apikey": SupabaseManager.shared.publicAnonKey
-        ]
-        
-        do {
-            _ = try await SupabaseManager.shared.client.functions.invoke(
-                "dynamic-endpoint",
-                options: FunctionInvokeOptions(headers: headers, body: params)
-            )
-            print("Successfully triggered initial suggestions.")
-        } catch {
-            print("Trigger failed: \(error)")
-        }
-    }
 }
+

@@ -40,22 +40,11 @@ class AnalyticsViewController: UIViewController {
     @IBOutlet weak var bestPostMetricsStack: UIStackView!
     @IBOutlet weak var bestPostDateLabel: UILabel!
     
-    // Suggestions
-    @IBOutlet weak var suggestionStack: UIStackView!
-    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
-    
-    @IBOutlet var suggestionCards: [UIView]!
-    @IBOutlet var suggestionTitles: [UILabel]!
-    @IBOutlet var suggestionBodies: [UILabel]!
-    
     // Info Button
     @IBOutlet weak var infoButton: UIButton!
     // MARK: - Variables
     private var connectedPlatforms: Set<String> = []
     private var currentBestPostURL: String?
-    
-    // Uses your struct defined in supabase.swift
-    var activeSuggestions: [Suggestion] = []
 
     // MARK: - Lifecycle
         override func viewDidLoad() {
@@ -83,7 +72,6 @@ class AnalyticsViewController: UIViewController {
             self.navigationController?.setNavigationBarHidden(false, animated: true)
             
             setupData()
-            setupSuggestions()
             
             Task {
                 DispatchQueue.main.async {
@@ -93,73 +81,9 @@ class AnalyticsViewController: UIViewController {
             }
         }
     
-    func setupSuggestions() {
-        Task {
-            let items = await SupabaseManager.shared.fetchPendingSuggestions()
-            
-            DispatchQueue.main.async {
-                //Save the data so the Tap Gestures can find it
-                self.activeSuggestions = items
-                
-                self.suggestionCards.forEach { $0.isHidden = true }
-                
-                if items.isEmpty {
-                    self.showWeeklyCompletionState()
-                    return
-                }
-                
-                for (index, item) in items.enumerated() {
-                    guard index < self.suggestionCards.count else { break }
-                    let card = self.suggestionCards[index]
-                    card.isHidden = false
-                    card.alpha = 1.0 // Ensure it's visible
-                    card.tag = index
-                    
-                    self.suggestionTitles[index].text = item.title
-                    self.suggestionBodies[index].text = item.ai_rule
-                }
-            }
-        }
-    }
-    
-    func updateSuggestionsUI() {
-        // Hide all first, then show only what we have
-        suggestionCards.forEach { $0.isHidden = true }
-        
-        for (index, item) in activeSuggestions.enumerated() {
-            guard index < suggestionCards.count else { break }
-            
-            let card = suggestionCards[index]
-            card.isHidden = false
-            card.alpha = 1.0
-            card.tag = index // Store index for the tap action
-            
-            suggestionTitles[index].text = item.title
-            self.suggestionBodies[index].text = item.ai_rule
-            
-            // Minimalist style: light border, no gradients
-            card.layer.borderColor = UIColor.systemGray5.cgColor
-            card.layer.borderWidth = 1.0
-            card.layer.cornerRadius = 12
-        }
-    }
-    
-    func loadSmartSuggestions() {
-        Task {
-            let items = await SupabaseManager.shared.fetchPendingSuggestions()
-            self.activeSuggestions = items
-            
-            DispatchQueue.main.async {
-                self.updateSuggestionsUI()
-            }
-        }
-    }
-
     // MARK: - Data Fetching
         func setupData() {
             guard let userId = SupabaseManager.shared.client.auth.currentSession?.user.id else { return }
-            
-            if handleScoreLabel?.text == "---" { self.activityIndicator?.startAnimating() }
             
             // clear the Best Post UI to a default loading state
             self.bestPostTextLabel?.text = "Loading content..."
@@ -183,15 +107,12 @@ class AnalyticsViewController: UIViewController {
                     let connectedSet = Set(connections.map { $0.platform })
                     
                     DispatchQueue.main.async {
-                        self.activityIndicator?.stopAnimating()
                         self.updateLabels(with: analytics, connected: connectedSet)
                         self.setupGraph()
                         self.fetchBestPost()
-                        self.updateSuggestionsUI()
                     }
                 } catch {
                     print("Error loading analytics: \(error)")
-                    DispatchQueue.main.async { self.activityIndicator?.stopAnimating() }
                 }
             }
         }
@@ -286,11 +207,19 @@ class AnalyticsViewController: UIViewController {
                     let hostingController = UIHostingController(rootView: chartView)
                     
                     self.addChild(hostingController)
-                    hostingController.view.frame = self.graphContainerView.bounds
                     hostingController.view.backgroundColor = .clear
+                    hostingController.view.translatesAutoresizingMaskIntoConstraints = false
                     
                     self.graphContainerView.subviews.forEach { $0.removeFromSuperview() }
                     self.graphContainerView.addSubview(hostingController.view)
+                    
+                    NSLayoutConstraint.activate([
+                        hostingController.view.topAnchor.constraint(equalTo: self.graphContainerView.topAnchor),
+                        hostingController.view.leadingAnchor.constraint(equalTo: self.graphContainerView.leadingAnchor),
+                        hostingController.view.trailingAnchor.constraint(equalTo: self.graphContainerView.trailingAnchor),
+                        hostingController.view.bottomAnchor.constraint(equalTo: self.graphContainerView.bottomAnchor)
+                    ])
+                    
                     hostingController.didMove(toParent: self)
                 }
             } catch {
@@ -301,6 +230,16 @@ class AnalyticsViewController: UIViewController {
 
     // MARK: - Best Post Logic
         func fetchBestPost() {
+            // No platforms connected → show styled placeholder, skip network call
+            if connectedPlatforms.isEmpty {
+                currentBestPostURL = nil
+                showBestPostPlaceholder()
+                return
+            }
+
+            // Restore real content in case placeholder was showing
+            hideBestPostPlaceholder()
+
             guard let userId = SupabaseManager.shared.client.auth.currentSession?.user.id else { return }
             Task {
                 do {
@@ -312,11 +251,9 @@ class AnalyticsViewController: UIViewController {
                             self.currentBestPostURL = post.post_url
                             self.updateBestPostUI(with: post)
                         } else {
-                            //(No posts or no platform connected)
+                            // No posts this week
                             self.bestPostTextLabel?.text = "No top post found for this week."
                             self.bestPostDateLabel?.text = "--"
-        
-                            // placeholder for best post image else system photo icon
                             self.bestPostPlatformImage?.image = UIImage(named: "placeholder") ?? UIImage(systemName: "photo")
                             self.bestPostPlatformImage?.tintColor = .systemGray4
                         }
@@ -324,7 +261,6 @@ class AnalyticsViewController: UIViewController {
                 } catch {
                     print("Best post error: \(error)")
                     DispatchQueue.main.async {
-                        // ERROR STATE
                         self.bestPostTextLabel?.text = "No top post found for this week."
                         self.bestPostDateLabel?.text = "--"
                         self.bestPostPlatformImage?.image = UIImage(named: "placeholder") ?? UIImage(systemName: "photo")
@@ -406,45 +342,74 @@ class AnalyticsViewController: UIViewController {
     }
     
     
-    private func showWeeklyCompletionState() {
-        // Clear hidden cards from the stack so the stub centers correctly
-        suggestionStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        
-        let container = UIView()
-        container.translatesAutoresizingMaskIntoConstraints = false
-        container.heightAnchor.constraint(equalToConstant: 120).isActive = true
-        
-        let label = UILabel()
-        label.text = "Good going! 🔥\nNew suggestions will load next week."
-        label.numberOfLines = 0
-        label.textAlignment = .center
-        label.font = .systemFont(ofSize: 15, weight: .semibold)
-        label.textColor = .secondaryLabel
-        
-        label.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(label)
+    // MARK: - Best Post Placeholder Helpers
+    private func showBestPostPlaceholder() {
+        // Hide all real content outlets
+        bestPostPlatformImage?.isHidden = true
+        bestPostDateLabel?.isHidden = true
+        bestPostTextLabel?.isHidden = true
+        bestPostMetricsStack?.arrangedSubviews.forEach { $0.removeFromSuperview() }
+
+        // Remove any existing placeholder before adding a fresh one
+        bestPostCard?.viewWithTag(8801)?.removeFromSuperview()
+        guard let card = bestPostCard else { return }
+
+        // Build a centered icon + label view, identical in style to the graph placeholder
+        let iconView = UIImageView(image: UIImage(systemName: "link.badge.plus"))
+        iconView.tintColor = .systemGray4
+        iconView.contentMode = .scaleAspectFit
+        iconView.translatesAutoresizingMaskIntoConstraints = false
+
+        let messageLabel = UILabel()
+        messageLabel.text = "Connect a platform to see your best post"
+        messageLabel.textColor = .secondaryLabel
+        messageLabel.font = .systemFont(ofSize: 14, weight: .medium)
+        messageLabel.numberOfLines = 0
+        messageLabel.textAlignment = .center
+        messageLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        let stack = UIStackView(arrangedSubviews: [iconView, messageLabel])
+        stack.axis = .vertical
+        stack.alignment = .center
+        stack.spacing = 12
+        stack.translatesAutoresizingMaskIntoConstraints = false
+
+        let placeholder = UIView()
+        placeholder.tag = 8801
+        placeholder.backgroundColor = .clear
+        placeholder.translatesAutoresizingMaskIntoConstraints = false
+        placeholder.addSubview(stack)
+        card.addSubview(placeholder)
+
+        let heightConstraint = card.heightAnchor.constraint(greaterThanOrEqualToConstant: 160)
+        heightConstraint.identifier = "PlaceholderHeight"
+
         NSLayoutConstraint.activate([
-            label.centerXAnchor.constraint(equalTo: container.centerXAnchor),
-            label.centerYAnchor.constraint(equalTo: container.centerYAnchor)
+            heightConstraint,
+            // Fill the card below its fixed title area (~55 pt)
+            placeholder.topAnchor.constraint(equalTo: card.topAnchor, constant: 55),
+            placeholder.leadingAnchor.constraint(equalTo: card.leadingAnchor),
+            placeholder.trailingAnchor.constraint(equalTo: card.trailingAnchor),
+            placeholder.bottomAnchor.constraint(equalTo: card.bottomAnchor),
+
+            iconView.widthAnchor.constraint(equalToConstant: 40),
+            iconView.heightAnchor.constraint(equalToConstant: 40),
+
+            stack.leadingAnchor.constraint(greaterThanOrEqualTo: placeholder.leadingAnchor, constant: 16),
+            stack.trailingAnchor.constraint(lessThanOrEqualTo: placeholder.trailingAnchor, constant: -16),
+            stack.centerXAnchor.constraint(equalTo: placeholder.centerXAnchor),
+            stack.centerYAnchor.constraint(equalTo: placeholder.centerYAnchor),
         ])
-        
-        // Animate the appearance of the stub
-        container.alpha = 0
-        suggestionStack.addArrangedSubview(container)
-        UIView.animate(withDuration: 0.5) { container.alpha = 1.0 }
     }
-    
-    private func checkSuggestionsEmptyState(removedIndex: Int) {
-        // 1. Mark the suggestion as no longer 'pending' locally
-        activeSuggestions[removedIndex].status = "accepted" // or "declined"
-        
-        // 2. Count how many are still pending
-        let remainingPending = activeSuggestions.filter { $0.status == "pending" }
-        
-        // 3. If zero, show your completion stub
-        if remainingPending.isEmpty {
-            showWeeklyCompletionState()
+
+    private func hideBestPostPlaceholder() {
+        if let constraint = bestPostCard?.constraints.first(where: { $0.identifier == "PlaceholderHeight" }) {
+            constraint.isActive = false
         }
+        bestPostCard?.viewWithTag(8801)?.removeFromSuperview()
+        bestPostPlatformImage?.isHidden = false
+        bestPostDateLabel?.isHidden = false
+        bestPostTextLabel?.isHidden = false
     }
 
     // MARK: - Navigation Actions
@@ -475,57 +440,6 @@ class AnalyticsViewController: UIViewController {
         }
     
     
-    @IBAction func didTapDismissSuggestion(_ sender: UIButton) {
-        // 1. Find the parent card view that holds the tag
-        guard let cardView = sender.superview else { return }
-        let index = cardView.tag
-        
-        // 2. Safety check for array bounds
-        guard index < activeSuggestions.count else { return }
-        let suggestion = activeSuggestions[index]
-        
-        Task {
-            // 3. Update Supabase
-            await SupabaseManager.shared.updateSuggestionStatus(id: suggestion.suggestion_id, status: "declined")
-            
-            DispatchQueue.main.async {
-                // 4. Animate the card away
-                UIView.animate(withDuration: 0.3, animations: {
-                    cardView.alpha = 0
-                    cardView.isHidden = true
-                }) { _ in
-                    // 5. Update local state and check if all are gone
-                    self.checkSuggestionsEmptyState(removedIndex: index)
-                }
-                self.showToast(message: "Suggestion Removed", isSuccess: false)
-            }
-        }
-    }
-    
-    @IBAction func didTapApplySuggestion(_ sender: UITapGestureRecognizer) {
-        guard let cardView = sender.view else { return }
-        let index = cardView.tag
-        guard index < activeSuggestions.count else { return }
-        
-        let suggestion = activeSuggestions[index]
-        
-        Task {
-            await SupabaseManager.shared.updateSuggestionStatus(id: suggestion.suggestion_id, status: "accepted")
-            
-            DispatchQueue.main.async {
-                // 1. Animate out
-                UIView.animate(withDuration: 0.3, animations: {
-                    cardView.alpha = 0
-                    cardView.isHidden = true
-                }) { _ in
-                // 2. Remove from local array and check if empty
-                    self.checkSuggestionsEmptyState(removedIndex: index)
-                }
-                self.showToast(message: "Strategy Applied!", isSuccess: true)
-            }
-        }
-    }
-
     // MARK: - Helpers
     private func formatEngagement(_ value: Int) -> String {
         let num = Double(value)

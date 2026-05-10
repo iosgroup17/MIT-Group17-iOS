@@ -584,65 +584,7 @@ extension SupabaseManager {
             return nil
         }
     }
-}
 
-struct Suggestion: Codable{
-    let suggestion_id: UUID
-    let title: String
-    let ai_rule: String
-    let industry: String
-    var status: String
-}
-
-extension SupabaseManager {
-    
-    func fetchPendingSuggestions() async -> [Suggestion] {
-        guard let userId = client.auth.currentSession?.user.id else { return [] }
-        
-        do {
-            let results: [Suggestion] = try await client.from("user_suggestions")
-                .select("*")
-                .eq("user_id", value: userId) // Only fetch for THIS user
-                .eq("status", value: "pending")
-                .order("created_at", ascending: false)
-                .limit(3)
-                .execute()
-                .value
-            return results
-        } catch {
-            print("Fetch Error: \(error)")
-            return []
-        }
-    }
-  
-    func updateSuggestionStatus(id: UUID, status: String) async {
-        do {
-            try await client.from("user_suggestions")
-                .update(["status": status])
-                .eq("suggestion_id", value: id.uuidString) 
-                .execute()
-        } catch {
-            print("Status Update Error: \(error)")
-        }
-    }
-
-    func fetchTopAcceptedRules() async -> [String] {
-        do {
-            struct RuleRow: Codable { let ai_rule: String }
-            let rows: [RuleRow] = try await client.from("user_suggestions")
-                .select("ai_rule")
-                .eq("status", value: "accepted")
-                .eq("user_id", value: currentUserID)
-                .order("created_at", ascending: false)
-                .limit(5)
-                .execute()
-                .value
-            return rows.map { $0.ai_rule }
-        } catch {
-            return []
-        }
-    }
-    
     func fetchUserOnboardingData() async -> [OnboardingResponse] {
         do {
             let currentUser = try await client.auth.session.user
@@ -659,3 +601,4 @@ extension SupabaseManager {
         }
     }
 }
+

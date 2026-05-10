@@ -537,139 +537,11 @@
                                                     <outletCollection property="gestureRecognizers" destination="WOm-Y7-lcp" appends="YES" id="9Y8-AE-Pok"/>
                                                 </connections>
                                             </view>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Smart Suggestions" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dxw-hZ-mqw">
-                                                <rect key="frame" x="20" y="900" width="151.66666666666666" height="20.333333333333371"/>
-                                                <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="0mY-yh-JdM" userLabel="SuggestionsStack">
-                                                <rect key="frame" x="20" y="936.33333333333326" width="362" height="212"/>
-                                                <subviews>
-                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kU7-ED-kUi" userLabel="Suggestion" customClass="AnalyticsCardView" customModule="HandleApp" customModuleProvider="target">
-                                                        <rect key="frame" x="0.0" y="0.0" width="362" height="100"/>
-                                                        <subviews>
-                                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YEs-2W-pzS">
-                                                                <rect key="frame" x="329" y="4" width="25" height="25"/>
-                                                                <color key="backgroundColor" systemColor="systemGray6Color"/>
-                                                                <constraints>
-                                                                    <constraint firstAttribute="width" constant="25" id="DGE-De-2BG"/>
-                                                                    <constraint firstAttribute="height" constant="25" id="L4n-2w-I93"/>
-                                                                </constraints>
-                                                                <color key="tintColor" systemColor="systemGray2Color"/>
-                                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                                                <state key="normal">
-                                                                    <imageReference key="image" image="xmark" catalog="system" symbolScale="small"/>
-                                                                    <preferredSymbolConfiguration key="preferredSymbolConfiguration" weight="semibold"/>
-                                                                </state>
-                                                                <buttonConfiguration key="configuration" style="plain">
-                                                                    <imageReference key="image" image="xmark" catalog="system" symbolScale="small"/>
-                                                                    <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" weight="semibold"/>
-                                                                </buttonConfiguration>
-                                                                <connections>
-                                                                    <action selector="didTapDismissSuggestion:" destination="vSe-a6-cVM" eventType="touchUpInside" id="x8B-0L-dgV"/>
-                                                                </connections>
-                                                            </button>
-                                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" translatesAutoresizingMaskIntoConstraints="NO" id="dvI-jT-Zb2">
-                                                                <rect key="frame" x="16" y="16" width="316" height="68"/>
-                                                                <subviews>
-                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Use Relevant Hashtags" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bUg-1c-Txf">
-                                                                        <rect key="frame" x="0.0" y="0.0" width="158.66666666666666" height="18"/>
-                                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleSubhead"/>
-                                                                        <nil key="textColor"/>
-                                                                        <nil key="highlightedColor"/>
-                                                                    </label>
-                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vy4-g6-ai5">
-                                                                        <rect key="frame" x="0.0" y="18" width="287.33333333333331" height="50"/>
-                                                                        <gestureRecognizers/>
-                                                                        <string key="text">Tweets with relevant tags see higher engagement. 
-(use #Productivity, #TechTalk)</string>
-                                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
-                                                                        <color key="textColor" systemColor="systemGrayColor"/>
-                                                                        <nil key="highlightedColor"/>
-                                                                    </label>
-                                                                </subviews>
-                                                            </stackView>
-                                                        </subviews>
-                                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                                        <gestureRecognizers/>
-                                                        <constraints>
-                                                            <constraint firstItem="dvI-jT-Zb2" firstAttribute="leading" secondItem="kU7-ED-kUi" secondAttribute="leading" constant="16" id="1ih-n1-bBD"/>
-                                                            <constraint firstItem="dvI-jT-Zb2" firstAttribute="top" secondItem="kU7-ED-kUi" secondAttribute="top" constant="16" id="7VM-X4-6WH"/>
-                                                            <constraint firstAttribute="trailing" secondItem="YEs-2W-pzS" secondAttribute="trailing" constant="8" id="Yj0-Tn-ZHx"/>
-                                                            <constraint firstAttribute="trailing" secondItem="dvI-jT-Zb2" secondAttribute="trailing" constant="30" id="iAb-pe-VI9"/>
-                                                            <constraint firstAttribute="height" constant="100" id="pOX-hK-SkM"/>
-                                                            <constraint firstAttribute="bottom" secondItem="dvI-jT-Zb2" secondAttribute="bottom" constant="16" id="qby-QH-iB9"/>
-                                                            <constraint firstItem="YEs-2W-pzS" firstAttribute="top" secondItem="kU7-ED-kUi" secondAttribute="top" constant="4" id="uYt-eL-Hxc"/>
-                                                        </constraints>
-                                                        <connections>
-                                                            <outletCollection property="gestureRecognizers" destination="PqT-AU-xcl" appends="YES" id="XCo-P8-gFl"/>
-                                                        </connections>
-                                                    </view>
-                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="uR7-nt-4yW" userLabel="Suggestion" customClass="AnalyticsCardView" customModule="HandleApp" customModuleProvider="target">
-                                                        <rect key="frame" x="0.0" y="112" width="362" height="100"/>
-                                                        <subviews>
-                                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zIu-5T-cBg">
-                                                                <rect key="frame" x="329" y="4" width="25" height="25"/>
-                                                                <color key="backgroundColor" systemColor="systemGray6Color"/>
-                                                                <constraints>
-                                                                    <constraint firstAttribute="width" constant="25" id="DtA-Db-eLU"/>
-                                                                    <constraint firstAttribute="height" constant="25" id="V8V-a4-RgH"/>
-                                                                </constraints>
-                                                                <color key="tintColor" systemColor="systemGray2Color"/>
-                                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                                                <state key="normal">
-                                                                    <imageReference key="image" image="xmark" catalog="system" symbolScale="small"/>
-                                                                </state>
-                                                                <buttonConfiguration key="configuration" style="plain">
-                                                                    <imageReference key="image" image="xmark" catalog="system" symbolScale="small"/>
-                                                                    <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" weight="semibold"/>
-                                                                </buttonConfiguration>
-                                                                <connections>
-                                                                    <action selector="didTapDismissSuggestion:" destination="vSe-a6-cVM" eventType="touchUpInside" id="dTP-QY-gmR"/>
-                                                                </connections>
-                                                            </button>
-                                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" translatesAutoresizingMaskIntoConstraints="NO" id="eUF-2P-U0h">
-                                                                <rect key="frame" x="16" y="16" width="316" height="68"/>
-                                                                <subviews>
-                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Maximize Performance with Visuals" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xZq-9R-E4U">
-                                                                        <rect key="frame" x="0.0" y="0.0" width="242" height="18"/>
-                                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleSubhead"/>
-                                                                        <nil key="textColor"/>
-                                                                        <nil key="highlightedColor"/>
-                                                                    </label>
-                                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2x9-CE-ggB">
-                                                                        <rect key="frame" x="0.0" y="18" width="287.33333333333331" height="50"/>
-                                                                        <string key="text">Tweets with relevant tags see higher engagement. 
-(use #Productivity, #TechTalk)</string>
-                                                                        <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
-                                                                        <color key="textColor" systemColor="systemGrayColor"/>
-                                                                        <nil key="highlightedColor"/>
-                                                                    </label>
-                                                                </subviews>
-                                                            </stackView>
-                                                        </subviews>
-                                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                                        <gestureRecognizers/>
-                                                        <constraints>
-                                                            <constraint firstAttribute="trailing" secondItem="zIu-5T-cBg" secondAttribute="trailing" constant="8" id="DRO-4M-GmY"/>
-                                                            <constraint firstAttribute="bottom" secondItem="eUF-2P-U0h" secondAttribute="bottom" constant="16" id="HnU-aK-ToE"/>
-                                                            <constraint firstItem="zIu-5T-cBg" firstAttribute="top" secondItem="uR7-nt-4yW" secondAttribute="top" constant="4" id="Uld-o9-gRM"/>
-                                                            <constraint firstAttribute="height" constant="100" id="aG1-h7-zXC"/>
-                                                            <constraint firstItem="eUF-2P-U0h" firstAttribute="leading" secondItem="uR7-nt-4yW" secondAttribute="leading" constant="16" id="hTv-cf-Sha"/>
-                                                            <constraint firstAttribute="trailing" secondItem="eUF-2P-U0h" secondAttribute="trailing" constant="30" id="qLp-JL-H8S"/>
-                                                            <constraint firstItem="eUF-2P-U0h" firstAttribute="top" secondItem="uR7-nt-4yW" secondAttribute="top" constant="16" id="wWf-13-oex"/>
-                                                        </constraints>
-                                                        <connections>
-                                                            <outletCollection property="gestureRecognizers" destination="1FQ-MM-e6o" appends="YES" id="AZa-WC-cK6"/>
-                                                        </connections>
-                                                    </view>
-                                                </subviews>
-                                            </stackView>
+
                                             <view contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="9jl-Vh-tq2" customClass="AnalyticsCardView" customModule="HandleApp" customModuleProvider="target">
                                                 <rect key="frame" x="20" y="1172.3333333333333" width="362" height="310"/>
                                                 <subviews>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Engagement Trends across Platforms" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jVI-Ma-SAf">
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Posting Activity" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jVI-Ma-SAf">
                                                         <rect key="frame" x="16" y="15.999999999999998" width="297.66666666666669" height="20.333333333333329"/>
                                                         <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
                                                         <nil key="textColor"/>
@@ -691,19 +563,14 @@
                                                     <constraint firstAttribute="trailing" secondItem="thV-nl-Hmh" secondAttribute="trailing" id="vC3-Op-lVK"/>
                                                 </constraints>
                                             </view>
-                                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" hidesWhenStopped="YES" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="ug7-5D-fvT">
-                                                <rect key="frame" x="191" y="263" width="20" height="20"/>
-                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                            </activityIndicatorView>
+
                                         </subviews>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                         <constraints>
                                             <constraint firstAttribute="trailing" secondItem="6lK-a0-a7V" secondAttribute="trailing" constant="20" id="1VA-ML-l2E"/>
                                             <constraint firstItem="C5X-rb-5Z4" firstAttribute="top" secondItem="FeB-Xb-EyN" secondAttribute="bottom" constant="24" id="8r7-bv-RhI"/>
-                                            <constraint firstItem="dxw-hZ-mqw" firstAttribute="leading" secondItem="cDN-so-8Bx" secondAttribute="leading" constant="20" id="Bdt-BS-Z8h"/>
                                             <constraint firstItem="FeB-Xb-EyN" firstAttribute="leading" secondItem="cDN-so-8Bx" secondAttribute="leading" constant="20" id="D64-Ld-kDB"/>
                                             <constraint firstItem="6lK-a0-a7V" firstAttribute="top" secondItem="vRe-Yd-tUJ" secondAttribute="bottom" constant="16" id="DJf-wD-Dma"/>
-                                            <constraint firstItem="0mY-yh-JdM" firstAttribute="top" secondItem="dxw-hZ-mqw" secondAttribute="bottom" constant="16" id="F4G-cr-uXG"/>
                                             <constraint firstAttribute="trailing" secondItem="9jl-Vh-tq2" secondAttribute="trailing" constant="20" id="FU8-6t-jeM"/>
                                             <constraint firstAttribute="trailing" secondItem="Cg3-2Y-Rvh" secondAttribute="trailing" constant="20" id="Gz0-hn-cAg"/>
                                             <constraint firstItem="gwE-Al-yFW" firstAttribute="leading" secondItem="cDN-so-8Bx" secondAttribute="leading" constant="20" id="IKL-DB-Dvr"/>
@@ -711,20 +578,17 @@
                                             <constraint firstItem="gwE-Al-yFW" firstAttribute="top" secondItem="Cg3-2Y-Rvh" secondAttribute="bottom" constant="24" id="M3s-4d-YHG"/>
                                             <constraint firstItem="dIg-uH-iEI" firstAttribute="leading" secondItem="cDN-so-8Bx" secondAttribute="leading" constant="20" id="Q60-TK-Hfl"/>
                                             <constraint firstItem="FeB-Xb-EyN" firstAttribute="top" secondItem="dIg-uH-iEI" secondAttribute="bottom" constant="16" id="YYG-j1-aNH"/>
-                                            <constraint firstItem="0mY-yh-JdM" firstAttribute="leading" secondItem="cDN-so-8Bx" secondAttribute="leading" constant="20" id="cQh-Ti-YlS"/>
                                             <constraint firstItem="dIg-uH-iEI" firstAttribute="top" secondItem="6lK-a0-a7V" secondAttribute="bottom" constant="16" id="eyv-zZ-nrD"/>
                                             <constraint firstItem="Cg3-2Y-Rvh" firstAttribute="leading" secondItem="cDN-so-8Bx" secondAttribute="leading" constant="20" id="fAp-Vc-4eY"/>
                                             <constraint firstItem="vRe-Yd-tUJ" firstAttribute="leading" secondItem="cDN-so-8Bx" secondAttribute="leading" constant="20" id="fGh-fg-nwM"/>
                                             <constraint firstItem="9jl-Vh-tq2" firstAttribute="leading" secondItem="cDN-so-8Bx" secondAttribute="leading" constant="20" id="fW9-ru-dkb"/>
                                             <constraint firstAttribute="trailing" secondItem="vRe-Yd-tUJ" secondAttribute="trailing" constant="20" id="k6q-6Q-I64"/>
-                                            <constraint firstItem="9jl-Vh-tq2" firstAttribute="top" secondItem="0mY-yh-JdM" secondAttribute="bottom" constant="24" id="l7s-Z8-67c"/>
+                                            <constraint firstItem="9jl-Vh-tq2" firstAttribute="top" secondItem="C5X-rb-5Z4" secondAttribute="bottom" constant="24" id="l7s-Z8-67c"/>
                                             <constraint firstAttribute="trailing" secondItem="C5X-rb-5Z4" secondAttribute="trailing" constant="20" id="nPK-CL-VZB"/>
                                             <constraint firstAttribute="bottom" secondItem="9jl-Vh-tq2" secondAttribute="bottom" constant="50" id="nul-uH-8FP"/>
                                             <constraint firstItem="6lK-a0-a7V" firstAttribute="leading" secondItem="cDN-so-8Bx" secondAttribute="leading" constant="20" id="qNm-F3-H2d"/>
-                                            <constraint firstAttribute="trailing" secondItem="0mY-yh-JdM" secondAttribute="trailing" constant="20" id="rFc-4X-zzc"/>
                                             <constraint firstItem="C5X-rb-5Z4" firstAttribute="leading" secondItem="cDN-so-8Bx" secondAttribute="leading" constant="20" id="u6I-YU-gpA"/>
                                             <constraint firstItem="vRe-Yd-tUJ" firstAttribute="top" secondItem="gwE-Al-yFW" secondAttribute="bottom" constant="16" id="wfG-Lw-HKv"/>
-                                            <constraint firstItem="dxw-hZ-mqw" firstAttribute="top" secondItem="C5X-rb-5Z4" secondAttribute="bottom" constant="24" id="yAa-2J-Rnz"/>
                                             <constraint firstAttribute="trailing" secondItem="FeB-Xb-EyN" secondAttribute="trailing" constant="20" id="zB6-FD-c5G"/>
                                         </constraints>
                                     </view>
@@ -752,7 +616,6 @@
                     </view>
                     <navigationItem key="navigationItem" title="Analytics" id="ZsS-6m-45i"/>
                     <connections>
-                        <outlet property="activityIndicator" destination="ug7-5D-fvT" id="KB0-Rf-fHh"/>
                         <outlet property="avgImpactLabel" destination="kPc-Sc-To2" id="HyJ-t0-3xw"/>
                         <outlet property="bestPostCard" destination="C5X-rb-5Z4" id="kKO-mh-ixf"/>
                         <outlet property="bestPostDateLabel" destination="Gn2-lj-BDp" id="lpv-vW-rew"/>
@@ -766,31 +629,15 @@
                         <outlet property="linkedinPostsLabel" destination="gXN-cE-j2l" id="fhS-hB-9Kr"/>
                         <outlet property="scoreArrowImage" destination="i4P-Kp-PLR" id="eZY-Fg-Y0q"/>
                         <outlet property="scoreDifferenceLabel" destination="3R6-td-w8V" id="WdO-AD-6QF"/>
-                        <outlet property="suggestionStack" destination="0mY-yh-JdM" id="sBp-CX-HmF"/>
                         <outlet property="topPlatformImageView" destination="it2-Ax-T0a" id="x6V-0W-7RL"/>
                         <outlet property="topPlatformLabel" destination="bW5-wt-Xic" id="9fz-g5-lbp"/>
                         <outlet property="totalEngagementLabel" destination="HfK-JH-oUZ" id="28y-X7-U3e"/>
                         <outlet property="weeksStreakLabel" destination="uiH-Yd-SVL" id="10C-kf-uXc"/>
                         <outlet property="xPostsLabel" destination="wxA-gr-yWe" id="8XR-D9-dos"/>
-                        <outletCollection property="suggestionCards" destination="kU7-ED-kUi" collectionClass="NSMutableArray" id="yLZ-hd-cgJ"/>
-                        <outletCollection property="suggestionCards" destination="uR7-nt-4yW" collectionClass="NSMutableArray" id="Sue-xl-kJm"/>
-                        <outletCollection property="suggestionTitles" destination="bUg-1c-Txf" collectionClass="NSMutableArray" id="YAK-88-4we"/>
-                        <outletCollection property="suggestionTitles" destination="xZq-9R-E4U" collectionClass="NSMutableArray" id="6gW-tw-mqb"/>
-                        <outletCollection property="suggestionBodies" destination="vy4-g6-ai5" collectionClass="NSMutableArray" id="zON-jM-9l9"/>
-                        <outletCollection property="suggestionBodies" destination="2x9-CE-ggB" collectionClass="NSMutableArray" id="LLg-v6-plT"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="pOU-vU-82A" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-                <tapGestureRecognizer id="PqT-AU-xcl">
-                    <connections>
-                        <action selector="didTapApplySuggestion:" destination="vSe-a6-cVM" id="wF2-l4-4Vv"/>
-                    </connections>
-                </tapGestureRecognizer>
-                <tapGestureRecognizer id="1FQ-MM-e6o">
-                    <connections>
-                        <action selector="didTapApplySuggestion:" destination="vSe-a6-cVM" id="GJ8-0K-CcS"/>
-                    </connections>
-                </tapGestureRecognizer>
+
                 <tapGestureRecognizer id="SXX-0N-eT5"/>
                 <tapGestureRecognizer id="WOm-Y7-lcp"/>
             </objects>
