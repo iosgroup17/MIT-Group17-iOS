@@ -29,7 +29,7 @@ actor OnDevicePostEngine {
                 - Tone: Authentic founder voice, high utility. No false claims, medical advice, or deepfakes.
                 - Mix: 2 'icon-linkedin', 2 'icon-x', 2 'icon-instagram'.
                 - post_heading: Max 3 words. Crisp gist.
-                - caption: ~2 lines. Catchy, precise teaser. No hashtags.
+                - caption: ~2 lines. Catchy, precise teaser. No hashtags. (Shorter caption when there are images).
                 - hashtags: 2 long compound tags OR 3 short tags.
                 - prediction_text: Max 25 chars. State the exact benefit to the reader.
                 - post_image: Instagram requires 1 random stock image. The path MUST be exactly between 'img_01' and 'img_34'. Others MUST be null.

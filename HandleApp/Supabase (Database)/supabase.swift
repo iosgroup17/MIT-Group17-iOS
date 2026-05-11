@@ -525,7 +525,7 @@ extension SupabaseManager {
             try await client
                 .from("posts")
                 .delete()
-                .eq("id", value: id.uuidString)
+                .eq("post_id", value: id.uuidString)
                 .execute()
             print("Post deleted successfully")
         } catch {
