@@ -308,8 +308,7 @@
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="n9G-6V-1kT">
                                 <rect key="frame" x="282.66666666666669" y="766" width="89.333333333333314" height="35"/>
-                                <color key="backgroundColor" name="AccentColor"/>
-                                <color key="tintColor" name="Color"/>
+                                <color key="tintColor" systemColor="systemTealColor"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Continue">
                                     <fontDescription key="titleFontDescription" style="UICTFontTextStyleCallout"/>

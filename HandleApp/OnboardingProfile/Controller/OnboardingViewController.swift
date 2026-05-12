@@ -48,7 +48,7 @@ class OnboardingViewController: UIViewController {
             let hasAnswer = OnboardingDataStore.shared.userAnswers[currentStepIndex] != nil
             
             //required steps
-            if currentStepIndex < 2 && !hasAnswer {
+            if !hasAnswer {
                 showAlert(message: "This step is required. Please select an option.")
                 return
             }
@@ -123,11 +123,7 @@ class OnboardingViewController: UIViewController {
             backButton.isHidden = false
         }
         
-        if index < 2 {
-            skipButton.isHidden = true
-        } else {
-            skipButton.isHidden = false
-        }
+        skipButton.isHidden = true
         
         // instantiate and display child VC based on layout type
         let storyboard = self.storyboard ?? UIStoryboard(name: "Profile", bundle: nil)
@@ -176,7 +172,7 @@ class OnboardingViewController: UIViewController {
     // logic to increment index and update UI
     func goToNextStep() {
         if !isEditMode && currentStepIndex == 2 {
-            navigateToProfileScreen()
+            askForShortBio()
         } else if currentStepIndex < OnboardingDataStore.shared.steps.count - 1 {
             currentStepIndex += 1
             updateUIForStep(index: currentStepIndex)
@@ -185,10 +181,34 @@ class OnboardingViewController: UIViewController {
         }
     }
     
+    func askForShortBio() {
+        let alert = UIAlertController(title: "Short Bio", message: "Please provide a short bio about yourself.", preferredStyle: .alert)
+        alert.addTextField { textField in
+            textField.placeholder = "Enter your short bio here"
+        }
+        
+        let saveAction = UIAlertAction(title: "Continue", style: .default) { [weak self] _ in
+            guard let bioText = alert.textFields?.first?.text, !bioText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                self?.showAlert(message: "A short bio is required to continue.") {
+                    self?.askForShortBio()
+                }
+                return
+            }
+            
+            OnboardingDataStore.shared.shortBio = bioText
+            self?.navigateToProfileScreen()
+        }
+        
+        alert.addAction(saveAction)
+        present(alert, animated: true)
+    }
+    
     // alert helper
-    func showAlert(message: String) {
+    func showAlert(message: String, completion: (() -> Void)? = nil) {
         let alert = UIAlertController(title: "Required", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+            completion?()
+        })
         present(alert, animated: true)
     }
     

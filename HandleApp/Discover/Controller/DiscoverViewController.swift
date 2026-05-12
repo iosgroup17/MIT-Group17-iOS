@@ -204,7 +204,7 @@ class DiscoverViewController: UIViewController {
                 
                 
                 sectionLayout.contentInsets = NSDirectionalEdgeInsets(
-                    top: 16, leading: 16, bottom: 20, trailing: 16
+                    top: 10, leading: 16, bottom: 20, trailing: 16
                 )
                 
                 return sectionLayout
@@ -215,7 +215,7 @@ class DiscoverViewController: UIViewController {
                 
                 let itemSize = NSCollectionLayoutSize(
                         widthDimension: .fractionalWidth(0.5),
-                        heightDimension: .absolute(50)
+                        heightDimension: .absolute(70)
                     )
                 
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
@@ -226,10 +226,13 @@ class DiscoverViewController: UIViewController {
                     heightDimension: .estimated(75)
                 )
                 
+                
                 let group = NSCollectionLayoutGroup.horizontal(
                     layoutSize: groupSize,
                     subitems: [item]
                 )
+                
+                group.interItemSpacing = .fixed(12)
                 
                 let sectionLayout = NSCollectionLayoutSection(group: group)
                 sectionLayout.interGroupSpacing = 16
@@ -249,7 +252,7 @@ class DiscoverViewController: UIViewController {
                 
                 sectionLayout.boundarySupplementaryItems = [header]
                 
-                sectionLayout.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: 16, bottom: 20, trailing: 16)
+                sectionLayout.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 16, bottom: 20, trailing: 16)
                 
                 return sectionLayout
             }
@@ -291,7 +294,7 @@ class DiscoverViewController: UIViewController {
                 
                 sectionLayout.boundarySupplementaryItems = [header]
                 
-                sectionLayout.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: 16, bottom: 20, trailing: 16)
+                sectionLayout.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 16, bottom: 20, trailing: 16)
                 
                 return sectionLayout
             }

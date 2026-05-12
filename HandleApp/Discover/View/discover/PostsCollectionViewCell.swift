@@ -29,17 +29,17 @@ class PostsCollectionViewCell: UICollectionViewCell {
     func configure(type: String, count: Int) {
      
         if type == "Saved" {
-            imageView.image = UIImage(systemName: "bookmark.fill")
-            imageView.tintColor = .darkGray
+            imageView.image = UIImage(systemName: "archivebox")
+            imageView.tintColor = .systemTeal
             
             textLabel.text = "Saved"
-            countLabel.text = "\(count) Posts"
+            countLabel.text = "\(count)"
         } else {
             imageView.image = UIImage(systemName: "calendar.badge.clock")
-            imageView.tintColor = .systemGreen
+            imageView.tintColor = .systemTeal
             
             textLabel.text = "Scheduled"
-            countLabel.text = "\(count) Posts"
+            countLabel.text = "\(count)"
         }
         
     }
