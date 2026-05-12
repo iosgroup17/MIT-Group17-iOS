@@ -116,13 +116,13 @@ class EditorSuiteViewController: UIViewController {
     
     
     func setupNavigationButtons() {
-        let shareAction = UIAction(image: UIImage(systemName: "square.and.arrow.up")) { [weak self] _ in
-            self?.handleShareFlow()
-        }
-        let shareButton = UIBarButtonItem(primaryAction: shareAction)
-        self.navigationItem.rightBarButtonItem = shareButton
+        let nextButton = UIBarButtonItem(title: "Next", style: .plain, target: self, action: #selector(nextTapped))
+        self.navigationItem.rightBarButtonItem = nextButton
     }
     
+    @objc func nextTapped() {
+        showDecisionSheet()
+    }
     
     @IBAction func regenerateTapped(_ sender: UIButton) {
         guard let currentText = captionTextView.text else { return }
@@ -145,6 +145,42 @@ class EditorSuiteViewController: UIViewController {
         
     }
     
+    func showDecisionSheet() {
+        let alert = UIAlertController(title: "Ready to go?", message: "Choose how you want to proceed with your post.", preferredStyle: .actionSheet)
+        
+        // 1. Publish / Post Now (Your existing handleShareFlow)
+        let publishAction = UIAlertAction(title: "Publish", style: .default) { _ in
+            self.handleShareFlow()
+        }
+        publishAction.setValue(UIImage(systemName: "square.and.arrow.up"), forKey: "image")
+        
+        // 2. Schedule (Triggers your existing Segue)
+        let scheduleAction = UIAlertAction(title: "Schedule", style: .default) { _ in
+            self.performSegue(withIdentifier: "showSchedulerSegue", sender: self)
+        }
+        scheduleAction.setValue(UIImage(systemName: "calendar.badge.clock"), forKey: "image")
+        
+        // 3. Save (Your existing saveButtonTapped logic)
+        let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
+            // We pass 'self' because your original function takes a sender
+            self.saveButtonTapped(self)
+        }
+        saveAction.setValue(UIImage(systemName: "bookmark.fill"), forKey: "image")
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+        
+        alert.addAction(publishAction)
+        alert.addAction(scheduleAction)
+        alert.addAction(saveAction)
+        alert.addAction(cancelAction)
+        
+        // Support for iPad
+        if let popover = alert.popoverPresentationController {
+            popover.barButtonItem = self.navigationItem.rightBarButtonItem
+        }
+        
+        present(alert, animated: true)
+    }
     
     @IBAction func saveButtonTapped(_ sender: Any) {
         
@@ -474,6 +510,8 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
                 }
             }
         }
+
+
     
 }
 
