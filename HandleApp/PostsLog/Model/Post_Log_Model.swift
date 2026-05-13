@@ -6,16 +6,16 @@ struct Post: Codable, Identifiable {
     var id: UUID?
     var userId: UUID
     let topicId: UUID?
-    
+
     var status: PostStatus
-    
+
     var postHeading: String
     var fullCaption: String?
     var imageNames: [PostImageRef]?
     var platformName: String
     var platformIconName: String?
     let hashtags: [String]?
-    
+
     var scheduledAt: Date?
     var publishedAt: Date?
 
@@ -41,11 +41,11 @@ struct Post: Codable, Identifiable {
 }
 
 extension Post {
-    
+
     static func loadTomorrowScheduledPosts(from allPosts: [Post]) -> [Post] {
         let today = Date()
         guard let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today) else { return [] }
-        
+
         return allPosts.filter { post in
             guard post.status == .scheduled, let date = post.scheduledAt else { return false }
             return Calendar.current.isDate(date, inSameDayAs: tomorrow)
@@ -56,14 +56,14 @@ extension Post {
         let today = Date()
         guard let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today),
               let endOfTomorrow = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: tomorrow) else { return [] }
-        
+
         return allPosts.filter { post in
             guard post.status == .scheduled, let date = post.scheduledAt else { return false }
             return date > endOfTomorrow
         }
         .sorted { ($0.scheduledAt ?? Date()) < ($1.scheduledAt ?? Date()) }
     }
-    
+
     static func loadPublishedPosts(from allPosts: [Post]) -> [Post] {
         return allPosts.filter { $0.status == .published }
             .sorted { ($0.publishedAt ?? Date()) > ($1.publishedAt ?? Date()) }

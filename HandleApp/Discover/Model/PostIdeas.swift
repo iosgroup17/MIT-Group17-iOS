@@ -7,10 +7,9 @@ struct DiscoverIdeaResponse {
     var publishReadyPosts: [PublishReadyPost] = []
 }
 
-
 struct PublishReadyPost: Codable, Identifiable {
     var id: String = UUID().uuidString
-    
+
     let topicDetailId: String?
     let postHeading: String
     let platformIcon: String
@@ -18,7 +17,7 @@ struct PublishReadyPost: Codable, Identifiable {
     let postImage: [PostImageRef]?
     let hashtags: [String]
     let predictionText: String
-    
+
     enum CodingKeys: String, CodingKey {
         case id
         case topicDetailId = "topic_detail_id"
@@ -29,27 +28,22 @@ struct PublishReadyPost: Codable, Identifiable {
         case hashtags
         case predictionText = "prediction_text"
     }
-    
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-   
+
         self.id = try container.decodeIfPresent(String.self, forKey: .id) ?? UUID().uuidString
         self.topicDetailId = try container.decodeIfPresent(String.self, forKey: .topicDetailId)
 
-        
         self.postHeading = try container.decodeIfPresent(String.self, forKey: .postHeading) ?? "New Idea"
         self.platformIcon = try container.decodeIfPresent(String.self, forKey: .platformIcon) ?? "icon-linkedin"
         self.caption = try container.decodeIfPresent(String.self, forKey: .caption) ?? ""
-        
-  
+
         self.postImage = try container.decodeIfPresent([PostImageRef].self, forKey: .postImage)
         self.hashtags = try container.decodeIfPresent([String].self, forKey: .hashtags) ?? []
-        
-   
+
         self.predictionText = try container.decodeIfPresent(String.self, forKey: .predictionText) ?? "AI Generated Insight"
     }
-    
 
     init(postHeading: String, platformIcon: String, caption: String, hashtags: [String], predictionText: String) {
         self.id = UUID().uuidString
@@ -62,7 +56,6 @@ struct PublishReadyPost: Codable, Identifiable {
         self.predictionText = predictionText
     }
 }
-
 
 struct TopicAction: Codable {
     let topicDetailId: String
@@ -80,7 +73,6 @@ struct TopicAction: Codable {
     }
 }
 
-
 struct EditorDraftData: Codable {
     var id: UUID?
     let postHeading: String?
@@ -89,7 +81,7 @@ struct EditorDraftData: Codable {
     let caption: String?
     let images: [PostImageRef]?
     let hashtags: [String]?
-    
+
     enum CodingKeys: String, CodingKey {
         case postHeading = "post_heading"
         case platformName, platformIconName, caption, images, hashtags, id

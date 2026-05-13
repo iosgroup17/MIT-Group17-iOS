@@ -12,14 +12,14 @@ class CurateAICollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var shadowContainer: UIView!
     @IBOutlet weak var cardContainer: UIView!
     @IBOutlet weak var createActionButton: UIButton!
-    
+
     var didTapButtonAction: (() -> Void)?
-    
+
     private let gradientLayer = CAGradientLayer()
-    
+
     override func awakeFromNib() {
         super.awakeFromNib()
-        
+
         shadowContainer.layer.shadowColor = UIColor.black.cgColor
         shadowContainer.layer.shadowOpacity = 0.1
         shadowContainer.layer.shadowRadius = 12
@@ -27,11 +27,11 @@ class CurateAICollectionViewCell: UICollectionViewCell {
         shadowContainer.layer.masksToBounds = false
 
         cardContainer.layer.cornerRadius = 20
-        
-        //setupGradient()
+
+        // setupGradient()
         // Initialization code
     }
-    
+
 //    private func setupGradient() {
 //            
 //        let colorTop = UIColor.white.withAlphaComponent(0.1).cgColor

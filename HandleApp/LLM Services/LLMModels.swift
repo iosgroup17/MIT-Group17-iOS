@@ -12,17 +12,17 @@ struct UserProfile: Sendable {
     let professionalIdentity: [String]
 
     let currentFocus: [String]
-    
+
     let industry: [String]
-    
+
     let primaryGoals: [String]
-    
+
     let contentFormats: [String]
-  
+
     let platforms: [String]
-    
+
     let targetAudience: [String]
-    
+
     let acceptedRules: [String]
 
     var promptContext: String {
@@ -37,7 +37,7 @@ struct UserProfile: Sendable {
 //                - Target Platforms: \(platforms.joined(separator: ", "))
 //                - Target Audience: \(targetAudience.joined(separator: ", "))
 //        """
-        
+
         return "ROLE:\(professionalIdentity.joined(separator: ",")) | FOCUS:\(currentFocus.joined(separator: ",")) | IND:\(industry.joined(separator: ",")) | GOAL:\(primaryGoals.joined(separator: ",")) | FMT:\(contentFormats.joined(separator: ",")) | PLT:\(platforms.joined(separator: ",")) | AUD:\(targetAudience.joined(separator: ",")) | RULES:\(ruleString.isEmpty ? "Standard" : ruleString)"
     }
 }
@@ -45,5 +45,3 @@ struct UserProfile: Sendable {
 extension Notification.Name {
     static let userProfileDidChange = Notification.Name("userProfileDidChange")
 }
-
-

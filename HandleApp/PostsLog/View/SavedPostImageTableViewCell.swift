@@ -24,30 +24,30 @@ class SavedPostImageTableViewCell: UITableViewCell {
         containerView.layer.cornerRadius = 8
         containerView.layer.borderColor = UIColor.systemGray.cgColor
     }
-    
+
     func configure(with post: Post) {
 
         self.titleLabel.text = post.postHeading
 
         self.captionLabel.text = post.fullCaption
-        
+
         if let iconName = post.platformIconName {
             platformIconImageView.image = UIImage(named: iconName)
         } else {
             platformIconImageView.image = nil
         }
         if let images = post.imageNames, let firstImage = images.first {
-                
+
                 if firstImage.type == "stock" {
                     // 1. It's a stock image. Load from local assets using the 'path'
                     thumbnailImageView.image = UIImage(named: firstImage.path)
-                    
+
                 } else if firstImage.type == "custom" {
                     // 2. It's a custom image! Fetch from Supabase URL
-                    
+
                     // Optional: Set a temporary placeholder while it downloads
                     thumbnailImageView.image = UIImage(systemName: "photo")
-                    
+
                     if let url = SupabaseManager.shared.getPublicURL(for: firstImage.path) {
                         Task {
                             do {
@@ -67,5 +67,5 @@ class SavedPostImageTableViewCell: UITableViewCell {
                 thumbnailImageView.image = nil
             }
     }
-    
+
 }

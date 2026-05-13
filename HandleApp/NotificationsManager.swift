@@ -11,62 +11,62 @@ import UIKit
 
 class NotificationManager {
     static let shared = NotificationManager()
-    
+
     private init() {}
-    
+
     // 1. Request Permission
     func requestAuthorization() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { _, error in
             if let error = error {
             }
         }
     }
-    
+
     // 2. Schedule Notification for SCHEDULED posts (3 Hours Before)
     func schedulePostReminder(for post: Post) {
         let postId = post.id
         guard let scheduledDate = post.scheduledAt else { return }
-        
+
         // Calculate 3 hours (10,800 seconds) before the scheduled time
         let triggerDate = scheduledDate.addingTimeInterval(-10800)
-        
+
         if triggerDate < Date() { return } // Don't schedule if time has passed
-        
+
         let content = UNMutableNotificationContent()
         content.title = "Upcoming Post: \(post.platformName)"
         content.body = "Your post is scheduled for \(formatTime(scheduledDate)). Check it now!"
         content.sound = .default
-        
+
         let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: triggerDate)
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-        
+
         let request = UNNotificationRequest(identifier: postId?.uuidString ?? "", content: content, trigger: trigger)
-        
+
         UNUserNotificationCenter.current().add(request)
     }
-    
+
     // 3. Schedule Notification for SAVED/DRAFT posts (2 Days After)
     func scheduleDraftReminder(for post: Post) {
-        let postId = post.id 
-        
+        let postId = post.id
+
         let content = UNMutableNotificationContent()
         content.title = "Unfinished Draft: \(post.platformName)"
         content.body = "You saved a draft 2 days ago. Don't forget to schedule it!"
         content.sound = .default
-        
+
         // 2 Days in seconds = 172,800 seconds
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 172800, repeats: false)
-        
+
         let request = UNNotificationRequest(identifier: postId?.uuidString ?? "", content: content, trigger: trigger)
-        
+
         UNUserNotificationCenter.current().add(request)
     }
-    
+
     // 4. Cancel Notification (Call this when deleting or moving posts)
     func cancelNotification(for postId: UUID) {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [postId.uuidString])
     }
-    
+
     private func formatTime(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.timeStyle = .short

@@ -7,8 +7,8 @@
 
 import UIKit
 
-class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresentationControllerDelegate{
-    
+class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresentationControllerDelegate {
+
     @IBOutlet weak var postTableView: UITableView!
     @IBOutlet weak var filterBarButton: UIBarButtonItem!
     var scheduledTodayPosts: [Post] = []
@@ -19,16 +19,16 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
     var allTodayPosts: [Post] = []
     var allTomorrowPosts: [Post] = []
     var allLaterPosts: [Post] = []
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         NotificationManager.shared.requestAuthorization()
         let imageNib = UINib(nibName: "ScheduledPostImageTableViewCell", bundle: nil)
             tableView.register(imageNib, forCellReuseIdentifier: "ScheduledPostImageTableViewCell")
-           
+
         let textNib = UINib(nibName: "ScheduledPostTextTableViewCell", bundle: nil)
             tableView.register(textNib, forCellReuseIdentifier: "ScheduledPostTextTableViewCell")
-        
+
         tableView.backgroundColor = .clear
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 100
@@ -38,29 +38,29 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
         allLaterPosts = scheduledLaterPosts
         refreshData()
     }
-    
-    //Data refresh from supabase.
+
+    // Data refresh from supabase.
     func refreshData() {
         Task {
-            //Fetch all posts
+            // Fetch all posts
             let allPosts = await SupabaseManager.shared.fetchUserPosts()
             self.allFetchedPosts = allPosts
-            
-            //Filter posts scheduled for today
+
+            // Filter posts scheduled for today
             let today = Date()
             let todayPosts = allPosts.filter { post in
                 guard post.status == .scheduled, let date = post.scheduledAt else { return false }
                 return Calendar.current.isDate(date, inSameDayAs: today)
             }
-            
-            //Filter posts scheduled for tomorrow or later
+
+            // Filter posts scheduled for tomorrow or later
             let tomorrowPosts = Post.loadTomorrowScheduledPosts(from: allPosts)
             let laterPosts = Post.loadScheduledPostsLater(from: allPosts)
 
             self.allTodayPosts = todayPosts
             self.allTomorrowPosts = tomorrowPosts
             self.allLaterPosts = laterPosts
-            
+
             await MainActor.run {
                 if self.currentPlatformFilter == "All" {
                     self.scheduledTodayPosts = todayPosts
@@ -73,13 +73,13 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
             }
         }
     }
-    
-    //Filter by platform.
+
+    // Filter by platform.
     func didSelectPlatform(_ platform: String) {
         self.currentPlatformFilter = platform
         filterScheduledPosts(by: platform)
     }
-    
+
     func filterScheduledPosts(by platform: String) {
         if platform == "All" {
             scheduledTodayPosts = allTodayPosts
@@ -92,8 +92,8 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
         }
         postTableView.reloadData()
     }
-    
-    //action on bar button item for platform wise filter. (Menu using UIAlert)
+
+    // action on bar button item for platform wise filter. (Menu using UIAlert)
     @IBAction func filterButtonTapped(_ sender: Any) {
         let alertController = UIAlertController(title: "Filter by Platform", message: nil, preferredStyle: .actionSheet)
         let platforms = ["All", "LinkedIn", "Instagram", "X"]
@@ -114,12 +114,12 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
         }
         present(alertController, animated: true, completion: nil)
     }
-    
+
     func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
         return .none
     }
-    
-    //Table view
+
+    // Table view
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 3
     }
@@ -135,16 +135,14 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        //Get the post for the current row
+        // Get the post for the current row
         let post: Post
-        if indexPath.section == 0 { post = scheduledTodayPosts[indexPath.row] }
-        else if indexPath.section == 1 { post = scheduledTomorrowPosts[indexPath.row] }
-        else { post = scheduledLaterPosts[indexPath.row] }
+        if indexPath.section == 0 { post = scheduledTodayPosts[indexPath.row] } else if indexPath.section == 1 { post = scheduledTomorrowPosts[indexPath.row] } else { post = scheduledLaterPosts[indexPath.row] }
 
-        //Check if the post has images to decide which identifier to use
+        // Check if the post has images to decide which identifier to use
         let hasImages = post.imageNames?.isEmpty == false
 
-        //Dequeue and configure
+        // Dequeue and configure
         if hasImages {
             let cell = tableView.dequeueReusableCell(withIdentifier: "ScheduledPostImageTableViewCell", for: indexPath) as! ScheduledPostImageTableViewCell
             cell.configure(with: post)
@@ -155,7 +153,7 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
             return cell
         }
     }
-    
+
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         if section == 0 {
             return scheduledTodayPosts.isEmpty ? nil : "Today"
@@ -166,38 +164,34 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
         }
         return nil
     }
-    
+
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         // Delete Action
-        let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] (action, view, completionHandler) in
+        let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] (_, _, completionHandler) in
             guard let self = self else { return }
-            
+
             let post: Post
-            if indexPath.section == 0 { post = self.scheduledTodayPosts[indexPath.row] }
-            else if indexPath.section == 1 { post = self.scheduledTomorrowPosts[indexPath.row] }
-            else { post = self.scheduledLaterPosts[indexPath.row] }
-            
+            if indexPath.section == 0 { post = self.scheduledTodayPosts[indexPath.row] } else if indexPath.section == 1 { post = self.scheduledTomorrowPosts[indexPath.row] } else { post = self.scheduledLaterPosts[indexPath.row] }
+
             guard let postId = post.id else { return completionHandler(false) }
-            
+
             NotificationManager.shared.cancelNotification(for: postId)
 
             Task {
                 await SupabaseManager.shared.deleteLogPost(id: postId)
-                
+
                 await MainActor.run {
                     if indexPath.section == 0 {
                         self.scheduledTodayPosts.remove(at: indexPath.row)
                         if let id = post.id { self.allTodayPosts.removeAll { $0.id == id } }
-                    }
-                    else if indexPath.section == 1 {
+                    } else if indexPath.section == 1 {
                         self.scheduledTomorrowPosts.remove(at: indexPath.row)
                         if let id = post.id { self.allTomorrowPosts.removeAll { $0.id == id } }
-                    }
-                    else {
+                    } else {
                         self.scheduledLaterPosts.remove(at: indexPath.row)
                         if let id = post.id { self.allLaterPosts.removeAll { $0.id == id } }
                     }
-                    
+
                     tableView.deleteRows(at: [indexPath], with: .automatic)
                     completionHandler(true)
                 }
@@ -206,30 +200,27 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
         deleteAction.image = UIImage(systemName: "trash.fill")
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
         configuration.performsFirstActionWithFullSwipe = false
-        
+
         return configuration
     }
-    
+
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         self.performSegue(withIdentifier: "openEditorModal", sender: indexPath)
     }
-    
-    //Pass data to scheduler and editor suite VC
+
+    // Pass data to scheduler and editor suite VC
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "openEditorModal" {
             var destinationVC: EditorSuiteViewController?
             if let navVC = segue.destination as? UINavigationController {
                 destinationVC = navVC.topViewController as? EditorSuiteViewController
-            }
-            else {
+            } else {
                 destinationVC = segue.destination as? EditorSuiteViewController
             }
             if let editorVC = destinationVC, let indexPath = sender as? IndexPath {
                  let selectedPost: Post
-                 if indexPath.section == 0 { selectedPost = scheduledTodayPosts[indexPath.row] }
-                 else if indexPath.section == 1 { selectedPost = scheduledTomorrowPosts[indexPath.row] }
-                 else { selectedPost = scheduledLaterPosts[indexPath.row] }
+                 if indexPath.section == 0 { selectedPost = scheduledTodayPosts[indexPath.row] } else if indexPath.section == 1 { selectedPost = scheduledTomorrowPosts[indexPath.row] } else { selectedPost = scheduledLaterPosts[indexPath.row] }
             let draftData = EditorDraftData(
                             id: selectedPost.id,
                             postHeading: selectedPost.postHeading,

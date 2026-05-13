@@ -15,7 +15,7 @@ class PostPreviewTextCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var captionLabel: UILabel!
     override func awakeFromNib() {
         super.awakeFromNib()
-        
+
         containerView.layer.cornerRadius = 12
         containerView.backgroundColor = .secondarySystemGroupedBackground
 
@@ -26,11 +26,11 @@ class PostPreviewTextCollectionViewCell: UICollectionViewCell {
         self.layer.masksToBounds = false
         // Initialization code
     }
-    
+
     func configure(platformName: String, iconName: String?, caption: String) {
             titleLabel.text = platformName
             captionLabel.text = caption
-            
+
             if let icon = iconName {
                 platformIcon.image = UIImage(named: icon)
             } else {

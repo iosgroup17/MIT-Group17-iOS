@@ -22,7 +22,6 @@ class SavedPostTextTableViewCell: UITableViewCell {
         containerView.layer.borderColor = UIColor.systemGray.cgColor
     }
 
-    
     func configure(with post: Post) {
 
         self.titleLabel.text = post.postHeading

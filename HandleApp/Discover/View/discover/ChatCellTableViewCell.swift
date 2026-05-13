@@ -12,9 +12,9 @@ class ChatCellTableViewCell: UITableViewCell {
     @IBOutlet weak var textView: UIView!
     @IBOutlet weak var messageLabel: UILabel!
     @IBOutlet weak var editorButton: UIButton!
-    
+
     var onEditorButtonTapped: (() -> Void)?
-    
+
     override func awakeFromNib() {
         super.awakeFromNib()
         textView.layer.cornerRadius = 16
@@ -25,7 +25,7 @@ class ChatCellTableViewCell: UITableViewCell {
     @IBAction func editorButtonTapped(_ sender: Any) {
             onEditorButtonTapped?()
         }
-    
+
     func configureBubble(isUser: Bool) {
             if isUser {
                 textView.backgroundColor = UIColor.systemGray5.withAlphaComponent(0.2)

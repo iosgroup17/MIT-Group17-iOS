@@ -15,21 +15,19 @@ struct GenerationRequest {
     let refinementInstruction: String?
 }
 
-
 actor PostGenerationModel {
 
     static let shared = PostGenerationModel()
-    
+
     private init() {}
-    
+
     private func createFreshSession() -> LanguageModelSession {
             return LanguageModelSession(model: SystemLanguageModel.default)
         }
 
     func generatePost(profile: UserProfile, request: GenerationRequest) async throws -> EditorDraftData {
-        
+
         let session = createFreshSession()
-        
 
         let prompt = """
             ### SYSTEM
@@ -62,19 +60,18 @@ actor PostGenerationModel {
             """
 
         let response = try await session.respond(to: prompt)
-        
 
         let cleanJSON = stripMarkdown(from: response.content)
-        
+
         guard let data = cleanJSON.data(using: .utf8) else {
             throw ContentError.jsonParsingFailed
         }
-        
+
         return try await MainActor.run {
             try JSONDecoder().decode(EditorDraftData.self, from: data)
         }
     }
-        
+
         private func stripMarkdown(from text: String) -> String {
                 var cleanText = text.trimmingCharacters(in: .whitespacesAndNewlines)
                 if cleanText.hasPrefix("```json") {
@@ -95,13 +92,12 @@ enum ContentError: Error {
     case noJSONFound
 }
 
-
 extension PostGenerationModel {
-   
+
     func generateTopicBasedPost(profile: UserProfile, topicContext: String, request: GenerationRequest) async throws -> EditorDraftData {
-        
+
         let session = createFreshSession()
-        
+
         let prompt = """
             ### SYSTEM
             Role: Lead Executive Ghostwriter.
@@ -133,17 +129,16 @@ extension PostGenerationModel {
                 "postingTimes": ["String (E.g., 'Mon 9:00 AM') (Day at Time)"]
             }
             """
-        
+
         let response = try await session.respond(to: prompt)
         let cleanJSON = stripMarkdown(from: response.content)
-        
+
         guard let data = cleanJSON.data(using: .utf8) else {
             throw ContentError.jsonParsingFailed
         }
-        
+
         return try await MainActor.run {
             try JSONDecoder().decode(EditorDraftData.self, from: data)
         }
     }
 }
-

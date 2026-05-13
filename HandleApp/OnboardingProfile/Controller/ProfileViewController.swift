@@ -2,27 +2,25 @@ import UIKit
 import Supabase
 
 class ProfileViewController: UIViewController {
-    
-    //image at the top
+
+    // image at the top
     @IBOutlet weak var profileImageView: UIImageView!
     @IBOutlet weak var completionProgress: UIProgressView!
-    
-    //card backgrounds
+
+    // card backgrounds
     @IBOutlet weak var accountCardView: UIView!
     @IBOutlet weak var detailsCardView: UIView!
     @IBOutlet weak var socialCardView: UIView!
     @IBOutlet weak var progressCardView: UIView!
     @IBOutlet weak var settingsCardView: UIView!
-    
-    
+
     @IBOutlet weak var accountStack: UIStackView!
     @IBOutlet weak var detailsStack: UIStackView!
     @IBOutlet weak var socialStack: UIStackView!
     @IBOutlet weak var settingsStack: UIStackView!
 
-    
     let store = OnboardingDataStore.shared
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -34,7 +32,7 @@ class ProfileViewController: UIViewController {
         // Refresh data every time we appear (in case user returns from editing)
         loadData()
     }
-    
+
     func setupUI() {
         // Round Image
         profileImageView.image = UIImage(named: "Avatar")
@@ -42,16 +40,16 @@ class ProfileViewController: UIViewController {
         profileImageView.clipsToBounds = true
         profileImageView.layer.borderWidth = 2
         profileImageView.layer.borderColor = UIColor.white.cgColor
-        
+
         let cards = [accountCardView, detailsCardView, socialCardView, progressCardView, settingsCardView]
         for card in cards {
             if let c = card {
                 c.backgroundColor = .white
                 c.layer.cornerRadius = 16
-                
+
                 // Subtle Drop Shadow
                 c.layer.shadowColor = UIColor.black.cgColor
-                c.layer.shadowOpacity = 0.06 
+                c.layer.shadowOpacity = 0.06
                 c.layer.shadowOffset = CGSize(width: 0, height: 4)
                 c.layer.shadowRadius = 8
             }
@@ -62,19 +60,19 @@ class ProfileViewController: UIViewController {
         styleCard(socialCardView)
         styleCard(settingsCardView)
     }
-    
+
     func loadGoogleProfileImage() {
         // 1. Get the current user from Supabase
         guard let currentUser = SupabaseManager.shared.client.auth.currentUser else {
             return
         }
-                      
+
         // 2. Grab the metadata
         let metadata = currentUser.userMetadata
-                
+
         // 3. Safely extract the avatar URL
-        var avatarURLString: String? = nil
-                
+        var avatarURLString: String?
+
         // Check standard Google image keys
         if let urlString = metadata["avatar_url"]?.value as? String {
             avatarURLString = urlString
@@ -96,7 +94,7 @@ class ProfileViewController: UIViewController {
             do {
                 let (data, _) = try await URLSession.shared.data(from: url)
                 if let downloadedImage = UIImage(data: data) {
-                            
+
                     // 6. Update the UI on the Main Thread
                     await MainActor.run {
                         self.profileImageView.image = downloadedImage
@@ -106,7 +104,7 @@ class ProfileViewController: UIViewController {
             }
         }
     }
-    
+
     func styleCard(_ view: UIView) {
         view.layer.cornerRadius = 16
         view.layer.shadowColor = UIColor.black.cgColor
@@ -114,25 +112,25 @@ class ProfileViewController: UIViewController {
         view.layer.shadowOffset = CGSize(width: 0, height: 4)
         view.layer.shadowRadius = 6
     }
-    
-    func loadData(){
-        Task{
+
+    func loadData() {
+        Task {
             let remoteResponses = await SupabaseManager.shared.fetchUserOnboardingData()
-            
+
             OnboardingDataStore.shared.syncWithRemoteData(remoteResponses)
-            
-            await MainActor.run{
+
+            await MainActor.run {
                 self.refreshUI()
             }
         }
     }
-    
+
     func refreshUI() {
         let store = OnboardingDataStore.shared
-        
+
         let teal = UIColor.systemTeal
         completionProgress.setProgress(store.completionPercentage, animated: true)
-        
+
         [accountStack, detailsStack, socialStack, settingsStack].forEach { stack in
             stack?.arrangedSubviews.forEach { $0.removeFromSuperview() }
         }
@@ -150,10 +148,10 @@ class ProfileViewController: UIViewController {
 
         let goal = (store.userAnswers[0] as? [String])?.first ?? "Set Goal"
         addRow(to: detailsStack!, title: "Primary Goal", value: goal) { self.openEditor(forStep: 0) }
-        
+
         let focus = (store.userAnswers[1] as? [String])?.first ?? "Set Focus"
         addRow(to: detailsStack!, title: "Professional Focus", value: focus) { self.openEditor(forStep: 1) }
-        
+
         let expertise = (store.userAnswers[2] as? [String])?.first ?? "Set Expertise"
         addRow(to: detailsStack!, title: "Expertise", value: expertise) { self.openEditor(forStep: 2) }
 
@@ -166,7 +164,7 @@ class ProfileViewController: UIViewController {
         addRow(to: socialStack!, title: "Platforms", value: platforms ?? "Boost Strategy") {
             self.openEditor(forStep: 5)
         }
-        
+
         let tone = (store.userAnswers[6] as? [String])?.first
         addRow(to: socialStack!,
                title: "Brand Tone",
@@ -181,85 +179,84 @@ class ProfileViewController: UIViewController {
 
         [accountStack, detailsStack, socialStack, settingsStack].forEach { hideLastSeparator(in: $0!) }
     }
-    
+
     func addRow(to stack: UIStackView, title: String, value: String, showIcon: Bool = true, titleColor: UIColor = .label, iconImage: UIImage? = nil, action: @escaping () -> Void) {
         let row = ProfileRow()
         row.configure(title: title, value: value, showIcon: showIcon, titleColor: titleColor, iconImage: iconImage)
         row.tapAction = action
-        
+
         row.translatesAutoresizingMaskIntoConstraints = false
         row.heightAnchor.constraint(equalToConstant: 50).isActive = true
         stack.addArrangedSubview(row)
     }
-    
-    
+
     func showTextInput(title: String, currentValue: String?, completion: @escaping (String) -> Void) {
         let alert = UIAlertController(title: title, message: nil, preferredStyle: .alert)
-        
+
         alert.addTextField { textField in
             textField.text = currentValue
             textField.placeholder = "Enter here..."
         }
-        
+
         let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
             if let text = alert.textFields?.first?.text, !text.isEmpty {
                 completion(text)
             }
         }
-        
+
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
-        
+
         alert.addAction(saveAction)
         alert.addAction(cancelAction)
-        
+
         present(alert, animated: true)
     }
-    
+
     func hideLastSeparator(in stack: UIStackView) {
         if let lastRow = stack.arrangedSubviews.last as? ProfileRow {
             lastRow.separatorLine.isHidden = true
         }
     }
-    
+
     func openEditor(forStep stepIndex: Int) {
-        
+
         let storyboard = UIStoryboard(name: "Profile", bundle: nil)
-        
+
         // instantiate onboardingVC here
         guard let editorVC = storyboard.instantiateViewController(withIdentifier: "OnboardingParentVC") as? OnboardingViewController else {
             return
         }
-        
+
         // configure for editing 
         editorVC.currentStepIndex = stepIndex
         editorVC.isEditMode = true
-        
+
         // present as sheet
         editorVC.onDismiss = { [weak self] in
             self?.loadData()
         }
-        
+
         editorVC.modalPresentationStyle = .pageSheet
         if let sheet = editorVC.sheetPresentationController {
             sheet.detents = [.large()]
             sheet.prefersGrabberVisible = true
         }
-        
+
         present(editorVC, animated: true)
     }
-    
+
     func showLogoutConfirmation() {
         let alert = UIAlertController(title: "Log Out", message: "Are you sure you want to log out of your account?", preferredStyle: .actionSheet)
-        
+
         let logoutAction = UIAlertAction(title: "Log Out", style: .destructive) { _ in
             self.handleLogout()
         }
-        
+
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
-        
+
         alert.addAction(logoutAction)
         alert.addAction(cancelAction)
-        
+
         present(alert, animated: true)
     }
 
@@ -270,13 +267,13 @@ class ProfileViewController: UIViewController {
 
             DispatchQueue.main.async {
                 if let window = self.view.window,
-                   let _ = window.windowScene?.delegate as? SceneDelegate {
-                    
+                   window.windowScene?.delegate as? SceneDelegate != nil {
+
                     let storyboard = UIStoryboard(name: "Profile", bundle: nil)
                     let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginAuthVC")
-                    
+
                     window.rootViewController = loginVC
-                    
+
                     UIView.transition(with: window,
                                     duration: 0.3,
                                     options: .transitionCrossDissolve,

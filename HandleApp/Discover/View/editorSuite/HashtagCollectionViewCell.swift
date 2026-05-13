@@ -8,21 +8,21 @@
 import UIKit
 
 class HashtagCollectionViewCell: UICollectionViewCell {
-    
+
     @IBOutlet weak var containerView: UIView!
-    
+
     @IBOutlet weak var hashtagLabel: UILabel!
-    
+
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
-        
+
         containerView.layer.cornerRadius = 8
-        
+
         containerView.backgroundColor = UIColor(red: 0.85, green: 0.95, blue: 0.96, alpha: 1.0)
 
     }
-    
+
     func configure(text: String) {
             hashtagLabel.text = text
         }

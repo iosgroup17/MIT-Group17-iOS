@@ -4,11 +4,11 @@ import UIKit
 class OnboardingDataStore {
 
     static let shared = OnboardingDataStore()
-    
+
     private init() {}
 
     var userAnswers: [Int: Any] = [:]
-    
+
     var steps: [OnboardingStep] = [
         OnboardingStep(
             index: 0,
@@ -98,7 +98,7 @@ class OnboardingDataStore {
             ]
         )
     ]
-    
+
     var completionPercentage: Float {
         let totalQuestions = Float(steps.count + 2) // All steps + Name + Bio
         var answeredCount: Float = Float(userAnswers.count)
@@ -110,42 +110,41 @@ class OnboardingDataStore {
     var displayName: String?
     var shortBio: String?
     var projects: [String] = []
-    
+
     var socialStatus: [String: Bool] = [
         "Instagram": false,
         "LinkedIn": false,
         "X (Twitter)": false
     ]
-    
-    
+
     func saveAnswer(stepIndex: Int, value: Any) {
         userAnswers[stepIndex] = value
     }
-    
+
     func getStep(at index: Int) -> OnboardingStep? {
         guard index >= 0 && index < steps.count else { return nil }
         return steps[index]
     }
-    
+
     func syncWithRemoteData(_ responses: [OnboardingResponse]) {
         for response in responses {
             self.userAnswers[response.step_index] = response.selection_tags
         }
     }
-    
+
     func reset() {
         self.userAnswers = [:]
-        
+
         self.profileImage = nil
         self.displayName = nil
         self.shortBio = nil
         self.projects = []
-        
+
         self.socialStatus = [
             "Instagram": false,
             "LinkedIn": false,
             "X (Twitter)": false
         ]
-        
+
     }
 }

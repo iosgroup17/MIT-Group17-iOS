@@ -8,36 +8,34 @@
 import UIKit
 
 class SavedPostsTableViewController: UITableViewController, UIPopoverPresentationControllerDelegate {
-    
-    
+
     @IBOutlet weak var filterBarButton: UIBarButtonItem!
     var savedPosts: [Post] = [] // Cache of all drafts from Supabase
     var displayedPosts: [Post] = [] // What is currently shown (filtered)
     var currentPlatformFilter: String = "All"
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         let imageNib = UINib(nibName: "SavedPostImageTableViewCell", bundle: nil)
             tableView.register(imageNib, forCellReuseIdentifier: "ImageSavedCell")
         let textNib = UINib(nibName: "SavedPostTextTableViewCell", bundle: nil)
             tableView.register(textNib, forCellReuseIdentifier: "TextSavedCell")
-        
+
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 100
-        
+
         displayedPosts = savedPosts
         fetchSavedPosts()
     }
-    
+
     func fetchSavedPosts() {
         Task {
-            //Fetch all posts
+            // Fetch all posts
             let allPosts = await SupabaseManager.shared.fetchUserPosts()
-            
-            //Fetch saved posts
+
+            // Fetch saved posts
             self.savedPosts = Post.loadSavedPosts(from: allPosts)
-            
 
             await MainActor.run {
                 self.filterSavedPosts(by: self.currentPlatformFilter)
@@ -45,8 +43,8 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
             }
         }
     }
-    
-    //Filter by platform.
+
+    // Filter by platform.
     func didSelectPlatform(_ platform: String) {
             self.currentPlatformFilter = platform
             filterSavedPosts(by: platform)
@@ -83,12 +81,12 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
         }
         present(alertController, animated: true, completion: nil)
     }
-    
+
     func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
         return .none
     }
-    
-    //Table view
+
+    // Table view
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
@@ -98,7 +96,7 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-     
+
         let post = displayedPosts[indexPath.row]
         let hasImages = post.imageNames?.isEmpty == false
         if hasImages {
@@ -128,20 +126,20 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
     }
 
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        //Delete action
-        let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] (action, view, completionHandler) in
+        // Delete action
+        let deleteAction = UIContextualAction(style: .destructive, title: nil) { [weak self] (_, _, completionHandler) in
                 guard let self = self else { return }
-                
+
                 let post = self.displayedPosts[indexPath.row]
                 guard let postId = post.id else {
                     completionHandler(false)
                     return
                 }
-                
+
                 NotificationManager.shared.cancelNotification(for: postId)
                 Task {
                     await SupabaseManager.shared.deleteLogPost(id: postId)
-                    
+
                     await MainActor.run {
                         if let indexInAll = self.savedPosts.firstIndex(where: { $0.id == postId }) {
                             self.savedPosts.remove(at: indexInAll)
@@ -156,16 +154,16 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
 
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
         configuration.performsFirstActionWithFullSwipe = false
-                
+
         return configuration
     }
-    
+
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         self.performSegue(withIdentifier: "openEditorModal", sender: indexPath)
     }
-    
-    //Pass data to scheduler and Editor suite VC.
+
+    // Pass data to scheduler and Editor suite VC.
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "openEditorModal" {
             let destinationVC = (segue.destination as? UINavigationController)?.topViewController as? EditorSuiteViewController
@@ -173,7 +171,7 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
 
             if let editorVC = destinationVC, let indexPath = sender as? IndexPath {
                 let selectedPost = displayedPosts[indexPath.row]
-                    
+
                 let draftData = EditorDraftData(
                                 id: selectedPost.id,
                                 postHeading: selectedPost.postHeading,
@@ -183,7 +181,7 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
                                 images: selectedPost.imageNames,
                                 hashtags: selectedPost.hashtags ?? []
                 )
-                    
+
                 editorVC.draft = draftData
             }
         }

@@ -11,14 +11,14 @@ class OptionPillCollectionViewCell: UICollectionViewCell {
 
     @IBOutlet weak var bgView: UIView!
     @IBOutlet weak var optionLabel: UILabel!
-    
+
     override func awakeFromNib() {
         super.awakeFromNib()
-        
+
         bgView.layer.cornerRadius = 16
         // Initialization code
     }
-    
+
     func configure(with text: String) {
         optionLabel.text = text
         bgView.layer.borderWidth = 0
@@ -37,5 +37,5 @@ class OptionPillCollectionViewCell: UICollectionViewCell {
             }
         }
     }
-    
+
 }

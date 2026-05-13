@@ -9,29 +9,28 @@ import UIKit
 import PhotosUI
 
 class EditorSuiteViewController: UIViewController {
-    
+
     @IBOutlet weak var platformIconImageView: UIImageView!
     @IBOutlet weak var platformNameLabel: UILabel!
-    
+
     @IBOutlet weak var imagesCollectionView: UICollectionView!
-    
+
     @IBOutlet weak var captionTextView: UITextView!
-    
+
     @IBOutlet weak var regenerateButton: UIButton!
-    
+
     @IBOutlet weak var hashtagContainerView: UIView!
     @IBOutlet weak var hashtagTitleLabel: UILabel!
     @IBOutlet weak var hashtagCollectionView: UICollectionView!
-    
-    
+
     private let captionService: CaptionGenerator = RegenerateCaption()
-    
+
     var draft: EditorDraftData?
-    
+
     var displayedImages: [UIImage] = []
-    
-    var selectedImageIndex: Int? = nil
-    
+
+    var selectedImageIndex: Int?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupCollectionViews()
@@ -40,58 +39,56 @@ class EditorSuiteViewController: UIViewController {
         setupNavigationButtons()
         setupKeyboardDismissal()
     }
-    
+
     func setupCollectionViews() {
-        
+
         imagesCollectionView.dataSource = self
         imagesCollectionView.delegate = self
-        
+
         hashtagCollectionView.dataSource = self
         hashtagCollectionView.delegate = self
-        
-        
+
         imagesCollectionView.register(UINib(nibName: "ImageCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "ImageCollectionViewCell")
-        
+
         let hashtagNib = UINib(nibName: "HashtagCollectionViewCell", bundle: nil)
         hashtagCollectionView.register(hashtagNib, forCellWithReuseIdentifier: "HashtagCollectionViewCell")
     }
-    
+
     func setupUI() {
-        
+
         captionTextView.layer.cornerRadius = 8
         captionTextView.layer.borderWidth = 1
         captionTextView.layer.borderColor = UIColor.systemGray5.cgColor
         captionTextView.textContainerInset = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
-        
+
         hashtagContainerView.layer.cornerRadius = 12
         hashtagContainerView.layer.borderWidth = 1
         hashtagContainerView.layer.borderColor = UIColor.systemGray4.cgColor
-        
+
     }
-    
-    
+
     func populateData() {
         guard let data = draft else { return }
-        
+
         platformNameLabel.text = data.platformName
         platformIconImageView.image = UIImage(named: data.platformIconName ?? "")
         captionTextView.text = data.caption
-        
+
         displayedImages.removeAll()
-        
+
         // loop through PostImageRef objects
         for imageRef in data.images ?? [] {
-            
+
             if imageRef.type == "stock" {
                 // if stock image then load from assets
                 if let img = UIImage(named: imageRef.path) {
                     displayedImages.append(img)
                 }
-                
+
             } else if imageRef.type == "custom" {
                 // custom image - download from supabase url
                 if let url = SupabaseManager.shared.getPublicURL(for: imageRef.path) {
-                    
+
                     // fetch the image from the internet asynchronously
                     Task {
                         do {
@@ -108,30 +105,29 @@ class EditorSuiteViewController: UIViewController {
                 }
             }
         }
-        
+
         imagesCollectionView.reloadData()
         hashtagCollectionView.reloadData()
     }
-    
-    
+
     func setupNavigationButtons() {
         let nextButton = UIBarButtonItem(title: "Next", style: .plain, target: self, action: #selector(nextTapped))
         self.navigationItem.rightBarButtonItem = nextButton
     }
-    
+
     @objc func nextTapped() {
         showDecisionSheet()
     }
-    
+
     @IBAction func regenerateTapped(_ sender: UIButton) {
         guard let currentText = captionTextView.text else { return }
-        
+
         sender.isEnabled = false
-        
+
         Task {
             do {
                 let newCaption = try await captionService.regenerate(currentText, tone: "professional")
-                
+
                 await MainActor.run {
                     self.captionTextView.text = newCaption
                     sender.isEnabled = true
@@ -140,96 +136,92 @@ class EditorSuiteViewController: UIViewController {
                 await MainActor.run { sender.isEnabled = true }
             }
         }
-        
+
     }
-    
+
     func showDecisionSheet() {
         let alert = UIAlertController(title: "Ready to go?", message: "Choose how you want to proceed with your post.", preferredStyle: .actionSheet)
-        
+
         // 1. Publish / Post Now (Your existing handleShareFlow)
         let publishAction = UIAlertAction(title: "Publish", style: .default) { _ in
             self.handleShareFlow()
         }
         publishAction.setValue(UIImage(systemName: "square.and.arrow.up"), forKey: "image")
-        
+
         // 2. Schedule (Triggers your existing Segue)
         let scheduleAction = UIAlertAction(title: "Schedule", style: .default) { _ in
             self.performSegue(withIdentifier: "showSchedulerSegue", sender: self)
         }
         scheduleAction.setValue(UIImage(systemName: "calendar.badge.clock"), forKey: "image")
-        
+
         // 3. Save (Your existing saveButtonTapped logic)
         let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
             // We pass 'self' because your original function takes a sender
             self.saveButtonTapped(self)
         }
         saveAction.setValue(UIImage(systemName: "archivebox"), forKey: "image")
-        
+
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
-        
+
         alert.addAction(publishAction)
         alert.addAction(scheduleAction)
         alert.addAction(saveAction)
         alert.addAction(cancelAction)
-        
+
         // Support for iPad
         if let popover = alert.popoverPresentationController {
             popover.barButtonItem = self.navigationItem.rightBarButtonItem
         }
-        
+
         present(alert, animated: true)
     }
-    
+
     @IBAction func saveButtonTapped(_ sender: Any) {
-        
+
         let loadingAlert = UIAlertController(title: "Saving...", message: nil, preferredStyle: .alert)
         let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 20, width: 50, height: 50))
         loadingIndicator.hidesWhenStopped = true
         loadingIndicator.style = .medium
         loadingIndicator.startAnimating()
         loadingAlert.view.addSubview(loadingIndicator)
-        
+
         present(loadingAlert, animated: true)
-        
+
         Task {
             // upload the custom images to storage
             let uploadedNames = await SupabaseManager.shared.uploadImagesToStorage(images: displayedImages)
-            
-            
+
             // format to jsonb structure
             var finalImageRefs: [PostImageRef] = []
             for name in uploadedNames {
                 finalImageRefs.append(PostImageRef(type: "custom", path: name))
             }
-            
-            
+
             let savedPost = Post(
                 id: draft?.id ?? UUID(),
                 userId: SupabaseManager.shared.currentUserID,
                 topicId: nil,
-                
+
                 status: .saved,
-                
+
                 postHeading: draft?.postHeading ?? "",
                 fullCaption: captionTextView.text,
                 imageNames: finalImageRefs.isEmpty ? nil : finalImageRefs,
-                
+
                 platformName: draft?.platformName ?? "General",
                 platformIconName: draft?.platformIconName,
                 hashtags: draft?.hashtags
             )
-            
-            
-            
+
             do {
                 try await SupabaseManager.shared.upsertPost(post: savedPost)
-                
+
                 await MainActor.run {
                     NotificationCenter.default.post(
                         name: NSNotification.Name("PostStatusChanged"),
                         object: nil
                     )
-        
+
                     loadingAlert.dismiss(animated: true) {
                         self.dismiss(animated: true) {
                         }
@@ -247,8 +239,7 @@ class EditorSuiteViewController: UIViewController {
             }
         }
     }
-    
-    
+
     func getFileURLs(from images: [UIImage]) -> [URL] {
         var urls: [URL] = []
         for (index, image) in images.enumerated() {
@@ -260,10 +251,10 @@ class EditorSuiteViewController: UIViewController {
         }
         return urls
     }
-    
+
     func markPostAsPublished() {
         guard let draftID = draft?.id else { return }
-        
+
         let publishedPost = Post(
             id: draftID,
             userId: SupabaseManager.shared.currentUserID,
@@ -278,21 +269,21 @@ class EditorSuiteViewController: UIViewController {
             scheduledAt: nil,
             publishedAt: Date()
         )
-        
+
         Task {
             do {
                 try await SupabaseManager.shared.upsertPost(post: publishedPost)
                 await MainActor.run {
                     NotificationManager.shared.cancelNotification(for: draftID)
                     self.showToast(message: "Post marked as Published!")
-                    
+
                     self.navigationController?.popToRootViewController(animated: true)
                 }
             } catch {
             }
         }
     }
-    
+
     func showToast(message: String) {
         let toastLabel = UILabel()
         toastLabel.text = message
@@ -303,13 +294,13 @@ class EditorSuiteViewController: UIViewController {
         toastLabel.alpha = 0
         toastLabel.layer.cornerRadius = 15
         toastLabel.clipsToBounds = true
-        
+
         let expectedSize = toastLabel.sizeThatFits(CGSize(width: self.view.frame.width - 40, height: 40))
         toastLabel.frame = CGRect(x: self.view.frame.width/2 - (expectedSize.width + 20)/2,
                                   y: self.view.frame.height - 100,
                                   width: expectedSize.width + 20,
                                   height: 35)
-        
+
         self.view.addSubview(toastLabel)
         UIView.animate(withDuration: 0.3, animations: { toastLabel.alpha = 1.0 }) { _ in
             UIView.animate(withDuration: 0.3, delay: 2.0, options: .curveEaseOut, animations: { toastLabel.alpha = 0.0 }) { _ in
@@ -317,71 +308,69 @@ class EditorSuiteViewController: UIViewController {
             }
         }
     }
-    
+
     func handleShareFlow() {
         guard let text = captionTextView.text else { return }
-        
+
         UIPasteboard.general.string = text
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        
+
         let textSource = ShareTextSource(text: text)
         let imageURLs = getFileURLs(from: displayedImages)
-        
+
         var itemsToShare: [Any] = [textSource]
         itemsToShare.append(contentsOf: imageURLs)
-        
+
         let activityVC = UIActivityViewController(activityItems: itemsToShare, applicationActivities: nil)
-        
-        activityVC.completionWithItemsHandler = { (activityType, completed, returnedItems, error) in
-            
+
+        activityVC.completionWithItemsHandler = { (_, completed, _, _) in
+
             imageURLs.forEach { try? FileManager.default.removeItem(at: $0) }
-            
+
             if completed {
-                
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     let alert = UIAlertController(
                         title: "Confirm Post",
                         message: "Did you successfully share this post to \(self.draft?.platformName ?? "the platform")?",
                         preferredStyle: .alert
                     )
-                    
+
                     let yesAction = UIAlertAction(title: "Yes, it's posted!", style: .default) { _ in
                         self.markPostAsPublished()
                     }
-                    
+
                     let noAction = UIAlertAction(title: "Not yet", style: .cancel, handler: nil)
-                    
+
                     alert.addAction(yesAction)
                     alert.addAction(noAction)
-                    
+
                     self.present(alert, animated: true)
                 }
             }
         }
-        
+
         if let popover = activityVC.popoverPresentationController {
             popover.barButtonItem = self.navigationItem.rightBarButtonItem
         }
-        
+
         self.present(activityVC, animated: true)
     }
-    
+
     private func setupKeyboardDismissal() {
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        
+
         tap.cancelsTouchesInView = false
         view.addGestureRecognizer(tap)
     }
-    
+
     @objc func dismissKeyboard() {
         view.endEditing(true)
     }
 }
 
+extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
-
-extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
-    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
 
         switch collectionView {
@@ -391,14 +380,14 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
         default: return 0
         }
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
+
         switch collectionView {
-            
+
         case imagesCollectionView:
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ImageCollectionViewCell", for: indexPath) as! ImageCollectionViewCell
-                
+
             if indexPath.row == displayedImages.count {
                         cell.configureAsAddButton()
                     } else {
@@ -406,68 +395,63 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
                         cell.configure(with: image)
                     }
                     return cell
-            
-    
+
         case hashtagCollectionView:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HashtagCollectionViewCell", for: indexPath) as! HashtagCollectionViewCell
-            
+
             if collectionView == hashtagCollectionView {
                 if let tag = draft?.hashtags?[indexPath.row] {
                     cell.configure(text: tag)
                 }
             }
             return cell
-            
+
         default: return UICollectionViewCell()
         }
     }
-    
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        
+
         if collectionView == imagesCollectionView {
-            
+
             if indexPath.row == displayedImages.count {
                 selectedImageIndex = nil
                 showImagePickerOptions()
-            }
-            
-            else {
+            } else {
                 selectedImageIndex = indexPath.row
                 showImagePickerOptions()
             }
         }
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
- 
+
         if collectionView == imagesCollectionView {
             return CGSize(width: 150, height: 150)
         }
-        
 
         if collectionView == hashtagCollectionView {
-            
+
             var text = ""
             if collectionView == hashtagCollectionView {
                 text = draft?.hashtags?[indexPath.row] ?? ""
             }
-            
+
             let font = UIFont.systemFont(ofSize: 13, weight: .medium)
             let width = text.size(withAttributes: [.font: font]).width + 30
-            
+
             return CGSize(width: width, height: 32)
         }
-        
+
         return CGSize(width: 50, height: 50)
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showSchedulerSegue" {
-                
+
                 if let navVC = segue.destination as? UINavigationController,
                    let destinationVC = navVC.topViewController as? SchedulerViewController {
-                    
+
                     let finalCaption = self.captionTextView.text ?? ""
                     let finalImages = self.displayedImages.isEmpty ? nil : self.displayedImages
                     let platform = self.draft?.platformName ?? "Post"
@@ -475,7 +459,6 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
                     let tags = self.draft?.hashtags ?? []
                     let heading = self.draft?.postHeading ?? ""
 
-                    
                     let package = ScheduledPostData(
                         postHeading: heading,
                         platformName: platform,
@@ -484,36 +467,32 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
                         images: finalImages,
                         hashtags: tags
                     )
-                    
+
                     destinationVC.postData = package
                     destinationVC.captionText = captionTextView.text
                     destinationVC.postHeading = draft?.postHeading
-                    
+
                     destinationVC.existingPostId = draft?.id
-         
+
                     destinationVC.imageNames = draft?.images
-                    
+
                     // When scheduling succeeds, pop the editor too so the user
                     // is returned cleanly to the home/discover screen.
                     destinationVC.onScheduled = { [weak self] in
                         self?.navigationController?.popViewController(animated: false)
                     }
-                    
+
                 }
             }
         }
 
-
-    
 }
-
 
 extension EditorSuiteViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     func showImagePickerOptions() {
 
         let alertController = UIAlertController(title: "Choose Image", message: nil, preferredStyle: .actionSheet)
-        
 
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
             let cameraAction = UIAlertAction(title: "Camera", style: .default) { _ in
@@ -521,7 +500,6 @@ extension EditorSuiteViewController: UIImagePickerControllerDelegate, UINavigati
             }
             alertController.addAction(cameraAction)
         }
-        
 
         if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
             let libraryAction = UIAlertAction(title: "Photo Library", style: .default) { _ in
@@ -529,27 +507,26 @@ extension EditorSuiteViewController: UIImagePickerControllerDelegate, UINavigati
             }
             alertController.addAction(libraryAction)
         }
-        
+
         if let indexToRemove = selectedImageIndex {
             let deleteAction = UIAlertAction(title: "Remove Image", style: .destructive) { [weak self] _ in
                 self?.removeImage(at: indexToRemove)
             }
             alertController.addAction(deleteAction)
         }
-        
+
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         alertController.addAction(cancelAction)
-        
 
         if let popover = alertController.popoverPresentationController {
             popover.sourceView = self.view
             popover.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 0, height: 0)
             popover.permittedArrowDirections = []
         }
-        
+
         self.present(alertController, animated: true, completion: nil)
     }
-    
+
     func openPicker(source: UIImagePickerController.SourceType) {
         let picker = UIImagePickerController()
         picker.delegate = self
@@ -558,11 +535,9 @@ extension EditorSuiteViewController: UIImagePickerControllerDelegate, UINavigati
         self.present(picker, animated: true, completion: nil)
     }
 
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
 
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-       
         guard let image = info[.originalImage] as? UIImage else { return }
-            
 
         if let indexToReplace = selectedImageIndex {
 
@@ -575,23 +550,22 @@ extension EditorSuiteViewController: UIImagePickerControllerDelegate, UINavigati
         }
 
         imagesCollectionView.reloadData()
-        
+
         picker.dismiss(animated: true, completion: nil)
     }
-    
-    
+
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
     }
-    
+
     func removeImage(at index: Int) {
-    
+
         guard index <= displayedImages.count else { return }
-     
+
         displayedImages.remove(at: index)
-       
+
         selectedImageIndex = nil
-        
+
         let indexPath = IndexPath(row: index, section: 0)
         imagesCollectionView.performBatchUpdates({
             imagesCollectionView.deleteItems(at: [indexPath])
@@ -618,4 +592,3 @@ class ShareTextSource: NSObject, UIActivityItemSource {
         return text
     }
 }
-

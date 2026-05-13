@@ -10,10 +10,10 @@ import UIKit
 class ImageCollectionViewCell: UICollectionViewCell {
 
     @IBOutlet weak var imageView: UIImageView!
-    
+
     override func awakeFromNib() {
         super.awakeFromNib()
-        
+
         imageView.layer.cornerRadius = 12
         imageView.clipsToBounds = true
     }
@@ -24,13 +24,13 @@ class ImageCollectionViewCell: UICollectionViewCell {
         imageView.tintColor = .clear
         imageView.contentMode = .scaleAspectFill
     }
-        
+
     func configureAsAddButton() {
         let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .semibold)
         imageView.image = UIImage(systemName: "plus", withConfiguration: config)
-        
-        imageView.backgroundColor = .systemGray5 
-        imageView.tintColor = .darkGray        
-        imageView.contentMode = .center        
+
+        imageView.backgroundColor = .systemGray5
+        imageView.tintColor = .darkGray
+        imageView.contentMode = .center
     }
 }

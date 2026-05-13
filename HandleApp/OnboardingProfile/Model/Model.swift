@@ -12,9 +12,9 @@ enum OnboardingLayoutType {
 struct OnboardingOption {
     let id: String
     let title: String
-    let subtitle: String? 
+    let subtitle: String?
     let iconName: String?
-    
+
     init(title: String, subtitle: String? = nil, iconName: String? = nil) {
         self.id = title // Using title as ID for simplicity
         self.title = title

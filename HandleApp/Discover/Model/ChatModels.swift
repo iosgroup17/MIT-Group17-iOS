@@ -16,20 +16,18 @@ enum ChatStep {
     case continuousChat
 }
 
-
 enum ChatMessageType {
     case text
     case optionPills
     case platformSelection
 }
 
-
 struct Message {
     let id = UUID()
     let text: String
     let isUser: Bool
     let type: ChatMessageType
- 
-    var options: [String]? = nil
-    var draft: EditorDraftData? = nil
+
+    var options: [String]?
+    var draft: EditorDraftData?
 }

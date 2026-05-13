@@ -12,7 +12,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
-
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
             guard let windowScene = (scene as? UIWindowScene) else { return }
             let window = UIWindow(windowScene: windowScene)
@@ -33,26 +32,22 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window.makeKeyAndVisible()
     }
 
-       
     private func routeUser(_ user: User) async {
         guard let window = self.window else { return }
         let userId = user.id.uuidString
         let userKey = "hasCompletedOnboarding_\(userId)"
-        
-     
+
         var hasCompletedOnboarding = UserDefaults.standard.bool(forKey: userKey)
 
-       
         if !hasCompletedOnboarding {
             let remoteData = await SupabaseManager.shared.fetchUserOnboardingData()
             if !remoteData.isEmpty {
                 hasCompletedOnboarding = true
-                
+
                 UserDefaults.standard.set(true, forKey: userKey)
             }
         }
 
-       
         await MainActor.run {
             if hasCompletedOnboarding {
                 showMainApp(window: window)
@@ -62,13 +57,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
     }
 
-        
     private func setupAuthListener() async {
             for await (event, session) in SupabaseManager.shared.client.auth.authStateChanges {
-                
+
                 let user = session?.user
-                
-               
+
                 if event == .signedOut || session == nil {
                     await MainActor.run {
                         guard let window = self.window else { return }
@@ -76,13 +69,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                         UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
                     }
                 } else if event == .signedIn, let user = user {
-                   
+
                     await self.routeUser(user)
                 }
             }
         }
 
-     
         func showLogin(window: UIWindow) {
             let storyboard = UIStoryboard(name: "Profile", bundle: nil)
             let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginAuthVC")
@@ -100,8 +92,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             let tabBarVC = storyboard.instantiateViewController(withIdentifier: "MainTabBarVC")
             window.rootViewController = tabBarVC
         }
-        
-    
+
 //    func showOnboarding(window: UIWindow) {
 //        let storyboard = UIStoryboard(name: "Profile", bundle: nil) 
 //        
@@ -138,6 +129,4 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
     }
 
-
 }
-
