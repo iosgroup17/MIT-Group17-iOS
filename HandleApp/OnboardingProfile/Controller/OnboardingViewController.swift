@@ -66,7 +66,6 @@ class OnboardingViewController: UIViewController {
             
             //bg task to update supabase
             Task {
-                print("Syncing Step \(currentStepIndex) to Supabase...")
                 
                 // test id call
                 await SupabaseManager.shared.savePreference(
@@ -215,13 +214,11 @@ class OnboardingViewController: UIViewController {
     func navigateToProfileScreen() {
         //Get the current User ID
         guard let userId = SupabaseManager.shared.client.auth.currentUser?.id.uuidString else {
-            print("Error: No user logged in during onboarding completion")
             return
         }
         let userKey = "hasCompletedOnboarding_\(userId)"
         UserDefaults.standard.set(true, forKey: userKey)
         
-        print("Onboarding completed for user: \(userId). Flag set in UserDefaults.")
 
         DispatchQueue.main.async {
             if let sceneDelegate = self.view.window?.windowScene?.delegate as? SceneDelegate,

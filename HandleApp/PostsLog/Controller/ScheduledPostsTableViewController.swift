@@ -76,13 +76,11 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
     
     //Filter by platform.
     func didSelectPlatform(_ platform: String) {
-        print("Selected Platform: \(platform)")
         self.currentPlatformFilter = platform
         filterScheduledPosts(by: platform)
     }
     
     func filterScheduledPosts(by platform: String) {
-        print("Filter requested for: [\(platform)]")
         if platform == "All" {
             scheduledTodayPosts = allTodayPosts
             scheduledTomorrowPosts = allTomorrowPosts
@@ -92,7 +90,6 @@ class ScheduledPostsTableViewController: UITableViewController, UIPopoverPresent
             scheduledTomorrowPosts = allTomorrowPosts.filter { $0.platformName == platform }
             scheduledLaterPosts = allLaterPosts.filter { $0.platformName == platform }
         }
-        print("Reloading table with \(scheduledTodayPosts.count + scheduledTomorrowPosts.count + scheduledLaterPosts.count) posts.")
         postTableView.reloadData()
     }
     

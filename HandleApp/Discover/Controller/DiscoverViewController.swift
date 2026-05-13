@@ -87,7 +87,6 @@ class DiscoverViewController: UIViewController {
     
     
     @objc func handleProfileChange() {
-        print("Profile changed notification received. Reloading discover data...")
         Task {
             await loadSupabaseData()
         }
@@ -103,7 +102,6 @@ class DiscoverViewController: UIViewController {
             let sCount = try? await SupabaseManager.shared.fetchPostCount(for: .saved)
             let schCount = try? await SupabaseManager.shared.fetchPostCount(for: .scheduled)
 
-            print("DEBUG: Fetched Saved: \(sCount ?? -1), Scheduled: \(schCount ?? -1)")
 
             await MainActor.run {
                 self.savedCount = sCount ?? 0
@@ -124,7 +122,6 @@ class DiscoverViewController: UIViewController {
                     userProfile = profile
                 } else {
                     
-                    print("Profile fetch failed. Using Default Context.")
                     userProfile = UserProfile(
                         professionalIdentity: ["Content Creator"],
                         currentFocus: ["Trends"],
@@ -145,7 +142,6 @@ class DiscoverViewController: UIViewController {
 
 
                 
-                print("Generative AI: Starting generation")
 
                 let generatedPosts = try await OnDevicePostEngine.shared.generatePublishReadyPosts(
                     context: userProfile
@@ -153,7 +149,6 @@ class DiscoverViewController: UIViewController {
 
 
                 await MainActor.run {
-                    print("AI Generation Complete. Reloading Section 2.")
                     self.publishReadyPosts = generatedPosts
                     self.isGeneratingPosts = false
                     self.collectionView.reloadSections(IndexSet(integer: 2))
@@ -161,7 +156,6 @@ class DiscoverViewController: UIViewController {
 
                 
             } catch {
-                print("Critical Error in Data Load: \(error)")
                 await MainActor.run {
                     self.isGeneratingPosts = false
                     self.collectionView.reloadSections(IndexSet(integer: 2))
@@ -438,20 +432,16 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
         
         if indexPath.section == 1 {
             if indexPath.row == 0 {
-                print("Navigate to Saved Posts")
                 let storyboard = UIStoryboard(name: "Posts", bundle: nil)
                 if let destinationVC = storyboard.instantiateViewController(withIdentifier: "SavedPostsViewControllerID") as? SavedPostsTableViewController {
                     self.navigationController?.pushViewController(destinationVC, animated: true)
                 } else {
-                    print("Error: Could not find View Controller with ID 'SavedPostsViewControllerID'")
                 }
             } else {
-                print("Navigate to Scheduled Posts")
                 let storyboard = UIStoryboard(name: "Posts", bundle: nil)
                 if let destinationVC = storyboard.instantiateViewController(withIdentifier: "ScheduledPostsViewControllerID") as? ScheduledPostsTableViewController {
                     self.navigationController?.pushViewController(destinationVC, animated: true)
                 } else {
-                    print("Error: Could not find View Controller with ID 'ScheduledPostsViewControllerID'")
                 }
             }
         }
@@ -481,7 +471,6 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
                 } catch {
                     await MainActor.run {
                         self.hideRefinementLoading()
-                        print("Error refining post: \(error)")
                     }
                 }
             }

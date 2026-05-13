@@ -66,7 +66,6 @@ class ProfileViewController: UIViewController {
     func loadGoogleProfileImage() {
         // 1. Get the current user from Supabase
         guard let currentUser = SupabaseManager.shared.client.auth.currentUser else {
-            print("Could not fetch user")
             return
         }
                       
@@ -89,7 +88,6 @@ class ProfileViewController: UIViewController {
 
         // 4. Convert string to an actual URL
         guard let finalURLString = avatarURLString, let url = URL(string: finalURLString) else {
-            print("No valid avatar URL found in user metadata.")
             return
         }
 
@@ -105,7 +103,6 @@ class ProfileViewController: UIViewController {
                     }
                 }
             } catch {
-                print("Failed to download profile image: \(error.localizedDescription)")
             }
         }
     }
@@ -230,7 +227,6 @@ class ProfileViewController: UIViewController {
         
         // instantiate onboardingVC here
         guard let editorVC = storyboard.instantiateViewController(withIdentifier: "OnboardingParentVC") as? OnboardingViewController else {
-            print("Error: Could not find OnboardingViewController. Check Storyboard ID.")
             return
         }
         

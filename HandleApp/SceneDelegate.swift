@@ -14,7 +14,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        print("Scene delegate started")
             guard let windowScene = (scene as? UIWindowScene) else { return }
             let window = UIWindow(windowScene: windowScene)
             self.window = window
@@ -45,7 +44,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
        
         if !hasCompletedOnboarding {
-            print("Local flag is false, checking Supabase...")
             let remoteData = await SupabaseManager.shared.fetchUserOnboardingData()
             if !remoteData.isEmpty {
                 hasCompletedOnboarding = true
@@ -66,9 +64,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         
     private func setupAuthListener() async {
-            print("Setting up auth listener")
             for await (event, session) in SupabaseManager.shared.client.auth.authStateChanges {
-                print("Auth Event: \(event)")
                 
                 let user = session?.user
                 

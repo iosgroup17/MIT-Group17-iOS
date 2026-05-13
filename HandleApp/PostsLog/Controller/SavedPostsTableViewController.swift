@@ -38,7 +38,6 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
             //Fetch saved posts
             self.savedPosts = Post.loadSavedPosts(from: allPosts)
             
-            print("Saved Drafts count: \(self.savedPosts.count)")
 
             await MainActor.run {
                 self.filterSavedPosts(by: self.currentPlatformFilter)
@@ -49,22 +48,18 @@ class SavedPostsTableViewController: UITableViewController, UIPopoverPresentatio
     
     //Filter by platform.
     func didSelectPlatform(_ platform: String) {
-        print("Selected Platform: \(platform)")
             self.currentPlatformFilter = platform
             filterSavedPosts(by: platform)
     }
 
     func filterSavedPosts(by platform: String) {
-        print("Filter requested for: [\(platform)]")
         if platform == "All" {
             displayedPosts = savedPosts
         } else {
             displayedPosts = savedPosts.filter { post in
-                print("Post platformName: [\(post.platformName)] vs Target: [\(platform)]")
                 return post.platformName == platform
             }
         }
-        print("Posts displayed after filter: \(displayedPosts.count)")
         self.tableView.reloadData()
     }
 

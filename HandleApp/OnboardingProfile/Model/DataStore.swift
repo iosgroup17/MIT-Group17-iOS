@@ -120,7 +120,6 @@ class OnboardingDataStore {
     
     func saveAnswer(stepIndex: Int, value: Any) {
         userAnswers[stepIndex] = value
-        print("Saved for Step \(stepIndex): \(value)")
     }
     
     func getStep(at index: Int) -> OnboardingStep? {
@@ -148,6 +147,5 @@ class OnboardingDataStore {
             "X (Twitter)": false
         ]
         
-        print("OnboardingDataStore has been successfully reset.")
     }
 }

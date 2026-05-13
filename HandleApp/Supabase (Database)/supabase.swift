@@ -118,9 +118,7 @@ class SupabaseManager {
                 .from("onboarding_responses")
                 .upsert(data)
                 .execute()
-            print("Data successfully saved")
         } catch {
-            print("Supabase Error: \(error)")
         }
     }
     
@@ -145,7 +143,6 @@ class SupabaseManager {
             return preferencesDict
             
         } catch {
-            print("Error fetching preferences: \(error)")
             return [:]
         }
     }
@@ -183,9 +180,7 @@ class SupabaseManager {
             try await client.from("social_connections")
                 .upsert(params, onConflict: "user_id, platform")
                 .execute()
-            print("Saved \(platform) handle: \(handle)")
         } catch {
-            print("Failed to save handle: \(error)")
         }
     }
       
@@ -197,7 +192,6 @@ class SupabaseManager {
                     .invoke("process-tweet-scrape", options: FunctionInvokeOptions(body: params))
                 return response["handle_score"] ?? 0
             } catch {
-                print("Scrape Error: \(error)")
                 return 0
             }
         }
@@ -209,7 +203,6 @@ class SupabaseManager {
                 .invoke("process-insta-scrape", options: FunctionInvokeOptions(body: params))
             return response["handle_score"] ?? 0
         } catch {
-            print("Instagram Scrape Error: \(error)")
             return 0
         }
     }
@@ -239,10 +232,8 @@ class SupabaseManager {
                         options: FunctionInvokeOptions(body: params)
                     )
                 
-                print("LinkedIn Scrape: Score \(response.handle_score), Posts \(response.post_count)")
                 return response.handle_score
             } catch {
-                print("LinkedIn Scrape Failed: \(error)")
                 return 0
             }
         }
@@ -270,10 +261,8 @@ class SupabaseManager {
                     options: FunctionInvokeOptions(body: params)
                 )
             
-            print("Twitter Scrape: Score \(response.handle_score), Posts \(response.post_count)")
             return response.handle_score
         } catch {
-            print("Twitter Scrape Failed: \(error)")
             return 0
         }
     }
@@ -289,7 +278,6 @@ class SupabaseManager {
                 
             return true
         } catch {
-            print("Disconnect Error: \(error)")
             return false
         }
     }
@@ -318,7 +306,6 @@ class SupabaseManager {
                 )
             }
         } catch {
-            print("Error fetching graph data: \(error)")
             return []
         }
     }
@@ -326,16 +313,13 @@ class SupabaseManager {
     func ensureAnonymousSession() async {
    
         if client.auth.currentSession != nil {
-            print("Session active for scrapers: \(client.auth.currentSession?.user.id.uuidString ?? "")")
             return
         }
         
         do {
             
             _ = try await client.auth.signInAnonymously()
-            print("Anonymous session established.")
         } catch {
-            print("Auth Failed: \(error)")
         }
     }
     
@@ -357,12 +341,10 @@ class SupabaseManager {
                let lastDate = ISO8601DateFormatter().date(from: lastDateStr) {
                 let hoursSince = Date().timeIntervalSince(lastDate) / 3600
                 if hoursSince < 24 {
-                    print("Data is fresh (\(Int(hoursSince))h old). Skipping auto-scrape.")
                     return
                 }
             }
             
-            print("Data is stale. Starting auto-scrape...")
             
        
             let connections: [SocialConnection] = try await client
@@ -380,10 +362,8 @@ class SupabaseManager {
                     if conn.platform == "linkedin" { _ = await runLinkedInScoreCalculation(handle: handle) }
                 }
             }
-            print("Auto-scrape completed.")
             
         } catch {
-            print("Auto-update failed or no analytics row yet.")
         }
     }
     
@@ -422,7 +402,6 @@ extension SupabaseManager {
             )
             
         } catch {
-            print("Error assembling UserProfile: \(error)")
             return nil
         }
     }
@@ -433,7 +412,6 @@ extension SupabaseManager {
             do {
                 
                 let targetID = self.currentUserID
-                print("DEBUG: Fetching posts for User: \(targetID)")
 
                 let posts: [Post] = try await client
                     .from("posts")
@@ -445,7 +423,6 @@ extension SupabaseManager {
                 
                 return posts
             } catch {
-                print("Error fetching user posts: \(error)")
                 return []
             }
         }
@@ -493,14 +470,12 @@ extension SupabaseManager {
 //                suggestedHashtags: post.suggestedHashtags
 //            )
 //
-//            print("DEBUG: Insert Post for User: \(targetID)")
 //
 //            try await client
 //                .from("posts")
 //                .insert(postPayload)
 //                .execute()
 //
-//            print("DEBUG: Post inserted successfully!")
 //        }
 
 
@@ -527,9 +502,7 @@ extension SupabaseManager {
                 .delete()
                 .eq("post_id", value: id.uuidString)
                 .execute()
-            print("Post deleted successfully")
         } catch {
-            print("Delete error: \(error)")
         }
     }
     
@@ -566,9 +539,7 @@ extension SupabaseManager {
                     .upload(fileName, data: imageData)
                 
                 uploadedFileNames.append(fileName)
-                print("Successfully uploaded: \(fileName)")
             } catch {
-                print("Upload failed for image \(index): \(error)")
             }
         }
         return uploadedFileNames
@@ -580,7 +551,6 @@ extension SupabaseManager {
                 .from("posts")
                 .getPublicURL(path: fileName)
         } catch {
-            print("Error generating public URL: \(error)")
             return nil
         }
     }
@@ -596,7 +566,6 @@ extension SupabaseManager {
                 .value
             return results
         } catch {
-            print("Error fetching onboarding data: \(error)")
             return []
         }
     }

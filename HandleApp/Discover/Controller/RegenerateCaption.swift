@@ -51,7 +51,6 @@ actor RegenerateCaption: CaptionGenerator {
             return response.content
         } catch {
             // If the model is missing on the real device
-            print("Model Error: \(error)")
             throw CaptionError.modelAssetsMissing
         }
 #endif

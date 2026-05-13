@@ -245,7 +245,6 @@ class SchedulerViewController: UIViewController, UICollectionViewDelegate, UICol
                 await MainActor.run {
                     loadingAlert.dismiss(animated: true) {
                         let errAlert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
-                        print(error)
                         errAlert.addAction(UIAlertAction(title: "OK", style: .default))
                         self.present(errAlert, animated: true)
                     }

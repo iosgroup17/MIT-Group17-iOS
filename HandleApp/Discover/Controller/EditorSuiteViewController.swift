@@ -103,7 +103,6 @@ class EditorSuiteViewController: UIViewController {
                                 }
                             }
                         } catch {
-                            print("Failed to load custom image from URL: \(error)")
                         }
                     }
                 }
@@ -138,7 +137,6 @@ class EditorSuiteViewController: UIViewController {
                     sender.isEnabled = true
                 }
             } catch {
-                print("oops: \(error)")
                 await MainActor.run { sender.isEnabled = true }
             }
         }
@@ -165,7 +163,7 @@ class EditorSuiteViewController: UIViewController {
             // We pass 'self' because your original function takes a sender
             self.saveButtonTapped(self)
         }
-        saveAction.setValue(UIImage(systemName: "bookmark.fill"), forKey: "image")
+        saveAction.setValue(UIImage(systemName: "archivebox"), forKey: "image")
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
         
@@ -221,7 +219,6 @@ class EditorSuiteViewController: UIViewController {
                 hashtags: draft?.hashtags
             )
             
-            print(SupabaseManager.shared.currentUserID)
             
             
             do {
@@ -235,7 +232,6 @@ class EditorSuiteViewController: UIViewController {
         
                     loadingAlert.dismiss(animated: true) {
                         self.dismiss(animated: true) {
-                            print("Post saved successfully. Notification sent.")
                         }
                     }
                 }
@@ -244,7 +240,6 @@ class EditorSuiteViewController: UIViewController {
                     NotificationManager.shared.scheduleDraftReminder(for: savedPost)
                     loadingAlert.dismiss(animated: true) {
                         let errAlert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
-                        print(error.localizedDescription)
                         errAlert.addAction(UIAlertAction(title: "OK", style: .default))
                         self.present(errAlert, animated: true)
                     }
@@ -294,7 +289,6 @@ class EditorSuiteViewController: UIViewController {
                     self.navigationController?.popToRootViewController(animated: true)
                 }
             } catch {
-                print("Failed to update status: \(error)")
             }
         }
     }
@@ -434,13 +428,11 @@ extension EditorSuiteViewController: UICollectionViewDataSource, UICollectionVie
         if collectionView == imagesCollectionView {
             
             if indexPath.row == displayedImages.count {
-                print("User tapped Add Button")
                 selectedImageIndex = nil
                 showImagePickerOptions()
             }
             
             else {
-                print("User tapped Image at index \(indexPath.row) to replace it")
                 selectedImageIndex = indexPath.row
                 showImagePickerOptions()
             }

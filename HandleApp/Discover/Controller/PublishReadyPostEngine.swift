@@ -93,7 +93,6 @@ actor OnDevicePostEngine {
             throw NSError(domain: "Decoder", code: 1, userInfo: [NSLocalizedDescriptionKey: "String to Data conversion failed"])
         }
 
-        print("Cleaned AI JSON:\n\(jsonString)")
         
 
         do {
@@ -101,9 +100,7 @@ actor OnDevicePostEngine {
             let decoded = try JSONDecoder().decode(ResponseWrapper.self, from: data)
             return decoded.posts
         } catch {
-            print("Decoding Error: \(error)")
 
-            print("Offending JSON: \(jsonString)")
             throw error
         }
     }
@@ -173,7 +170,6 @@ extension OnDevicePostEngine {
             throw NSError(domain: "EditorEngine", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to extract JSON"])
         }
         
-        print("Cleaned AI JSON:\n\(jsonString)")
 
         return try await MainActor.run {
             try JSONDecoder().decode(EditorDraftData.self, from: data)

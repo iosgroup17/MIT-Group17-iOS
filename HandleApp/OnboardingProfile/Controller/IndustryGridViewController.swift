@@ -60,7 +60,6 @@ class IndustryGridViewController: UIViewController, UICollectionViewDataSource, 
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let selectedItem = items[indexPath.row]
-        print("Step 2: Industry - \(selectedItem.title)")
         
         OnboardingDataStore.shared.saveAnswer(stepIndex: stepIndex, value: [selectedItem.title])
     }

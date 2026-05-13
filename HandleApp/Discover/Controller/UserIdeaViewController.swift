@@ -334,7 +334,6 @@ extension UserIdeaViewController {
     
     
     func handleError(error: Error) {
-        print("AI Error: \(error.localizedDescription)")
         let errorMessage = Message(text: "Couldn't generate a draft right now. Please check your connection.", isUser: false, type: .text)
         self.messages.append(errorMessage)
         self.insertNewMessage()

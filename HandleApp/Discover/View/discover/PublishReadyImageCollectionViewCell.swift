@@ -69,7 +69,6 @@ class PublishReadyImageCollectionViewCell: UICollectionViewCell {
                                         }
                                     }
                                 } catch {
-                                    print("Failed to load image from URL: \(error)")
                                 }
                             }
                         }

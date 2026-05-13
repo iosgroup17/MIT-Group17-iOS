@@ -110,7 +110,6 @@ class ListSelectionViewController: UIViewController, UICollectionViewDataSource,
             return items[indexPath.row].title
         }
         
-        print("Step \(stepIndex) Saved: \(selectedTitles)")
         
         // save to data store
         OnboardingDataStore.shared.saveAnswer(stepIndex: stepIndex, value: selectedTitles)

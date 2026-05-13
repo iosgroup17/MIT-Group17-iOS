@@ -75,7 +75,6 @@ class ScheduledPostImageTableViewCell: UITableViewCell {
                                     }
                                 }
                             } catch {
-                                print("Failed to load thumbnail from URL: \(error)")
                             }
                         }
                     }

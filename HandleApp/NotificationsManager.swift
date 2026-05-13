@@ -18,7 +18,6 @@ class NotificationManager {
     func requestAuthorization() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             if let error = error {
-                print("Notification permission error: \(error)")
             }
         }
     }
@@ -44,7 +43,6 @@ class NotificationManager {
         let request = UNNotificationRequest(identifier: postId?.uuidString ?? "", content: content, trigger: trigger)
         
         UNUserNotificationCenter.current().add(request)
-        print("Scheduled reminder for \(triggerDate)")
     }
     
     // 3. Schedule Notification for SAVED/DRAFT posts (2 Days After)
@@ -62,7 +60,6 @@ class NotificationManager {
         let request = UNNotificationRequest(identifier: postId?.uuidString ?? "", content: content, trigger: trigger)
         
         UNUserNotificationCenter.current().add(request)
-        print("Draft reminder set for 2 days from now")
     }
     
     // 4. Cancel Notification (Call this when deleting or moving posts)

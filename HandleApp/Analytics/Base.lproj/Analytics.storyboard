@@ -660,7 +660,7 @@
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="-49" translatesAutoresizingMaskIntoConstraints="NO" id="VW3-Hu-J31" userLabel="Title Stack">
                                                 <rect key="frame" x="64" y="40" width="274" height="211"/>
                                                 <subviews>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="252" text="Handle" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="JZI-30-8av">
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="252" text="HandleHQ" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="JZI-30-8av">
                                                         <rect key="frame" x="57.333333333333329" y="0.0" width="159.33333333333337" height="60"/>
                                                         <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="50"/>
                                                         <nil key="textColor"/>

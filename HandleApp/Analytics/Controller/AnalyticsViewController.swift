@@ -112,7 +112,6 @@ class AnalyticsViewController: UIViewController {
                         self.fetchBestPost()
                     }
                 } catch {
-                    print("Error loading analytics: \(error)")
                 }
             }
         }
@@ -223,7 +222,6 @@ class AnalyticsViewController: UIViewController {
                     hostingController.didMove(toParent: self)
                 }
             } catch {
-                print("Graph Error: \(error)")
             }
         }
     }
@@ -259,7 +257,6 @@ class AnalyticsViewController: UIViewController {
                         }
                     }
                 } catch {
-                    print("Best post error: \(error)")
                     DispatchQueue.main.async {
                         self.bestPostTextLabel?.text = "No top post found for this week."
                         self.bestPostDateLabel?.text = "--"
@@ -435,7 +432,6 @@ class AnalyticsViewController: UIViewController {
                 self.present(navController, animated: true)
                 
             } else {
-                print("ERROR: Could not find a View Controller with the Storyboard ID 'AuthViewController'.")
             }
         }
     
