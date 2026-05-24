@@ -107,9 +107,26 @@ class OnboardingDataStore {
         return answeredCount / totalQuestions
     }
     var profileImage: UIImage?
-    var displayName: String?
-    var shortBio: String?
+
+    // Name & Bio aren't part of the Supabase onboarding_responses table, so back
+    // them with UserDefaults to keep them across launches (used by the home-screen
+    // profile-completion card). Cleared on logout via reset().
+    private let displayNameKey = "profile_displayName"
+    private let shortBioKey = "profile_shortBio"
+
+    var displayName: String? {
+        get { UserDefaults.standard.string(forKey: displayNameKey) }
+        set { UserDefaults.standard.set(newValue, forKey: displayNameKey) }
+    }
+    var shortBio: String? {
+        get { UserDefaults.standard.string(forKey: shortBioKey) }
+        set { UserDefaults.standard.set(newValue, forKey: shortBioKey) }
+    }
     var projects: [String] = []
+
+    // Reset to false on every launch (singleton lifetime), so the card returns
+    // each time the app opens but stays hidden after dismissal within a session.
+    var profileNudgeDismissedThisSession: Bool = false
 
     var socialStatus: [String: Bool] = [
         "Instagram": false,
@@ -139,6 +156,7 @@ class OnboardingDataStore {
         self.displayName = nil
         self.shortBio = nil
         self.projects = []
+        self.profileNudgeDismissedThisSession = false
 
         self.socialStatus = [
             "Instagram": false,

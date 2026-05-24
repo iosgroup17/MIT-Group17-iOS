@@ -20,6 +20,9 @@ class DiscoverViewController: UIViewController {
     var savedCount: Int = 0
     var scheduledCount: Int = 0
 
+    // Whether the "Complete your profile" card (section 0) is currently visible.
+    var showNudge: Bool = false
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -59,7 +62,14 @@ class DiscoverViewController: UIViewController {
                     forCellWithReuseIdentifier: "LoadingCell"
         )
 
+        collectionView.register(
+            ProfileNudgeCell.self,
+            forCellWithReuseIdentifier: ProfileNudgeCell.reuseID
+        )
+
         collectionView.setCollectionViewLayout(generateLayout(), animated: true)
+
+        refreshProfileNudge()
 
         Task {
                 await loadSupabaseData()
@@ -79,12 +89,53 @@ class DiscoverViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         refreshCounts()
+        refreshProfileNudge()
     }
 
     @objc func handleProfileChange() {
         Task {
             await loadSupabaseData()
         }
+        refreshProfileNudge()
+    }
+
+    // MARK: - Profile completion card
+
+    /// Pulls the latest onboarding answers, then recomputes whether the card shows.
+    func refreshProfileNudge() {
+        Task {
+            let responses = await SupabaseManager.shared.fetchUserOnboardingData()
+            await MainActor.run {
+                OnboardingDataStore.shared.syncWithRemoteData(responses)
+                self.recomputeNudge()
+            }
+        }
+    }
+
+    /// Recompute visibility from the current store state and refresh section 0.
+    func recomputeNudge() {
+        let store = OnboardingDataStore.shared
+        showNudge = !ProfileChecklist.isComplete && !store.profileNudgeDismissedThisSession
+        collectionView.reloadSections(IndexSet(integer: 0))
+    }
+
+    func dismissNudge() {
+        OnboardingDataStore.shared.profileNudgeDismissedThisSession = true
+        recomputeNudge()
+    }
+
+    func presentProfileHub() {
+        let hub = ProfileCompletionHubViewController()
+        hub.onChange = { [weak self] in
+            self?.recomputeNudge()
+        }
+        let nav = UINavigationController(rootViewController: hub)
+        nav.modalPresentationStyle = .pageSheet
+        if let sheet = nav.sheetPresentationController {
+            sheet.detents = [.large()]
+            sheet.prefersGrabberVisible = true
+        }
+        present(nav, animated: true)
     }
 
     deinit {
@@ -99,7 +150,7 @@ class DiscoverViewController: UIViewController {
             await MainActor.run {
                 self.savedCount = sCount ?? 0
                 self.scheduledCount = schCount ?? 0
-                self.collectionView.reloadSections(IndexSet(integer: 1))
+                self.collectionView.reloadSections(IndexSet(integer: 2))
             }
         }
     }
@@ -129,7 +180,7 @@ class DiscoverViewController: UIViewController {
 
                 await MainActor.run {
                     self.isGeneratingPosts = true
-                    self.collectionView.reloadData()
+                    self.collectionView.reloadSections(IndexSet(integer: 3))
                 }
 
                 let generatedPosts = try await OnDevicePostEngine.shared.generatePublishReadyPosts(
@@ -139,13 +190,13 @@ class DiscoverViewController: UIViewController {
                 await MainActor.run {
                     self.publishReadyPosts = generatedPosts
                     self.isGeneratingPosts = false
-                    self.collectionView.reloadSections(IndexSet(integer: 2))
+                    self.collectionView.reloadSections(IndexSet(integer: 3))
                 }
 
             } catch {
                 await MainActor.run {
                     self.isGeneratingPosts = false
-                    self.collectionView.reloadSections(IndexSet(integer: 2))
+                    self.collectionView.reloadSections(IndexSet(integer: 3))
                 }
             }
         }
@@ -161,7 +212,27 @@ class DiscoverViewController: UIViewController {
 
         return UICollectionViewCompositionalLayout { section, _ -> NSCollectionLayoutSection? in
 
+            // Section 0: profile-completion card. The cell carries its own margins,
+            // so zero insets here let the section collapse cleanly when it has 0 items.
             if section == 0 {
+
+                let itemSize = NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1.0),
+                    heightDimension: .estimated(120)
+                )
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+
+                let group = NSCollectionLayoutGroup.horizontal(
+                    layoutSize: itemSize,
+                    subitems: [item]
+                )
+
+                let sectionLayout = NSCollectionLayoutSection(group: group)
+                sectionLayout.contentInsets = .zero
+                return sectionLayout
+            }
+
+            if section == 1 {
 
                 let itemSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
@@ -190,7 +261,7 @@ class DiscoverViewController: UIViewController {
 
             }
 
-            if section == 1 {
+            if section == 2 {
 
                 let itemSize = NSCollectionLayoutSize(
                         widthDimension: .fractionalWidth(0.5),
@@ -235,7 +306,7 @@ class DiscoverViewController: UIViewController {
                 return sectionLayout
             }
 
-            if section == 2 {
+            if section == 3 {
 
                 let itemSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1.0),
@@ -284,13 +355,14 @@ class DiscoverViewController: UIViewController {
 extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 3
+        return 4
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if section == 0 { return 1 }
-        if section == 1 { return 2 }
-        if section == 2 { return isGeneratingPosts ? 1 : publishReadyPosts.count }
+        if section == 0 { return showNudge ? 1 : 0 }
+        if section == 1 { return 1 }
+        if section == 2 { return 2 }
+        if section == 3 { return isGeneratingPosts ? 1 : publishReadyPosts.count }
 
         return 0
     }
@@ -298,6 +370,21 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
 
         if indexPath.section == 0 {
+
+            let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: ProfileNudgeCell.reuseID,
+                for: indexPath
+            ) as! ProfileNudgeCell
+
+            cell.configure(completed: ProfileChecklist.completedCount, total: ProfileChecklist.totalCount)
+            cell.dismissAction = { [weak self] in
+                self?.dismissNudge()
+            }
+
+            return cell
+        }
+
+        if indexPath.section == 1 {
 
             let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: "CurateAICollectionViewCell",
@@ -312,7 +399,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
 
         }
 
-        if indexPath.section == 1 {
+        if indexPath.section == 2 {
             let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: "PostsCollectionViewCell",
                 for: indexPath
@@ -332,7 +419,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
             return cell
         }
 
-        if indexPath.section == 2 {
+        if indexPath.section == 3 {
             if isGeneratingPosts {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "LoadingCell", for: indexPath)
 
@@ -394,10 +481,10 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
             withReuseIdentifier: "HeaderCollectionReusableView",
             for: indexPath
         ) as! HeaderCollectionReusableView
-        if indexPath.section == 1 {
+        if indexPath.section == 2 {
             header.titleLabel.text = "Your Content Summary"
         }
-        if indexPath.section == 2 {
+        if indexPath.section == 3 {
             header.titleLabel.text = "Suggested For You"
         }
 
@@ -407,13 +494,17 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
 
         if indexPath.section == 0 {
+            presentProfileHub()
+        }
+
+        if indexPath.section == 1 {
             let storyboard = UIStoryboard(name: "Discover", bundle: nil)
             if let destVC = storyboard.instantiateViewController(withIdentifier: "ChatViewController") as? UserIdeaViewController {
                 navigationController?.pushViewController(destVC, animated: true)
             }
         }
 
-        if indexPath.section == 1 {
+        if indexPath.section == 2 {
             if indexPath.row == 0 {
                 let storyboard = UIStoryboard(name: "Posts", bundle: nil)
                 if let destinationVC = storyboard.instantiateViewController(withIdentifier: "SavedPostsViewControllerID") as? SavedPostsTableViewController {
@@ -429,7 +520,7 @@ extension DiscoverViewController: UICollectionViewDataSource, UICollectionViewDe
             }
         }
 
-        if indexPath.section == 2 {
+        if indexPath.section == 3 {
             let selectedPost = publishReadyPosts[indexPath.row]
 
             self.showRefinementLoading()
