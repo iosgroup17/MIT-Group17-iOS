@@ -16,7 +16,6 @@ final class ProfileNudgeCell: UICollectionViewCell {
     private let subtitleLabel = UILabel()
     private let progressBar = UIProgressView(progressViewStyle: .default)
     private let progressLabel = UILabel()
-    private let chevron = UIImageView()
     private let dismissButton = UIButton(type: .system)
 
     override init(frame: CGRect) {
@@ -101,14 +100,6 @@ final class ProfileNudgeCell: UICollectionViewCell {
         textStack.translatesAutoresizingMaskIntoConstraints = false
         card.addSubview(textStack)
 
-        // Chevron affordance
-        chevron.image = UIImage(systemName: "chevron.right")
-        chevron.tintColor = .tertiaryLabel
-        chevron.contentMode = .scaleAspectFit
-        chevron.setContentHuggingPriority(.required, for: .horizontal)
-        chevron.translatesAutoresizingMaskIntoConstraints = false
-        card.addSubview(chevron)
-
         // Dismiss button (top-trailing)
         dismissButton.setImage(UIImage(systemName: "xmark"), for: .normal)
         dismissButton.tintColor = .tertiaryLabel
@@ -131,11 +122,8 @@ final class ProfileNudgeCell: UICollectionViewCell {
             textStack.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 12),
             textStack.topAnchor.constraint(equalTo: card.topAnchor, constant: 14),
             textStack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -14),
-
-            chevron.leadingAnchor.constraint(equalTo: textStack.trailingAnchor, constant: 8),
-            chevron.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -16),
-            chevron.centerYAnchor.constraint(equalTo: card.centerYAnchor),
-            chevron.widthAnchor.constraint(equalToConstant: 12),
+            // Updated textStack trailing constraint to account for the missing chevron
+            textStack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -24),
 
             dismissButton.topAnchor.constraint(equalTo: card.topAnchor, constant: 6),
             dismissButton.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -6),
