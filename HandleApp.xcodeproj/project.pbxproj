@@ -19,6 +19,16 @@
 		F996936C049C6E76CCF56F26 /* HandleAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1027A8B69793C9404A2CC5 /* HandleAppUITests.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		1912B1522FC5767100B58460 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19850B2A2ED9A24400D4CE7F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 19850B312ED9A24400D4CE7F;
+			remoteInfo = HandleApp;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		19850B322ED9A24400D4CE7F /* HandleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HandleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B644D252C5E93C11B3E23219 /* HandleAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HandleAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -246,6 +256,7 @@
 		3868FBAB52B4A99738244979 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 19850B312ED9A24400D4CE7F /* HandleApp */;
+			targetProxy = 1912B1522FC5767100B58460 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
