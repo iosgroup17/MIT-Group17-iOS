@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_3" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--EditorModalEntry-->
+        <scene sceneID="F8Q-9F-pwe">
+            <objects>
+                <viewControllerPlaceholder storyboardName="Discover" referencedIdentifier="EditorModalEntry" id="TrU-PV-xKs" sceneMemberID="viewController">
+                    <navigationItem key="navigationItem" id="XWQ-73-Vmi"/>
+                </viewControllerPlaceholder>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="yON-rA-JUM" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="5676" y="487"/>
+        </scene>
+        <!--Saved Posts-->
+        <scene sceneID="KZN-nY-N70">
+            <objects>
+                <tableViewController storyboardIdentifier="SavedPostsViewControllerID" id="clW-Wt-JuI" customClass="SavedPostsTableViewController" customModule="HandleApp" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="60" estimatedRowHeight="-1" sectionHeaderHeight="40" estimatedSectionHeaderHeight="-1" sectionFooterHeight="40" estimatedSectionFooterHeight="-1" id="yNa-C7-RQK">
+                        <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="saved_cell" id="fhJ-ZC-9yl" customClass="SavedPostsTableViewCell" customModule="HandleApp" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="50" width="402" height="60"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="fhJ-ZC-9yl" id="dGI-qJ-9ma">
+                                    <rect key="frame" x="0.0" y="0.0" width="402" height="60"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="clW-Wt-JuI" id="kBc-sF-N5P"/>
+                            <outlet property="delegate" destination="clW-Wt-JuI" id="SKT-ge-lSR"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" title="Saved Posts" id="AJx-YK-KA5">
+                        <barButtonItem key="rightBarButtonItem" title="Item" image="line.3.horizontal.decrease" catalog="system" id="Ntl-h7-pJD">
+                            <connections>
+                                <action selector="filterButtonTapped:" destination="clW-Wt-JuI" id="65G-Vn-ecC"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="filterBarButton" destination="Ntl-h7-pJD" id="cs8-Mu-pvx"/>
+                        <segue destination="ggw-6s-R43" kind="show" identifier="openEditorModal" id="VLm-Vh-BqZ"/>
+                    </connections>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="TKy-7y-YeP" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="5990" y="866"/>
+        </scene>
+        <!--EditorModalEntry-->
+        <scene sceneID="Wqq-mf-vCi">
+            <objects>
+                <viewControllerPlaceholder storyboardName="Discover" referencedIdentifier="EditorModalEntry" id="ggw-6s-R43" sceneMemberID="viewController">
+                    <navigationItem key="navigationItem" id="1C4-pY-Vt3"/>
+                </viewControllerPlaceholder>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="P3b-ld-vjl" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="5727" y="1254"/>
+        </scene>
+        <!--Scheduled Posts-->
+        <scene sceneID="3MX-5A-0fd">
+            <objects>
+                <tableViewController storyboardIdentifier="ScheduledPostsViewControllerID" id="Tja-70-L4n" customClass="ScheduledPostsTableViewController" customModule="HandleApp" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="59" estimatedRowHeight="-1" sectionHeaderHeight="40" estimatedSectionHeaderHeight="-1" sectionFooterHeight="40" estimatedSectionFooterHeight="-1" id="YdE-83-1Ro">
+                        <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="scheduled_cell" id="L0r-b4-6Fz" customClass="ScheduledPostsTableViewCell" customModule="HandleApp" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="50" width="402" height="59"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="L0r-b4-6Fz" id="A1h-gK-zRk">
+                                    <rect key="frame" x="0.0" y="0.0" width="402" height="59"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="Tja-70-L4n" id="FXB-bX-rSZ"/>
+                            <outlet property="delegate" destination="Tja-70-L4n" id="Aed-2L-ey4"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" title="Scheduled Posts" id="D8c-3Q-zxr">
+                        <barButtonItem key="rightBarButtonItem" title="Item" image="line.3.horizontal.decrease" catalog="system" id="1z8-cu-erq">
+                            <connections>
+                                <action selector="filterButtonTapped:" destination="Tja-70-L4n" id="atp-lC-lPO"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="filterBarButton" destination="1z8-cu-erq" id="Lyq-Rh-ymp"/>
+                        <outlet property="postTableView" destination="YdE-83-1Ro" id="TwW-RC-lg7"/>
+                        <segue destination="YvC-xN-IDR" kind="show" identifier="openEditorModal" id="GTO-M9-I6x"/>
+                    </connections>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="z7q-QV-03c" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="7908.9552238805963" y="896.56750572082376"/>
+        </scene>
+        <!--EditorModalEntry-->
+        <scene sceneID="YyM-hB-J9i">
+            <objects>
+                <viewControllerPlaceholder storyboardName="Discover" referencedIdentifier="EditorModalEntry" id="YvC-xN-IDR" sceneMemberID="viewController">
+                    <navigationItem key="navigationItem" id="cqj-Ud-T7R"/>
+                </viewControllerPlaceholder>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="fF6-SJ-XEe" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="6954" y="1254"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="SzI-8q-6JZ">
+            <objects>
+                <navigationController id="JNi-Ee-kE0" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="Oaz-bh-Mdt">
+                        <rect key="frame" x="0.0" y="124" width="402" height="54"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="Tja-70-L4n" kind="relationship" relationship="rootViewController" id="YMG-iF-92b"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="7Ff-eW-6bS" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="6954" y="130"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="LXj-hm-SmI">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="tlv-AP-FiO" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationItem key="navigationItem" id="tal-td-qVA"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="sLx-NT-nVF">
+                        <rect key="frame" x="0.0" y="124" width="402" height="54"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="clW-Wt-JuI" kind="relationship" relationship="rootViewController" id="Lxd-Ik-wte"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="fYI-8j-8vg" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="5166" y="861"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="line.3.horizontal.decrease" catalog="system" width="128" height="73"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

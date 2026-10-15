@@ -1,0 +1,54 @@
+# Xcode
+.DS_Store
+DerivedData/
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+*.xcarchive
+*.moved-aside
+*.xcuserstate
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+.build/
+Packages/
+Package.resolved
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Carthage
+Carthage/Build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# SwiftLint
+.swiftlint.yml
+
+# Crash Reports
+*.crash
+*.ips
+
+# Firebase Crashlytics
+*.dSYM.zip
+*.dSYM
+
+# Other Common
+*.log
+*.tmp
+HandleApp/Secrets.xcconfig

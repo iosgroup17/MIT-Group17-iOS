@@ -1,0 +1,38 @@
+//
+//  ImageCollectionViewCell.swift
+//  OnboardingScreens
+//
+//  Created by SDC-USER on 28/11/25.
+//
+
+import UIKit
+
+class ImageCollectionViewCell: UICollectionViewCell {
+
+    @IBOutlet weak var imageView: UIImageView!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+
+        backgroundColor = .clear
+        contentView.backgroundColor = .clear
+        imageView.layer.cornerRadius = 12
+        imageView.clipsToBounds = true
+    }
+
+    func configure(with image: UIImage) {
+        imageView.image = image
+        imageView.backgroundColor = .clear
+        imageView.tintColor = .clear
+        imageView.contentMode = .scaleAspectFill
+    }
+
+    func configureAsAddButton() {
+        let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .semibold)
+        imageView.image = UIImage(systemName: "plus", withConfiguration: config)
+
+        imageView.backgroundColor = .systemGray5
+        imageView.tintColor = .secondaryLabel
+        imageView.contentMode = .center
+    }
+}
